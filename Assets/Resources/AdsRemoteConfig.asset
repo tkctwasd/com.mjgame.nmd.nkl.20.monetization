@@ -15,7 +15,7 @@ MonoBehaviour:
   interstitialInterval: 40
   aoaInterval: 60
   maxRetry: 5
-  baseDelay: 2
+  baseDelay: 1.88
   bannerId: 
   interstitialId: 
   rewardedId: 

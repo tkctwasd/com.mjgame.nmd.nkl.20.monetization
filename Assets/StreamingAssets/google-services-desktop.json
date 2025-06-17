@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "816400651425",
+    "project_id": "adspackage-b6d5b",
+    "storage_bucket": "adspackage-b6d5b.firebasestorage.app",
+     "database_url": "https://adspackage-b6d5b.firebaseio.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:816400651425:android:bc90368453daa265044ce0",
+        "android_client_info": {
+          "package_name": "com.game.adssdk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAO5551JvGG6yJKzFY7sXW3Si8cyd5vVwE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
