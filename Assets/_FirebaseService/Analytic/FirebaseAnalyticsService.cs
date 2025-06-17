@@ -63,5 +63,8 @@ namespace FirebaseModules.Analytics
 #endif
             Debug.Log($"<color=yellow><b>[Firebase]</b></color>-<color=orange><i>[Analytics]</i></color> SetUserProperty: {name} = {value}");
         }
+
+
+       
     }
 }
