@@ -3,9 +3,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Firebase;
 using FirebaseModules.RemoteConfig;
-using Firebase.RemoteConfig;
-using System.Collections.Generic;
-using Newtonsoft.Json;
+using FirebaseModules.Analytics;
 
 public class FirebaseManager : MonoBehaviour
 {
@@ -49,10 +47,15 @@ public class FirebaseManager : MonoBehaviour
 
         await RemoteConfigService.InitializeAsync(remoteConfigDefaultFile, remoteConfigCacheSeconds);
 
+#if FIREBASE_ANALYTICS
+        FirebaseAnalyticsService.Initialize();
+        FirebaseAnalyticsService.SetUserProperty("platform", Application.platform.ToString());
+#endif
+
         IsFirebaseReady = true;
         OnFirebaseReady?.Invoke();
 
-        Debug.Log("<color=yellow><b>[Firebase]</b><color> Sẵn sàng.");
+        Debug.Log("<color=yellow><b>[Firebase]</b></color> <b><color=white>Sẵn sàng</color></b>");
         RemoteConfigService.LogAllValues();
     }
 }
