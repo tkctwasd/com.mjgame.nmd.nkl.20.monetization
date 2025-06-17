@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "appsflyer-unity-plugin": {
+      "version": "https://github.com/AppsFlyerSDK/appsflyer-unity-plugin.git#upm",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "2546c1fb46a4cecc632fb0fbb25fb5cc5368f901"
+    },
     "com.unity.collab-proxy": {
       "version": "2.8.2",
       "depth": 0,

@@ -1,5 +1,0 @@
-{
-  "ads_settings": "{   \"IntervalShowInterstitial\": 40,   \"EnableAppOpenAd\": true,   \"ShowBannerOnStart\": true,   \"RewardedCooldown\": 60,   \"AppOpenCooldown\": 30,   \"MaxRetryAttempts\": 3,   \"EnableGDPRConsent\": false,   \"BannerPosition\": \"BottomCenter\",   \"InterstitialStartDelay\": 5,   \"EnableDebugLog\": true }",
-  "gameplay_settings": "{\"MaxLevel\":100,\"DefaultLives\":5}",
-  "ui_settings": "{\"Theme\":\"Dark\",\"ShowTutorial\":true}"
-}

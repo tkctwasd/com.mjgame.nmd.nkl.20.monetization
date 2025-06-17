@@ -164,6 +164,7 @@ PlayerSettings:
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
     Android: com.game.adssdk
+    Standalone: com.DefaultCompany.AdsUnity
   buildNumber:
     Standalone: 0
     VisionOS: 0
@@ -842,6 +843,7 @@ PlayerSettings:
   webGLPowerPreference: 2
   scriptingDefineSymbols:
     Android: FIREBASE_ANALYTICS
+    Standalone: FIREBASE_ANALYTICS
     iPhone: FIREBASE_ANALYTICS
   additionalCompilerArguments: {}
   platformArchitecture: {}
