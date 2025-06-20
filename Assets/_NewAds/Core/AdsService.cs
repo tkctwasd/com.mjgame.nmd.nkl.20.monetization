@@ -24,13 +24,14 @@ public class AdsService : MonoBehaviour
     private IEnumerator Start()
     {
         // 1. Load remote config (giả lập async, có thể thay bằng Firebase RemoteConfig, v.v.)
-        yield return StartCoroutine(RemoteConfigLoader.LoadStart((config) => {
+        yield return StartCoroutine(RemoteConfigLoader.LoadStart((config) =>
+        {
             Config = config;
         }));
 
         // 2. Khởi tạo tracker và analytics (có thể chọn Adjust, AppsFlyer, Firebase, ...)
         Tracker = new AppsFlyerTracker(); // hoặc AdjustTracker
-        Analytics = new UnityAnalytics(); // hoặc FirebaseAnalytics
+        Analytics = new FirebaseAnalytics(); 
 
         // 3. Khởi tạo các module quảng cáo
         Banner = new BannerAdModule(Config, Tracker, Analytics);
