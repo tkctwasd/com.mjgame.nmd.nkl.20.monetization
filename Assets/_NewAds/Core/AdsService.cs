@@ -24,7 +24,7 @@ public class AdsService : MonoBehaviour
     private IEnumerator Start()
     {
         // 1. Load remote config (giả lập async, có thể thay bằng Firebase RemoteConfig, v.v.)
-        yield return StartCoroutine(RemoteConfigLoader.Load((config) => {
+        yield return StartCoroutine(RemoteConfigLoader.LoadStart((config) => {
             Config = config;
         }));
 
