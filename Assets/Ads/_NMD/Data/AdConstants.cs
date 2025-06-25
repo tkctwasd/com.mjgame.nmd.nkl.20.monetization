@@ -21,5 +21,9 @@ namespace A
         public string BannerId = "banner-id";
         public string InterstitialId = "interstitial-id";
         public string RewardedId = "rewarded-id";
+
+        [Header("Banner")]
+        public MaxSdkBase.AdViewPosition bannerPosition = MaxSdkBase.AdViewPosition.BottomCenter;
+
     }
 }

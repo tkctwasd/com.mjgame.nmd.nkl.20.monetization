@@ -17,26 +17,21 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
     using UnityEditor;
     using UnityEngine;
     using static MaxSdkBase;
+    using System.Collections;
 
-    public class InterstitialAdManager : MonoBehaviour
+    public class InterstitialAdManager
     {
-        public ApplovinMaxManager ApplovinMaxManager;
-        [SerializeField] string intersId = "interstitial-id";
-
-        [Header("Interstitial")]
-        private Action callBackInters;
-        private int intersRetry;
-        private string interLocation;
-
-        public InterstitialAdManager(ApplovinMaxManager applovinMaxManager)
+        public ApplovinMaxManager ApplovinManager;
+        private string intersId = "inters-id";
+        public InterstitialAdManager(ApplovinMaxManager applovinMaxManager, string intersId)
         {
-            ApplovinMaxManager = applovinMaxManager;
+            ApplovinManager = applovinMaxManager;
+            this.intersId = intersId;
         }
 
         #region Interstitial
-        private void InitializeInterstitialAds()
+        public void Initialize()
         {
-            // Attach callbacks
             MaxSdkCallbacks.Interstitial.OnAdLoadedEvent += InterstitialOnAdLoadedEvent;
             MaxSdkCallbacks.Interstitial.OnAdLoadFailedEvent += InterstitialOnAdLoadFailedEvent;
             MaxSdkCallbacks.Interstitial.OnAdDisplayedEvent += InterstitialOnAdDisplayedEvent;
@@ -45,6 +40,12 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
             MaxSdkCallbacks.Interstitial.OnAdClickedEvent += InterstitialOnAdClickedEvent;
             MaxSdkCallbacks.Interstitial.OnAdHiddenEvent += InterstitialOnAdHiddenEvent;
 
+            ApplovinManager.StartCoroutine(IELoadDelay(0.5f));
+        }
+
+        private IEnumerator IELoadDelay(float time)
+        {
+            yield return new WaitForSeconds(time);
             LoadInterstitial();
         }
 
@@ -61,41 +62,41 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
 
         public void ShowInterstitial(string location, Action callBack)
         {
-            if (!RemoteConfigManager.GetConfigValue<bool>("Ad_Use_Interstitial"))
+            if (!RemoteConfigManager.GetConfigValue<bool>(RemoteKey.AdUseInterstitial))
             {
                 callBack?.Invoke();
                 return;
             }
 
-            interLocation = location;
-            FirebaseAnalyticManager.Instance.LogAd("show_interstitial_ads", interLocation);
-            isCanShowAOABackGame = false;
-            bool passedCappingTime = Time.unscaledTime >= timeCloseAOA;
+            ApplovinManager.interLocation = location;
+            FirebaseAnalyticManager.Instance.LogAd("show_interstitial_ads", location);
+            ApplovinManager.isCanShowAOABackGame = false;
+            bool passedCappingTime = Time.unscaledTime >= ApplovinManager.timeCloseAOA;
             if (MaxSdk.IsInterstitialReady(intersId) && passedCappingTime)
             {
-                FirebaseAnalyticManager.Instance.LogAd("show_interstitial_success", interLocation);
-                callBackInters = callBack;
+                FirebaseAnalyticManager.Instance.LogAd("show_interstitial_success", location);
+                ApplovinManager.callBackInters = callBack;
                 MaxSdk.ShowInterstitial(intersId);
             }
             else
             {
                 LoadInterstitial();
-                isCanShowAOABackGame = true;
+                ApplovinManager.isCanShowAOABackGame = true;
                 callBack?.Invoke();
             }
         }
 
         private void InterstitialOnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            intersRetry = 0;
+            ApplovinManager.intersRetry = 0;
             LogW.Log($"Ad Loaded", "Interstitial");
         }
 
         private void InterstitialOnAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
-            intersRetry++;
-            double retryDelay = Math.Pow(2, Math.Min(6, intersRetry));
-            Invoke(nameof(LoadInterstitial), (float)retryDelay);
+            ApplovinManager.intersRetry++;
+            double retryDelay = Math.Pow(2, Math.Min(6, ApplovinManager.intersRetry));
+            ApplovinManager.StartCoroutine(IELoadDelay((float)retryDelay));
             LogW.Log($"Ad Load Failed", "Interstitial");
         }
 
@@ -106,35 +107,35 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
 
         private void InterstitialOnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
         {
-            if (callBackInters != null)
+            if (ApplovinManager.callBackInters != null)
             {
-                callBackInters.Invoke();
-                callBackInters = null;
+                ApplovinManager.callBackInters?.Invoke();
+                ApplovinManager.callBackInters = null;
             }
-            isCanShowAOABackGame = true;
-            Invoke(nameof(LoadInterstitial), 0.5f);
+            ApplovinManager.isCanShowAOABackGame = true;
+            ApplovinManager.StartCoroutine(IELoadDelay(0.5f));
             LogW.Log($"Ad Display Failed", "Interstitial");
         }
 
         private void InterstitialOnAdClickedEvent(string adUnitID, MaxSdkBase.AdInfo adInfo)
         {
             LogW.Log($"Ad Click", "Interstitial");
-            if (!string.IsNullOrEmpty(interLocation))
+            if (!string.IsNullOrEmpty(ApplovinManager.interLocation))
             {
-                FirebaseAnalyticManager.Instance.LogAd("show_interstitial_click", interLocation);
+                FirebaseAnalyticManager.Instance.LogAd("show_interstitial_click", ApplovinManager.interLocation);
             }
         }
 
         private void InterstitialOnAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            if (callBackInters != null)
+            if (ApplovinManager.callBackInters != null)
             {
-                callBackInters.Invoke();
-                callBackInters = null;
-                timeCloseAOA = Time.unscaledTime;
+                ApplovinManager.callBackInters.Invoke();
+                ApplovinManager.callBackInters = null;
+                ApplovinManager.timeCloseAOA = Time.unscaledTime;
             }
-            isCanShowAOABackGame = true;
-            Invoke(nameof(LoadInterstitial), 0.5f);
+            ApplovinManager.isCanShowAOABackGame = true;
+            ApplovinManager.StartCoroutine(IELoadDelay(0.5f));
             LogW.Log($"Ad Hidden", "Interstitial");
         }
         #endregion
@@ -142,52 +143,7 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
         #region RevenuePaidEvent
         private void OnAdRevenuePaidEvent(string adUnitId, AdInfo impressionData)
         {
-            sendRevenueMAXToFirebase(impressionData);
-            sendRevenueMAXToAdjust(impressionData);
-            sendRevenueMAXToAppsflyer(impressionData);
-        }
-
-        void sendRevenueMAXToFirebase(AdInfo adInfo)
-        {
-            Parameter[] AdParameters = {
-                new Parameter("ad_platform", "Applovin"),
-                new Parameter("ad_source", adInfo.NetworkName),
-                new Parameter("ad_unit_name", adInfo.AdUnitIdentifier),
-                new Parameter("currency","USD"),
-                new Parameter("value", adInfo.Revenue),
-                new Parameter("placement", adInfo.Placement),
-                new Parameter("country_code", adInfo.NetworkPlacement),
-                new Parameter("ad_format", adInfo.AdFormat)
-            };
-
-            FirebaseAnalytics.LogEvent("ad_impression", AdParameters);
-        }
-
-        void sendRevenueMAXToAdjust(AdInfo adInfo)
-        {
-#if USE_ADJUST
-        LogW.Log("AdjustRevenue " + Time.time + " " + adInfo.Revenue);
-        var adRevenue = new AdjustAdRevenue("applovin_max_sdk");
-        adRevenue.SetRevenue(adInfo.Revenue, "USD");
-        adRevenue.AdRevenueNetwork = adInfo.NetworkName;
-        adRevenue.AdRevenueUnit = adInfo.AdUnitIdentifier;
-        adRevenue.AdRevenuePlacement = adInfo.Placement;
-        Adjust.TrackAdRevenue(adRevenue);
-#endif
-        }
-
-        void sendRevenueMAXToAppsflyer(AdInfo adInfo)
-        {
-#if USE_APPSFLYER
-            LogW.Log("AppsflyerRevenue: " + Time.time + " " + adInfo.Revenue);
-            Dictionary<string, string> additionalParams = new Dictionary<string, string>();
-            additionalParams.Add(AdRevenueScheme.COUNTRY, adInfo.NetworkPlacement);
-            additionalParams.Add(AdRevenueScheme.AD_UNIT, adInfo.AdUnitIdentifier);
-            additionalParams.Add(AdRevenueScheme.AD_TYPE, adInfo.AdFormat);
-            additionalParams.Add(AdRevenueScheme.PLACEMENT, adInfo.Placement);
-            var logRevenue = new AFAdRevenueData(adInfo.NetworkName, MediationNetwork.ApplovinMax, "USD", adInfo.Revenue);
-            AppsFlyer.logAdRevenue(logRevenue, additionalParams);
-#endif
+            ApplovinManager.SendAdRevenueTracker(impressionData);
         }
         #endregion
     }

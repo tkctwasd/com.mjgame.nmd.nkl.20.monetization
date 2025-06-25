@@ -3,6 +3,7 @@ namespace A
     using Firebase.Extensions;
     using Firebase.RemoteConfig;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -82,7 +83,12 @@ namespace A
 
         void LoadLocalRemoteConfigAndCompare()
         {
-            string platformName = "RemoteConfig_".PlatformName().Replace(".json", "");
+            string platformName = "RemoteConfig_";
+#if UNITY_ANDROID
+         platformName = "RemoteConfig_Android";
+#elif UNITY_IOS
+            platformName = "RemoteConfig_iOS";
+#endif
             TextAsset jsonFile = Resources.Load<TextAsset>(platformName);
 
             if (jsonFile == null)
@@ -94,6 +100,7 @@ namespace A
             try
             {
                 remoteConfigData = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonFile.text);
+
                 List<string> changedKeys = new List<string>();
 
                 foreach (var key in remoteConfigData.Keys.ToList())
@@ -107,7 +114,7 @@ namespace A
                     if (!string.IsNullOrEmpty(remoteValue) && normalizedLocal != normalizedRemote)
                     {
                         changedKeys.Add(key);
-                        Debug.Log($"[DIFF] Key: {key} | Local: {localValue} Remote: {remoteValue}");
+                        Debug.Log($"<color=orange>[DIFF] </color> Key: {key} | <color=green>Local</color>: {localValue} <color=white>Remote</color>: {remoteValue}");
                         remoteConfigData[key] = remoteValue;
                     }
                 }
@@ -124,34 +131,71 @@ namespace A
 
         public static T GetConfigValue<T>(string key)
         {
-            if (remoteConfigData == null)
-            {
-                return default(T);
-            }
+            if (remoteConfigData == null || !remoteConfigData.ContainsKey(key))
+                return default;
 
-            if (remoteConfigData.Count == 0)
+            try
             {
-                return default(T);
-            }
+                object data = remoteConfigData[key];
 
-            if (remoteConfigData.ContainsKey(key))
-            {
-                try
+                if (data is T tValue)
+                    return tValue;
+
+                if (data is JObject jObject)
                 {
-                    object value = remoteConfigData[key];
-                    return (T)System.Convert.ChangeType(value, typeof(T));
+                    string jsonStr = jObject.ToString();
+                    return JsonConvert.DeserializeObject<T>(jsonStr);
                 }
-                catch (System.Exception ex)
+
+                string strVal = data?.ToString();
+
+                if (typeof(T) == typeof(string))
+                    return (T)(object)strVal;
+
+                if (typeof(T) == typeof(bool))
                 {
-                    Debug.LogError("Error parsing RemoteConfig: " + ex.Message);
-                    return default(T);
+                    if (bool.TryParse(strVal, out bool b))
+                        return (T)(object)b;
+                    if (long.TryParse(strVal, out long l))
+                        return (T)(object)(l != 0);
                 }
+
+                if (typeof(T) == typeof(int))
+                {
+                    if (int.TryParse(strVal, out int i))
+                        return (T)(object)i;
+                    if (long.TryParse(strVal, out long l))
+                        return (T)(object)(int)l;
+                }
+
+                if (typeof(T).IsClass && strVal.TrimStart().StartsWith("{"))
+                {
+                    return JsonConvert.DeserializeObject<T>(strVal);
+                }
+
+                return (T)Convert.ChangeType(data, typeof(T));
             }
-            else
+            catch (Exception ex)
             {
-                return default(T);
+                Debug.LogError($"[RemoteConfigManager] Error parsing key '{key}' to type {typeof(T).Name}: {ex.Message}");
+                return default;
             }
         }
+
+        public static Dictionary<string, string> GetAllRemoteConfigValues()
+        {
+            var allKeys = FirebaseRemoteConfig.DefaultInstance.Keys;
+            var result = new Dictionary<string, string>();
+
+            foreach (var key in allKeys)
+            {
+                var value = FirebaseRemoteConfig.DefaultInstance.GetValue(key).StringValue;
+                result[key] = value;
+            }
+
+            return result;
+        }
+        public static Dictionary<string, object> DataRemoteConfig => remoteConfigData;
     }
 
 }

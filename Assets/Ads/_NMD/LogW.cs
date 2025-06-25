@@ -8,7 +8,7 @@ namespace A
     {
         public static void Log(string content, string location = "")
         {
-            Debug.Log($"[WASD][{location}]: " + content);
+            Debug.Log($"<color=yellow>[WASD]</color> <color=green>[{location}]</color>: " + content);
         }
     }
 

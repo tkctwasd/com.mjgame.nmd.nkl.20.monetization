@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1787129196201843582
+--- !u!1 &3206406836936094970
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,11 +8,12 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7474109933728397272}
-  - component: {fileID: 7881736622249535371}
-  - component: {fileID: 8300681041438441316}
-  - component: {fileID: 5020662922975068114}
-  - component: {fileID: 1162212078215296517}
+  - component: {fileID: 3524885215895138054}
+  - component: {fileID: 5209567066714744370}
+  - component: {fileID: 4014425139679762330}
+  - component: {fileID: -386287473302165900}
+  - component: {fileID: -2172741992057031343}
+  - component: {fileID: -236774336825455472}
   m_Layer: 0
   m_Name: Ads
   m_TagString: Untagged
@@ -20,13 +21,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &7474109933728397272
+--- !u!4 &3524885215895138054
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1787129196201843582}
+  m_GameObject: {fileID: 3206406836936094970}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -35,64 +36,66 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7881736622249535371
+--- !u!114 &5209567066714744370
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1787129196201843582}
+  m_GameObject: {fileID: 3206406836936094970}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 54a3e0f6c625efb4dacf10478ba04390, type: 3}
+  m_Script: {fileID: 11500000, guid: 94fb5ccdeadc1bd41901cfa10903afc2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &8300681041438441316
+  AdConstants: {fileID: 11400000, guid: 9f1a0a698012be34ea3a6f4d2b2e0794, type: 2}
+--- !u!114 &4014425139679762330
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1787129196201843582}
+  m_GameObject: {fileID: 3206406836936094970}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 451f47522b2a7f442abebee6892b29c6, type: 3}
+  m_Script: {fileID: 11500000, guid: c61154ee99a8fb34ea9bccd56e263f23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &5020662922975068114
+  devKey: 6dg9UQUuNJbSqUHjBeaSUP
+  appID: id-app
+--- !u!114 &-386287473302165900
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1787129196201843582}
+  m_GameObject: {fileID: 3206406836936094970}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a36006bcb4ec10a4d9f81ae343f3f19a, type: 3}
+  m_Script: {fileID: 11500000, guid: a6135e7abbe441844965162d0c3cb557, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nameGame: name-game
-  packageName: id-package-name
-  sdkKey: sdk-key
-  admobId: admob-id
-  privacyPolicyURL: privacy-policy-URL
-  termsURL: terms-URL
-  appOpenId: app-open-id
-  bannerId: banner-id
-  intersId: interstitial-id
-  rewardId: rewarded-id
-  bannerPosition: 7
---- !u!114 &1162212078215296517
+--- !u!114 &-2172741992057031343
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1787129196201843582}
+  m_GameObject: {fileID: 3206406836936094970}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7bf98ca4f70da4478eead7461ad4876, type: 3}
+  m_Script: {fileID: 11500000, guid: 528deee985adabb499de877c268be91b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  devKey: af0e0d2f-7b89-4b8f-bb0e-3fdff5f547ec
-  appID: id123456789
+--- !u!114 &-236774336825455472
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3206406836936094970}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c14f74b931a0bbb48899558733f7d104, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
