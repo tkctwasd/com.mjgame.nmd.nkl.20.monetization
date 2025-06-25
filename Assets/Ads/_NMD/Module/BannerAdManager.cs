@@ -1,76 +1,171 @@
 namespace A
 {
+#if USE_ADJUST
+using AdjustSdk;
+using AppLovinMax.Scripts.IntegrationManager.Editor;
+
+#endif
+#if USE_APPSFLYER
+    using AppsFlyerSDK;
+#endif
+#if UNITY_EDITOR
+    using AppLovinMax.Scripts.IntegrationManager.Editor;
+#endif
+    using Firebase.Analytics;
+    using System;
+    using System.Collections.Generic;
+    using UnityEditor;
     using UnityEngine;
-using static MaxSdkBase;
+    using static MaxSdkBase;
 
-public class BannerAdManager
-{
-    // NEW: Tham chiếu đến ApplovinMaxManager (nếu cần tương tác ngược lại)
-    private ApplovinMaxManager _applovinMaxManager;
-    private string _adUnitId;
-    private MaxSdkBase.AdViewPosition _bannerPosition = MaxSdkBase.AdViewPosition.BottomCenter;
-
-    // Constructor: Khởi tạo Manager với tham chiếu và Ad Unit ID
-    public BannerAdManager(ApplovinMaxManager applovinManager, string adUnitId)
+    public class BannerAdManager
     {
-        _applovinMaxManager = applovinManager; // Gán tham chiếu
-        _adUnitId = adUnitId;
-    }
+        ApplovinMaxManager ApplovinMaxManager;
+        [SerializeField] string bannerId = "banner-id";
 
-    public void Initialize()
-    {
-        LogW.Log($"Initializing Banner Ad with ID: {_adUnitId}", "Banner");
+        [Header("Banner")]
+        [SerializeField] private AdViewPosition bannerPosition = AdViewPosition.BottomCenter;
 
-        MaxSdkCallbacks.Banner.OnAdLoadedEvent += OnBannerAdLoadedEvent;
-        MaxSdkCallbacks.Banner.OnAdLoadFailedEvent += OnBannerAdLoadFailedEvent;
-        MaxSdkCallbacks.Banner.OnAdClickedEvent += OnBannerAdClickedEvent;
+        private Action callBackReward;
 
-        var _adViewConfiguration = new AdViewConfiguration(_bannerPosition);
-        MaxSdk.SetBannerWidth(_adUnitId, MaxSdkUtils.IsTablet() ? 800 : 350);
-        MaxSdk.CreateBanner(_adUnitId, _adViewConfiguration);
-        MaxSdk.SetBannerBackgroundColor(_adUnitId, Color.clear);
 
-    }
-
-    private bool IsShowBanner()
-    {
-        return RemoteConfigManager.GetConfigValue<bool>("Ad_Use_Banner");
-    }
-
-    public void ShowBanner()
-    {
-        if (IsShowBanner())
+        public BannerAdManager(ApplovinMaxManager applovinMaxManager)
         {
-            LogW.Log("Showing Banner Ad", "Banner");
-            MaxSdk.ShowBanner(_adUnitId);
-            FirebaseAnalyticManager.Instance.LogAd("show_banner_ads", "bottom_center");
+            ApplovinMaxManager = applovinMaxManager;
         }
-        else
+        void Awake()
         {
-            LogW.Log("Banner Ad is disabled by Remote Config or IsShowBanner() is false.", "Banner");
+
+            MaxSdkCallbacks.OnSdkInitializedEvent += sdkConfiguration =>
+            {
+                Debug.Log("MAX SDK Initialized");
+#if USE_APPSFLYER
+                AppsFlyerManager.Instance.Init();
+#endif
+#if USE_ADJUST
+            AdjustManager.Instance.Init();
+#endif
+                InitializeBannerAds();
+            };
+
+#if USE_APPSFLYER
+            MaxSdk.SetUserId(AppsFlyer.getAppsFlyerId());
+#endif
+            MaxSdk.InitializeSdk();
         }
+
+
+
+        #region Banner
+
+        private void InitializeBannerAds()
+        {
+            MaxSdkCallbacks.Banner.OnAdLoadedEvent += OnBannerAdLoadedEvent;
+            MaxSdkCallbacks.Banner.OnAdLoadFailedEvent += OnBannerAdLoadFailedEvent;
+            MaxSdkCallbacks.Banner.OnAdClickedEvent += OnBannerAdClickedEvent;
+            MaxSdkCallbacks.Banner.OnAdRevenuePaidEvent += OnAdRevenuePaidEvent;
+            MaxSdkCallbacks.Banner.OnAdExpandedEvent += OnBannerAdExpandedEvent;
+            MaxSdkCallbacks.Banner.OnAdCollapsedEvent += OnBannerAdCollapsedEvent;
+
+            ApplovinMaxManager.Invoke(nameof(LoadBanner), 0.5f);
+        }
+
+        private void LoadBanner()
+        {
+            var adViewConfiguration = new AdViewConfiguration(bannerPosition);
+            MaxSdk.SetBannerWidth(bannerId, MaxSdkUtils.IsTablet() ? 800 : 350);
+            MaxSdk.CreateBanner(bannerId, adViewConfiguration);
+            MaxSdk.SetBannerBackgroundColor(bannerId, Color.clear);
+        }
+
+
+        public void ShowBanner()
+        {
+            if (RemoteConfigManager.GetConfigValue<bool>("Ad_Use_Banner"))
+            {
+                FirebaseAnalyticManager.Instance.LogAd("show_banner_ads", "");
+                MaxSdk.ShowBanner(bannerId);
+            }
+        }
+
+        public void HideBanner()
+        {
+            MaxSdk.HideBanner(bannerId);
+        }
+
+        private void OnBannerAdLoadedEvent(string adUnitId, AdInfo adInfo)
+        {
+            LogW.Log($"Ad Loaded", "Banner");
+        }
+
+        private void OnBannerAdLoadFailedEvent(string adUnitId, ErrorInfo errorInfo)
+        {
+            LogW.Log($"Ad Load Failed", "Banner");
+        }
+
+        private void OnBannerAdClickedEvent(string adUnitId, AdInfo adInfo)
+        {
+            FirebaseAnalyticManager.Instance.LogAd("show_banner_ads_click", "");
+        }
+
+        private void OnBannerAdExpandedEvent(string adUnitId, AdInfo adInfo) { }
+
+        private void OnBannerAdCollapsedEvent(string adUnitId, AdInfo adInfo) { }
+
+        #endregion
+
+        #region RevenuePaidEvent
+        private void OnAdRevenuePaidEvent(string adUnitId, AdInfo impressionData)
+        {
+            sendRevenueMAXToFirebase(impressionData);
+            sendRevenueMAXToAdjust(impressionData);
+            sendRevenueMAXToAppsflyer(impressionData);
+        }
+
+        void sendRevenueMAXToFirebase(AdInfo adInfo)
+        {
+            Parameter[] AdParameters = {
+                new Parameter("ad_platform", "Applovin"),
+                new Parameter("ad_source", adInfo.NetworkName),
+                new Parameter("ad_unit_name", adInfo.AdUnitIdentifier),
+                new Parameter("currency","USD"),
+                new Parameter("value", adInfo.Revenue),
+                new Parameter("placement", adInfo.Placement),
+                new Parameter("country_code", adInfo.NetworkPlacement),
+                new Parameter("ad_format", adInfo.AdFormat)
+            };
+
+            FirebaseAnalytics.LogEvent("ad_impression", AdParameters);
+        }
+
+        void sendRevenueMAXToAdjust(AdInfo adInfo)
+        {
+#if USE_ADJUST
+        LogW.Log("AdjustRevenue " + Time.time + " " + adInfo.Revenue);
+        var adRevenue = new AdjustAdRevenue("applovin_max_sdk");
+        adRevenue.SetRevenue(adInfo.Revenue, "USD");
+        adRevenue.AdRevenueNetwork = adInfo.NetworkName;
+        adRevenue.AdRevenueUnit = adInfo.AdUnitIdentifier;
+        adRevenue.AdRevenuePlacement = adInfo.Placement;
+        Adjust.TrackAdRevenue(adRevenue);
+#endif
+        }
+
+        void sendRevenueMAXToAppsflyer(AdInfo adInfo)
+        {
+#if USE_APPSFLYER
+            LogW.Log("AppsflyerRevenue: " + Time.time + " " + adInfo.Revenue);
+            Dictionary<string, string> additionalParams = new Dictionary<string, string>();
+            additionalParams.Add(AdRevenueScheme.COUNTRY, adInfo.NetworkPlacement);
+            additionalParams.Add(AdRevenueScheme.AD_UNIT, adInfo.AdUnitIdentifier);
+            additionalParams.Add(AdRevenueScheme.AD_TYPE, adInfo.AdFormat);
+            additionalParams.Add(AdRevenueScheme.PLACEMENT, adInfo.Placement);
+            var logRevenue = new AFAdRevenueData(adInfo.NetworkName, MediationNetwork.ApplovinMax, "USD", adInfo.Revenue);
+            AppsFlyer.logAdRevenue(logRevenue, additionalParams);
+#endif
+        }
+        #endregion
     }
 
-    public void HideBanner()
-    {
-        LogW.Log("Hiding Banner Ad", "Banner");
-        MaxSdk.HideBanner(_adUnitId);
-    }
 
-    private void OnBannerAdLoadedEvent(string adUnitId, AdInfo adInfo)
-    {
-        LogW.Log($"Banner Ad loaded. Source: {adInfo.NetworkName}", "Banner");
-    }
-
-    private void OnBannerAdLoadFailedEvent(string adUnitId, ErrorInfo errorInfo)
-    {
-        LogW.Log($"Banner Ad load failed: {errorInfo.Message}", "Banner");
-    }
-
-    private void OnBannerAdClickedEvent(string adUnitId, AdInfo adInfo)
-    {
-        LogW.Log($"Banner Ad clicked. Source: {adInfo.NetworkName}", "Banner");
-        FirebaseAnalyticManager.Instance.LogAd("show_banner_ads_click", "bottom_center");
-    }
-}
 }

@@ -1,153 +1,196 @@
 namespace A
 {
+#if USE_ADJUST
+using AdjustSdk;
+using AppLovinMax.Scripts.IntegrationManager.Editor;
+
+#endif
+#if USE_APPSFLYER
+    using AppsFlyerSDK;
+#endif
+#if UNITY_EDITOR
+    using AppLovinMax.Scripts.IntegrationManager.Editor;
+#endif
+    using Firebase.Analytics;
     using System;
-using UnityEngine;
-using static MaxSdkBase;
+    using System.Collections.Generic;
+    using UnityEditor;
+    using UnityEngine;
+    using static MaxSdkBase;
 
-public class InterstitialAdManager
-{
-    // NEW: Tham chiếu đến ApplovinMaxManager
-    private ApplovinMaxManager _applovinMaxManager;
-    private string _adUnitId;
-    private int _retryAttempt;
-    private string _interstitialLocation;
-
-    private Action _onInterstitialFinishedCallback;
-    private DateTime _lastInterstitialShowTime = DateTime.MinValue;
-
-    // Actions để thông báo cho lớp điều phối (ApplovinMaxManager)
-    public Action OnAdDisplayed;
-    public Action OnAdHidden;
-
-    // Constructor: Khởi tạo Manager với tham chiếu và Ad Unit ID
-    public InterstitialAdManager(ApplovinMaxManager applovinManager, string adUnitId)
+    public class InterstitialAdManager : MonoBehaviour
     {
-        _applovinMaxManager = applovinManager; // Gán tham chiếu
-        _adUnitId = adUnitId;
-    }
+        public ApplovinMaxManager ApplovinMaxManager;
+        [SerializeField] string intersId = "interstitial-id";
 
-    public void Initialize()
-    {
-        LogW.Log($"Initializing Interstitial Ad with ID: {_adUnitId}", "Interstitial");
+        [Header("Interstitial")]
+        private Action callBackInters;
+        private int intersRetry;
+        private string interLocation;
 
-        MaxSdkCallbacks.Interstitial.OnAdLoadedEvent += OnInterstitialAdLoadedEvent;
-        MaxSdkCallbacks.Interstitial.OnAdLoadFailedEvent += OnInterstitialAdLoadFailedEvent;
-        MaxSdkCallbacks.Interstitial.OnAdDisplayedEvent += OnInterstitialAdDisplayedEvent;
-        MaxSdkCallbacks.Interstitial.OnAdDisplayFailedEvent += OnInterstitialAdDisplayFailedEvent;
-        MaxSdkCallbacks.Interstitial.OnAdClickedEvent += OnInterstitialAdClickedEvent;
-        MaxSdkCallbacks.Interstitial.OnAdHiddenEvent += OnInterstitialAdHiddenEvent;
-
-        LoadInterstitial();
-    }
-
-    private bool IsInterstitialEnabledByRemoteConfig()
-    {
-        return RemoteConfigManager.GetConfigValue<bool>("Ad_Use_Interstitial");
-    }
-
-    public bool IsInterstitialReady()
-    {
-        return MaxSdk.IsInterstitialReady(_adUnitId);
-    }
-
-    public void LoadInterstitial()
-    {
-        if (MaxSdk.IsInterstitialReady(_adUnitId))
+        public InterstitialAdManager(ApplovinMaxManager applovinMaxManager)
         {
-            LogW.Log("Interstitial Ad is already loaded.", "Interstitial");
-            return;
+            ApplovinMaxManager = applovinMaxManager;
         }
 
-        LogW.Log("Loading Interstitial Ad...", "Interstitial");
-        MaxSdk.LoadInterstitial(_adUnitId);
-    }
-
-    public void ShowInterstitial(string placement, Action callBack)
-    {
-        _interstitialLocation = placement;
-        _onInterstitialFinishedCallback = callBack;
-
-        if (!IsInterstitialEnabledByRemoteConfig())
+        #region Interstitial
+        private void InitializeInterstitialAds()
         {
-            LogW.Log("Interstitial Ad is disabled by Remote Config. Invoking callback.", "Interstitial");
-            _onInterstitialFinishedCallback?.Invoke();
-            return;
-        }
+            // Attach callbacks
+            MaxSdkCallbacks.Interstitial.OnAdLoadedEvent += InterstitialOnAdLoadedEvent;
+            MaxSdkCallbacks.Interstitial.OnAdLoadFailedEvent += InterstitialOnAdLoadFailedEvent;
+            MaxSdkCallbacks.Interstitial.OnAdDisplayedEvent += InterstitialOnAdDisplayedEvent;
+            MaxSdkCallbacks.Interstitial.OnAdDisplayFailedEvent += InterstitialOnAdDisplayFailedEvent;
+            MaxSdkCallbacks.Interstitial.OnAdRevenuePaidEvent += OnAdRevenuePaidEvent;
+            MaxSdkCallbacks.Interstitial.OnAdClickedEvent += InterstitialOnAdClickedEvent;
+            MaxSdkCallbacks.Interstitial.OnAdHiddenEvent += InterstitialOnAdHiddenEvent;
 
-        int interval = RemoteConfigManager.GetConfigValue<int>("Ad_Interval_Show_Interstitial");
-        bool passedCappingTime = (DateTime.UtcNow - _lastInterstitialShowTime).TotalSeconds >= interval;
-
-        LogW.Log($"Attempting to show Interstitial Ad at {placement}. IsReady: {IsInterstitialReady()}, PassedCappingTime: {passedCappingTime}", "Interstitial");
-        FirebaseAnalyticManager.Instance.LogAd("show_interstitial_ads", placement);
-
-        if (IsInterstitialReady() && passedCappingTime)
-        {
-            LogW.Log($"Showing Interstitial Ad from {placement}", "Interstitial");
-            FirebaseAnalyticManager.Instance.LogAd("show_interstitial_ads_success", placement);
-            MaxSdk.ShowInterstitial(_adUnitId);
-        }
-        else
-        {
-            LogW.Log($"Interstitial Ad not shown. Ready: {IsInterstitialReady()}, Capping: {passedCappingTime}. Invoking callback.", "Interstitial");
-            FirebaseAnalyticManager.Instance.LogAd("show_interstitial_ads_not_ready_or_capped", placement);
             LoadInterstitial();
-            _onInterstitialFinishedCallback?.Invoke();
-            _onInterstitialFinishedCallback = null;
         }
-    }
 
-    private void OnInterstitialAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-    {
-        LogW.Log($"Interstitial Ad loaded. Source: {adInfo.NetworkName}", "Interstitial");
-        _retryAttempt = 0;
-    }
-
-    private void OnInterstitialAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
-    {
-        LogW.Log($"Interstitial Ad load failed: {errorInfo.Message}", "Interstitial");
-        FirebaseAnalyticManager.Instance.LogAd("interstitial_load_fail", _interstitialLocation, errorInfo.Message);
-        _retryAttempt++;
-        double retryDelay = Math.Pow(2, Math.Min(6, _retryAttempt));
-        LogW.Log($"Retrying Interstitial Ad load in {retryDelay} seconds...", "Interstitial");
-    }
-
-    private void OnInterstitialAdDisplayedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-    {
-        LogW.Log($"Interstitial Ad displayed. Source: {adInfo.NetworkName}", "Interstitial");
-        _lastInterstitialShowTime = DateTime.UtcNow;
-        OnAdDisplayed?.Invoke(); // Kích hoạt sự kiện
-    }
-
-    private void OnInterstitialAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
-    {
-        LogW.Log($"Interstitial Ad display failed: {errorInfo.Message}", "Interstitial");
-        FirebaseAnalyticManager.Instance.LogAd("show_interstitial_ads_fail", _interstitialLocation, errorInfo.Message);
-
-        _onInterstitialFinishedCallback?.Invoke();
-        _onInterstitialFinishedCallback = null;
-
-        LoadInterstitial();
-        OnAdHidden?.Invoke(); // Kích hoạt sự kiện
-    }
-
-    private void OnInterstitialAdClickedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-    {
-        LogW.Log($"Interstitial Ad clicked. Source: {adInfo.NetworkName}", "Interstitial");
-        if (!string.IsNullOrEmpty(_interstitialLocation))
+        public void LoadInterstitial()
         {
-            FirebaseAnalyticManager.Instance.LogAd("show_interstitial_ads_click", _interstitialLocation);
+            if (MaxSdk.IsInitialized())
+            {
+                if (!MaxSdk.IsInterstitialReady(intersId))
+                {
+                    MaxSdk.LoadInterstitial(intersId);
+                }
+            }
         }
+
+        public void ShowInterstitial(string location, Action callBack)
+        {
+            if (!RemoteConfigManager.GetConfigValue<bool>("Ad_Use_Interstitial"))
+            {
+                callBack?.Invoke();
+                return;
+            }
+
+            interLocation = location;
+            FirebaseAnalyticManager.Instance.LogAd("show_interstitial_ads", interLocation);
+            isCanShowAOABackGame = false;
+            bool passedCappingTime = Time.unscaledTime >= timeCloseAOA;
+            if (MaxSdk.IsInterstitialReady(intersId) && passedCappingTime)
+            {
+                FirebaseAnalyticManager.Instance.LogAd("show_interstitial_success", interLocation);
+                callBackInters = callBack;
+                MaxSdk.ShowInterstitial(intersId);
+            }
+            else
+            {
+                LoadInterstitial();
+                isCanShowAOABackGame = true;
+                callBack?.Invoke();
+            }
+        }
+
+        private void InterstitialOnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        {
+            intersRetry = 0;
+            LogW.Log($"Ad Loaded", "Interstitial");
+        }
+
+        private void InterstitialOnAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
+        {
+            intersRetry++;
+            double retryDelay = Math.Pow(2, Math.Min(6, intersRetry));
+            Invoke(nameof(LoadInterstitial), (float)retryDelay);
+            LogW.Log($"Ad Load Failed", "Interstitial");
+        }
+
+        private void InterstitialOnAdDisplayedEvent(string adUnitID, MaxSdkBase.AdInfo adInfo)
+        {
+            LogW.Log($"Ad Displayed", "Interstitial");
+        }
+
+        private void InterstitialOnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
+        {
+            if (callBackInters != null)
+            {
+                callBackInters.Invoke();
+                callBackInters = null;
+            }
+            isCanShowAOABackGame = true;
+            Invoke(nameof(LoadInterstitial), 0.5f);
+            LogW.Log($"Ad Display Failed", "Interstitial");
+        }
+
+        private void InterstitialOnAdClickedEvent(string adUnitID, MaxSdkBase.AdInfo adInfo)
+        {
+            LogW.Log($"Ad Click", "Interstitial");
+            if (!string.IsNullOrEmpty(interLocation))
+            {
+                FirebaseAnalyticManager.Instance.LogAd("show_interstitial_click", interLocation);
+            }
+        }
+
+        private void InterstitialOnAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        {
+            if (callBackInters != null)
+            {
+                callBackInters.Invoke();
+                callBackInters = null;
+                timeCloseAOA = Time.unscaledTime;
+            }
+            isCanShowAOABackGame = true;
+            Invoke(nameof(LoadInterstitial), 0.5f);
+            LogW.Log($"Ad Hidden", "Interstitial");
+        }
+        #endregion
+
+        #region RevenuePaidEvent
+        private void OnAdRevenuePaidEvent(string adUnitId, AdInfo impressionData)
+        {
+            sendRevenueMAXToFirebase(impressionData);
+            sendRevenueMAXToAdjust(impressionData);
+            sendRevenueMAXToAppsflyer(impressionData);
+        }
+
+        void sendRevenueMAXToFirebase(AdInfo adInfo)
+        {
+            Parameter[] AdParameters = {
+                new Parameter("ad_platform", "Applovin"),
+                new Parameter("ad_source", adInfo.NetworkName),
+                new Parameter("ad_unit_name", adInfo.AdUnitIdentifier),
+                new Parameter("currency","USD"),
+                new Parameter("value", adInfo.Revenue),
+                new Parameter("placement", adInfo.Placement),
+                new Parameter("country_code", adInfo.NetworkPlacement),
+                new Parameter("ad_format", adInfo.AdFormat)
+            };
+
+            FirebaseAnalytics.LogEvent("ad_impression", AdParameters);
+        }
+
+        void sendRevenueMAXToAdjust(AdInfo adInfo)
+        {
+#if USE_ADJUST
+        LogW.Log("AdjustRevenue " + Time.time + " " + adInfo.Revenue);
+        var adRevenue = new AdjustAdRevenue("applovin_max_sdk");
+        adRevenue.SetRevenue(adInfo.Revenue, "USD");
+        adRevenue.AdRevenueNetwork = adInfo.NetworkName;
+        adRevenue.AdRevenueUnit = adInfo.AdUnitIdentifier;
+        adRevenue.AdRevenuePlacement = adInfo.Placement;
+        Adjust.TrackAdRevenue(adRevenue);
+#endif
+        }
+
+        void sendRevenueMAXToAppsflyer(AdInfo adInfo)
+        {
+#if USE_APPSFLYER
+            LogW.Log("AppsflyerRevenue: " + Time.time + " " + adInfo.Revenue);
+            Dictionary<string, string> additionalParams = new Dictionary<string, string>();
+            additionalParams.Add(AdRevenueScheme.COUNTRY, adInfo.NetworkPlacement);
+            additionalParams.Add(AdRevenueScheme.AD_UNIT, adInfo.AdUnitIdentifier);
+            additionalParams.Add(AdRevenueScheme.AD_TYPE, adInfo.AdFormat);
+            additionalParams.Add(AdRevenueScheme.PLACEMENT, adInfo.Placement);
+            var logRevenue = new AFAdRevenueData(adInfo.NetworkName, MediationNetwork.ApplovinMax, "USD", adInfo.Revenue);
+            AppsFlyer.logAdRevenue(logRevenue, additionalParams);
+#endif
+        }
+        #endregion
     }
 
-    private void OnInterstitialAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-    {
-        LogW.Log($"Interstitial Ad hidden", "Interstitial");
-        _onInterstitialFinishedCallback?.Invoke();
-        _onInterstitialFinishedCallback = null;
 
-        LoadInterstitial();
-        _interstitialLocation = "";
-        OnAdHidden?.Invoke(); // Kích hoạt sự kiện
-    }
-}
 }

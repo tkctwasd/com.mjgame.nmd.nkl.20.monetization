@@ -1,143 +1,188 @@
 namespace A
 {
+#if USE_ADJUST
+using AdjustSdk;
+using AppLovinMax.Scripts.IntegrationManager.Editor;
+
+#endif
+#if USE_APPSFLYER
+    using AppsFlyerSDK;
+#endif
+#if UNITY_EDITOR
+    using AppLovinMax.Scripts.IntegrationManager.Editor;
+#endif
+    using Firebase.Analytics;
     using System;
+    using System.Collections.Generic;
+    using UnityEditor;
     using UnityEngine;
     using static MaxSdkBase;
 
-    public class RewardedAdManager
+    public class RewardedAdManager : MonoBehaviour
     {
-        // NEW: Tham chiếu đến ApplovinMaxManager
-        private ApplovinMaxManager _applovinMaxManager;
-        private string _adUnitId;
-        private int _retryAttempt;
-        private string _rewardedLocation;
+        public ApplovinMaxManager ApplovinMaxManager;
+        [SerializeField] string rewardId = "rewarded-id";
 
-        public Action<string> OnUserRewarded;
-        public Action OnAdDisplayed;
-        public Action OnAdHidden;
+        [Header("Banner")]
+        [SerializeField] private AdViewPosition bannerPosition = AdViewPosition.BottomCenter;
 
-        private Action _onRewardedFinishedCallback;
+        private Action callBackReward;
 
-        // Constructor: Khởi tạo Manager với tham chiếu và Ad Unit ID
-        public RewardedAdManager(ApplovinMaxManager applovinManager, string adUnitId)
+
+        [Header("Rewarded")]
+        private int rewardedRetry;
+
+        private string rewardLocation;
+
+
+        #region Rewarded
+
+        public RewardedAdManager(ApplovinMaxManager applovinMaxManager)
         {
-            _applovinMaxManager = applovinManager; // Gán tham chiếu
-            _adUnitId = adUnitId;
+            ApplovinMaxManager = applovinMaxManager;
         }
 
-        public void Initialize()
+        private void InitializeRewardedAds()
         {
-            LogW.Log($"Initializing Rewarded Ad with ID: {_adUnitId}", "Rewarded");
+            MaxSdkCallbacks.Rewarded.OnAdLoadedEvent += RewardedOnAdLoadedEvent;
+            MaxSdkCallbacks.Rewarded.OnAdLoadFailedEvent += RewardedOnAdLoadFailedEvent;
+            MaxSdkCallbacks.Rewarded.OnAdDisplayedEvent += RewardedOnAdDisplayedEvent;
+            MaxSdkCallbacks.Rewarded.OnAdDisplayFailedEvent += RewardedOnAdDisplayFailedEvent;
+            MaxSdkCallbacks.Rewarded.OnAdClickedEvent += RewardedOnAdClickedEvent;
+            MaxSdkCallbacks.Rewarded.OnAdRevenuePaidEvent += OnAdRevenuePaidEvent;
+            MaxSdkCallbacks.Rewarded.OnAdHiddenEvent += RewardedOnAdHiddenEvent;
+            MaxSdkCallbacks.Rewarded.OnAdReceivedRewardEvent += RewardedOnAdReceivedRewardEvent;
 
-            MaxSdkCallbacks.Rewarded.OnAdLoadedEvent += OnRewardedAdLoadedEvent;
-            MaxSdkCallbacks.Rewarded.OnAdLoadFailedEvent += OnRewardedAdLoadFailedEvent;
-            MaxSdkCallbacks.Rewarded.OnAdDisplayedEvent += OnRewardedAdDisplayedEvent;
-            MaxSdkCallbacks.Rewarded.OnAdDisplayFailedEvent += OnRewardedAdDisplayFailedEvent;
-            MaxSdkCallbacks.Rewarded.OnAdClickedEvent += OnRewardedAdClickedEvent;
-            MaxSdkCallbacks.Rewarded.OnAdHiddenEvent += OnRewardedAdHiddenEvent;
-            MaxSdkCallbacks.Rewarded.OnAdReceivedRewardEvent += OnRewardedAdReceivedRewardEvent;
-
-            LoadRewardedAd();
+            Invoke(nameof(LoadRewardedAd), 0.5f);
         }
 
-        public bool IsRewardedAdReady()
+        private void LoadRewardedAd()
         {
-            return MaxSdk.IsRewardedAdReady(_adUnitId);
-        }
-
-        public void LoadRewardedAd()
-        {
-            if (MaxSdk.IsRewardedAdReady(_adUnitId))
+            if (MaxSdk.IsInitialized())
             {
-                LogW.Log("Rewarded Ad is already loaded.", "Rewarded");
-                return;
-            }
-
-            LogW.Log("Loading Rewarded Ad...", "Rewarded");
-            MaxSdk.LoadRewardedAd(_adUnitId);
-        }
-
-        public void ShowRewarded(string placement, Action callBack)
-        {
-            _rewardedLocation = placement;
-            _onRewardedFinishedCallback = callBack;
-
-            LogW.Log($"Attempting to show Rewarded Ad at {placement}. IsReady: {IsRewardedAdReady()}", "Rewarded");
-            FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads", placement);
-
-            if (IsRewardedAdReady())
-            {
-                LogW.Log($"Showing Rewarded Ad from {placement}", "Rewarded");
-                FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads_success", placement);
-                MaxSdk.ShowRewardedAd(_adUnitId);
-            }
-            else
-            {
-                LogW.Log($"Rewarded Ad not ready for {placement}. Invoking callback.", "Rewarded");
-                FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads_not_ready", placement);
-                LoadRewardedAd();
-                _onRewardedFinishedCallback?.Invoke();
-                _onRewardedFinishedCallback = null;
+                MaxSdk.LoadRewardedAd(rewardId);
             }
         }
 
-        private void OnRewardedAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        public void ShowRewarded(string location, Action callBack)
         {
-            LogW.Log($"Rewarded Ad loaded. Source: {adInfo.NetworkName}", "Rewarded");
-            _retryAttempt = 0;
-        }
-
-        private void OnRewardedAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
-        {
-            LogW.Log($"Rewarded Ad load failed: {errorInfo.Message}", "Rewarded");
-            FirebaseAnalyticManager.Instance.LogAd("rewarded_load_fail", _rewardedLocation, errorInfo.Message);
-            _retryAttempt++;
-            double retryDelay = Math.Pow(2, Math.Min(6, _retryAttempt));
-            LogW.Log($"Retrying Rewarded Ad load in {retryDelay} seconds...", "Rewarded");
-        }
-
-        private void OnRewardedAdDisplayedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            LogW.Log($"Rewarded Ad displayed. Source: {adInfo.NetworkName}", "Rewarded");
-            OnAdDisplayed?.Invoke(); // Kích hoạt sự kiện
-        }
-
-        private void OnRewardedAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
-        {
-            LogW.Log($"Rewarded Ad display failed: {errorInfo.Message}", "Rewarded");
-            FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads_fail", _rewardedLocation, errorInfo.Message);
-
-            _onRewardedFinishedCallback?.Invoke();
-            _onRewardedFinishedCallback = null;
-
-            LoadRewardedAd();
-            OnAdHidden?.Invoke(); // Kích hoạt sự kiện
-        }
-
-        private void OnRewardedAdClickedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            LogW.Log($"Rewarded Ad clicked. Source: {adInfo.NetworkName}", "Rewarded");
-            if (!string.IsNullOrEmpty(_rewardedLocation))
+            rewardLocation = location;
+            isCanShowAOABackGame = false;
+            FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads", rewardLocation);
+            if (MaxSdk.IsRewardedAdReady(rewardId))
             {
-                FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads_click", _rewardedLocation);
+                FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads_sucess", rewardLocation);
+                callBackReward = callBack;
+                MaxSdk.ShowRewardedAd(rewardId);
             }
         }
 
-        private void OnRewardedAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        private void RewardedOnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            LogW.Log($"Rewarded Ad hidden", "Rewarded");
-            LoadRewardedAd();
-            _rewardedLocation = "";
-            OnAdHidden?.Invoke(); // Kích hoạt sự kiện
+            LogW.Log($"Ad Loaded", "Rewarded");
+            rewardedRetry = 0;
         }
 
-        private void OnRewardedAdReceivedRewardEvent(string adUnitId, MaxSdk.Reward reward, MaxSdkBase.AdInfo adInfo)
+        private void RewardedOnAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
-            LogW.Log($"Rewarded Ad received reward. Amount: {reward.Amount}, Label: {reward.Label}", "Rewarded");
-            FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads_completed", _rewardedLocation);
-
-            _onRewardedFinishedCallback?.Invoke();
-            _onRewardedFinishedCallback = null;
+            rewardedRetry++;
+            double retryDelay = Math.Pow(2, Math.Min(6, rewardedRetry));
+            Invoke(nameof(LoadRewardedAd), (float)retryDelay);
+            LogW.Log($"Ad Load Failed + {errorInfo.Message}", "Rewarded");
         }
+
+        private void RewardedOnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
+        {
+            Invoke(nameof(LoadRewardedAd), 0.5f);
+            isCanShowAOABackGame = true;
+            LogW.Log($"Ad Display Failed + {errorInfo.Message}", "Rewarded");
+        }
+
+        private void RewardedOnAdDisplayedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        {
+            LogW.Log("Ad Displayed", "Rewarded");
+        }
+
+        private void RewardedOnAdClickedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        {
+            LogW.Log("Ad Clicked", "Rewarded");
+            FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads_click", rewardLocation);
+        }
+
+        private void RewardedOnAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        {
+            LogW.Log("Ad Hidden", "Rewarded");
+            timeCloseAOA = Time.unscaledTime;
+            Invoke(nameof(LoadRewardedAd), 0.5f);
+            isCanShowAOABackGame = true;
+        }
+
+        private void RewardedOnAdReceivedRewardEvent(string adUnitId, MaxSdkBase.Reward reward, MaxSdkBase.AdInfo adInfo)
+        {
+            if (callBackReward != null)
+            {
+                callBackReward.Invoke();
+                callBackReward = null;
+            }
+            isCanShowAOABackGame = true;
+            FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads_completed", rewardLocation);
+            LogW.Log("Ad Completed", "Rewarded");
+        }
+
+        #endregion
+
+        #region RevenuePaidEvent
+        private void OnAdRevenuePaidEvent(string adUnitId, AdInfo impressionData)
+        {
+            sendRevenueMAXToFirebase(impressionData);
+            sendRevenueMAXToAdjust(impressionData);
+            sendRevenueMAXToAppsflyer(impressionData);
+        }
+
+        void sendRevenueMAXToFirebase(AdInfo adInfo)
+        {
+            Parameter[] AdParameters = {
+                new Parameter("ad_platform", "Applovin"),
+                new Parameter("ad_source", adInfo.NetworkName),
+                new Parameter("ad_unit_name", adInfo.AdUnitIdentifier),
+                new Parameter("currency","USD"),
+                new Parameter("value", adInfo.Revenue),
+                new Parameter("placement", adInfo.Placement),
+                new Parameter("country_code", adInfo.NetworkPlacement),
+                new Parameter("ad_format", adInfo.AdFormat)
+            };
+
+            FirebaseAnalytics.LogEvent("ad_impression", AdParameters);
+        }
+
+        void sendRevenueMAXToAdjust(AdInfo adInfo)
+        {
+#if USE_ADJUST
+        LogW.Log("AdjustRevenue " + Time.time + " " + adInfo.Revenue);
+        var adRevenue = new AdjustAdRevenue("applovin_max_sdk");
+        adRevenue.SetRevenue(adInfo.Revenue, "USD");
+        adRevenue.AdRevenueNetwork = adInfo.NetworkName;
+        adRevenue.AdRevenueUnit = adInfo.AdUnitIdentifier;
+        adRevenue.AdRevenuePlacement = adInfo.Placement;
+        Adjust.TrackAdRevenue(adRevenue);
+#endif
+        }
+
+        void sendRevenueMAXToAppsflyer(AdInfo adInfo)
+        {
+#if USE_APPSFLYER
+            LogW.Log("AppsflyerRevenue: " + Time.time + " " + adInfo.Revenue);
+            Dictionary<string, string> additionalParams = new Dictionary<string, string>();
+            additionalParams.Add(AdRevenueScheme.COUNTRY, adInfo.NetworkPlacement);
+            additionalParams.Add(AdRevenueScheme.AD_UNIT, adInfo.AdUnitIdentifier);
+            additionalParams.Add(AdRevenueScheme.AD_TYPE, adInfo.AdFormat);
+            additionalParams.Add(AdRevenueScheme.PLACEMENT, adInfo.Placement);
+            var logRevenue = new AFAdRevenueData(adInfo.NetworkName, MediationNetwork.ApplovinMax, "USD", adInfo.Revenue);
+            AppsFlyer.logAdRevenue(logRevenue, additionalParams);
+#endif
+        }
+        #endregion
     }
+
+
 }
