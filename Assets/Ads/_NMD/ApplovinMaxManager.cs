@@ -21,10 +21,10 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
         [Header("References")]
         public static ApplovinMaxManager Instance = null;
         public AdConstants AdConstants;
-        public AppOpenAdManager AppOpenAdManager;
-        public BannerAdManager BannerAdManager;
-        public InterstitialAdManager InterstitialAdManager;
-        public RewardedAdManager RewardedAdManager;
+        public AppOpenModule AppOpenAdManager;
+        public BannerModule BannerAdManager;
+        public InterstitialModule InterstitialAdManager;
+        public RewardedModule RewardedAdManager;
         public AdRevenueTracker AdRevenueTracker;
 
         [Header("AppOpen")]
@@ -52,10 +52,10 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
         {
             Instance = this;
 
-            InterstitialAdManager = new InterstitialAdManager(this, AdConstants.InterstitialId);
-            RewardedAdManager = new RewardedAdManager(this, AdConstants.RewardedId);
-            BannerAdManager = new BannerAdManager(this, AdConstants.BannerId);
-            AppOpenAdManager = new AppOpenAdManager(this, AdConstants.AppOpenId);
+            InterstitialAdManager = new InterstitialModule(this, AdConstants.InterstitialId);
+            RewardedAdManager = new RewardedModule(this, AdConstants.RewardedId);
+            BannerAdManager = new BannerModule(this, AdConstants.BannerId);
+            AppOpenAdManager = new AppOpenModule(this, AdConstants.AppOpenId);
             AdRevenueTracker = new AdRevenueTracker();
 
             TimeCloseAOA = DateTime.MinValue;

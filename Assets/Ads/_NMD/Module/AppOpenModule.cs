@@ -18,7 +18,7 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
     using UnityEngine;
     using static MaxSdkBase;
 
-    public class AppOpenAdManager
+    public class AppOpenModule
     {
         public ApplovinMaxManager ApplovinManager;
         private string appOpenId = "app-open-id";
@@ -26,7 +26,7 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
         #region App Open 
 
 
-        public AppOpenAdManager(ApplovinMaxManager applovin, string appOpenId)
+        public AppOpenModule(ApplovinMaxManager applovin, string appOpenId)
         {
             ApplovinManager = applovin;
             this.appOpenId = appOpenId;

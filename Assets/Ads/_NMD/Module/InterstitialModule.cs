@@ -20,11 +20,11 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
     using System.Collections;
     using Firebase.RemoteConfig;
 
-    public class InterstitialAdManager
+    public class InterstitialModule
     {
         public ApplovinMaxManager ApplovinManager;
         private string intersId = "inters-id";
-        public InterstitialAdManager(ApplovinMaxManager applovinMaxManager, string intersId)
+        public InterstitialModule(ApplovinMaxManager applovinMaxManager, string intersId)
         {
             ApplovinManager = applovinMaxManager;
             this.intersId = intersId;

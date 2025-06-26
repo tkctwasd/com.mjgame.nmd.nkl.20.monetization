@@ -19,13 +19,13 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
     using static MaxSdkBase;
     using System.Collections;
 
-    public class BannerAdManager
+    public class BannerModule
     {
         ApplovinMaxManager ApplovinMamager;
         string bannerId = "banner-id";
 
 
-        public BannerAdManager(ApplovinMaxManager applovin, string bannerId)
+        public BannerModule(ApplovinMaxManager applovin, string bannerId)
         {
             ApplovinMamager = applovin;
             this.bannerId = bannerId;

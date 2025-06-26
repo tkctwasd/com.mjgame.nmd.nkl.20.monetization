@@ -19,14 +19,14 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
     using static MaxSdkBase;
     using System.Collections;
 
-    public class RewardedAdManager
+    public class RewardedModule
     {
         public ApplovinMaxManager ApplovinManager;
         private string rewardId = "reward-id";
 
         #region Rewarded
 
-        public RewardedAdManager(ApplovinMaxManager applovinMaxManager, string rewardId)
+        public RewardedModule(ApplovinMaxManager applovinMaxManager, string rewardId)
         {
             ApplovinManager = applovinMaxManager;
             this.rewardId = rewardId;
