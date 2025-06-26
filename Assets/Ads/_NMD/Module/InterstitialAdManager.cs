@@ -18,6 +18,7 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
     using UnityEngine;
     using static MaxSdkBase;
     using System.Collections;
+    using Firebase.RemoteConfig;
 
     public class InterstitialAdManager
     {
@@ -62,7 +63,7 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
 
         public void ShowInterstitial(string location, Action callBack)
         {
-            if (!RemoteConfigManager.GetConfigValue<bool>(RemoteKey.AdUseInterstitial))
+            if (!RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig).ShowInterstitial)
             {
                 callBack?.Invoke();
                 return;
@@ -71,7 +72,9 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
             ApplovinManager.interLocation = location;
             FirebaseAnalyticManager.Instance.LogAd("show_interstitial_ads", location);
             ApplovinManager.isCanShowAOABackGame = false;
-            bool passedCappingTime = Time.unscaledTime >= ApplovinManager.timeCloseAOA;
+
+            bool passedCappingTime = (DateTime.UtcNow - ApplovinManager.TimeCloseInterstitial).TotalSeconds >= RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig).InterstitialCappingTime;
+
             if (MaxSdk.IsInterstitialReady(intersId) && passedCappingTime)
             {
                 FirebaseAnalyticManager.Instance.LogAd("show_interstitial_success", location);
@@ -89,7 +92,7 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
         private void InterstitialOnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
             ApplovinManager.intersRetry = 0;
-            LogW.Log($"Ad Loaded", "Interstitial");
+            LogMessage.Log($"Ad Loaded", "Interstitial");
         }
 
         private void InterstitialOnAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
@@ -97,12 +100,12 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
             ApplovinManager.intersRetry++;
             double retryDelay = Math.Pow(2, Math.Min(6, ApplovinManager.intersRetry));
             ApplovinManager.StartCoroutine(IELoadDelay((float)retryDelay));
-            LogW.Log($"Ad Load Failed", "Interstitial");
+            LogMessage.Log($"Ad Load Failed: {errorInfo.Message}", "Interstitial");
         }
 
         private void InterstitialOnAdDisplayedEvent(string adUnitID, MaxSdkBase.AdInfo adInfo)
         {
-            LogW.Log($"Ad Displayed", "Interstitial");
+            LogMessage.Log($"Ad Displayed", "Interstitial");
         }
 
         private void InterstitialOnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
@@ -114,12 +117,12 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
             }
             ApplovinManager.isCanShowAOABackGame = true;
             ApplovinManager.StartCoroutine(IELoadDelay(0.5f));
-            LogW.Log($"Ad Display Failed", "Interstitial");
+            LogMessage.Log($"Ad Display Failed", "Interstitial");
         }
 
         private void InterstitialOnAdClickedEvent(string adUnitID, MaxSdkBase.AdInfo adInfo)
         {
-            LogW.Log($"Ad Click", "Interstitial");
+            LogMessage.Log($"Ad Click", "Interstitial");
             if (!string.IsNullOrEmpty(ApplovinManager.interLocation))
             {
                 FirebaseAnalyticManager.Instance.LogAd("show_interstitial_click", ApplovinManager.interLocation);
@@ -132,11 +135,11 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
             {
                 ApplovinManager.callBackInters.Invoke();
                 ApplovinManager.callBackInters = null;
-                ApplovinManager.timeCloseAOA = Time.unscaledTime;
+                ApplovinManager.TimeCloseInterstitial = DateTime.UtcNow;
             }
             ApplovinManager.isCanShowAOABackGame = true;
             ApplovinManager.StartCoroutine(IELoadDelay(0.5f));
-            LogW.Log($"Ad Hidden", "Interstitial");
+            LogMessage.Log($"Ad Hidden", "Interstitial");
         }
         #endregion
 

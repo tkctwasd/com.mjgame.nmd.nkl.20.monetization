@@ -4,7 +4,7 @@ namespace A
     using System.Collections.Generic;
     using UnityEngine;
 
-    public static class LogW
+    public static class LogMessage
     {
         public static void Log(string content, string location = "")
         {

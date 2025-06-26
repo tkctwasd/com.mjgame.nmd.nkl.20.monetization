@@ -24,19 +24,14 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
         private string appOpenId = "app-open-id";
 
         #region App Open 
-        private void OnApplicationPause(bool pauseStatus)
-        {
-            if (!pauseStatus)
-            {
-                ShowAppOpen(false);
-            }
-        }
+
 
         public AppOpenAdManager(ApplovinMaxManager applovin, string appOpenId)
         {
             ApplovinManager = applovin;
             this.appOpenId = appOpenId;
-            ApplovinManager.timeCloseAOA = -1000f;
+            ApplovinManager.TimeCloseAOA = DateTime.MinValue;
+            ApplovinManager.isLogEventLoading = false;
             ApplovinManager.isCanShowAOABackGame = true;
         }
 
@@ -53,17 +48,21 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
         }
         private void OnAppOpenAdDisplayedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            LogW.Log($"Ad Displayed", "AppOpen");
+            LogMessage.Log($"Ad Displayed", "AppOpen");
+            ApplovinManager.isLogEventLoading = false;
             if (!ApplovinManager.IsShowFirstAOA) ApplovinManager.IsShowFirstAOA = true;
         }
         private void OnAppOpenAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
         {
-            LogW.Log($"Ad Display Failed: {errorInfo.Message}", "AppOpen");
+            LogMessage.Log($"Ad Display Failed: {errorInfo.Message}", "AppOpen");
+            ApplovinManager.isLogEventLoading = false;
+            // tai lai quang cao
+            MaxSdk.LoadAppOpenAd(appOpenId);
         }
 
         private void OnAppOpenAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            LogW.Log($"Ad Hidden", "AppOpen");
+            LogMessage.Log($"Ad Hidden", "AppOpen");
             MaxSdk.LoadAppOpenAd(appOpenId);
             ApplovinManager.appOpenLocation = "";
             if (!ApplovinManager.IsCloseFirstAOA) ApplovinManager.IsCloseFirstAOA = true;
@@ -72,17 +71,17 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
 
         private void OnAppOpenAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            LogW.Log($"Ad Loaded", "AppOpen");
+            LogMessage.Log($"Ad Loaded", "AppOpen");
         }
 
         private void OnAppOpenAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
-            LogW.Log($"Ad Load Failed: {errorInfo.Message}", "AppOpen");
+            LogMessage.Log($"Ad Load Failed: {errorInfo.Message}", "AppOpen");
         }
 
         private void OnAppOpenAdClickEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            LogW.Log($"Ad Clicked", "AppOpen");
+            LogMessage.Log($"Ad Clicked", "AppOpen");
             if (!string.IsNullOrEmpty(ApplovinManager.appOpenLocation))
             {
                 FirebaseAnalyticManager.Instance.LogAd("show_app_open_ads_click", ApplovinManager.appOpenLocation);
@@ -91,11 +90,13 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
 
         private bool IsShowAOA()
         {
-            return RemoteConfigManager.GetConfigValue<bool>(RemoteKey.AdUseAppOpen) && ApplovinManager.isCanShowAOABackGame;
+            return RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig).ShowAppOpen && ApplovinManager.isCanShowAOABackGame;
         }
         public void ShowAppOpen(bool isLoading)
         {
-            bool passedCappingTime = DateTime.UtcNow.Subtract(ApplovinManager.TimeCloseAOA).TotalSeconds >= RemoteConfigManager.GetConfigValue<int>(RemoteKey.AdIntervalShowAppOpen);
+            if (!IsShowAOA()) return;
+            bool passedCappingTime = (DateTime.UtcNow - ApplovinManager.TimeCloseAOA).TotalSeconds >= RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig).AppOpenCappingTime;
+
             ApplovinManager.appOpenLocation = isLoading ? "loading" : "resume";
 
             if ((isLoading || passedCappingTime) && IsShowAOA())

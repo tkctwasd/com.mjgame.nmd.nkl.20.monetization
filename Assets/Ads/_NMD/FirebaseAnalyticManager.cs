@@ -25,12 +25,12 @@ namespace A
                     {
                         Firebase.Analytics.FirebaseAnalytics.LogEvent(nameEvent,
                         new Firebase.Analytics.Parameter("placement", placement));
-                        LogW.Log($"{placement}", nameEvent);
+                        LogMessage.Log($"{placement}", nameEvent);
                     }
                     else
                     {
                         Firebase.Analytics.FirebaseAnalytics.LogEvent(nameEvent);
-                        LogW.Log($"", nameEvent);
+                        LogMessage.Log($"", nameEvent);
                     }
                 }
                 else
@@ -38,7 +38,7 @@ namespace A
                     Firebase.Analytics.FirebaseAnalytics.LogEvent(nameEvent,
                     new Firebase.Analytics.Parameter("placement", placement),
                     new Firebase.Analytics.Parameter("error", error));
-                    LogW.Log($"{placement} {error}", nameEvent);
+                    LogMessage.Log($"{placement} {error}", nameEvent);
                 }
             }
             catch (Exception e)

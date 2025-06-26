@@ -1,8 +1,4 @@
 {
-  "Ad_Interval_Show_AppOpen": 60,
-  "Ad_Use_AppOpen": true,
-  "Ad_Use_Banner": true,
-  "Ad_Use_Interstitial": true,
   "AdSetting": {
     "hello": "hello",
     "xinchao": "xinchao"
@@ -12,6 +8,7 @@
     "ShowAppOpen": true,
     "ShowInterstitial": true,
     "ShowBanner": true,
-    "IntervalShowAppOpen": 60
+    "InterstitialCappingTime": 45,
+    "AppOpenCappingTime": 60
   }
 }

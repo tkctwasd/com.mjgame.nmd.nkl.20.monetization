@@ -30,8 +30,8 @@ namespace A
         [ContextMenu("LoadTest")]
         public void LoadTest()
         {
-            AdsConfig ads = RemoteConfigManager.GetConfigValue<AdsConfig>("AdsConfig");
-            Debug.Log(ads.IntervalShowAppOpen);
+            AdsConfig ads = RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig);
+            Debug.Log(ads.AppOpenCappingTime);
             Debug.Log(ads.ShowAppOpen);
             Debug.Log(ads.ShowBanner);
             Debug.Log(ads.ShowInterstitial);
@@ -40,7 +40,7 @@ namespace A
         [ContextMenu("LoadTest2")]
         public void LoadTest2()
         {
-            int time = RemoteConfigManager.GetConfigValue<int>(RemoteKey.AdIntervalShowAppOpen);
+            int time = RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig).InterstitialCappingTime;
         }
         #endregion
 
@@ -49,7 +49,7 @@ namespace A
         [ContextMenu("AOA")]
         public void ShowAOA()
         {
-            ApplovinMaxManager.Instance.AppOpenAdManager.ShowAppOpen(true);
+            ApplovinMaxManager.Instance.AppOpenAdManager.ShowAppOpen(false);
         }
         #endregion
 

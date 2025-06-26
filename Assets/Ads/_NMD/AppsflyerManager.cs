@@ -21,7 +21,7 @@ namespace A
 
         public void Init()
         {
-            LogW.Log("Appsflyer Init", "Ads");
+            LogMessage.Log("Appsflyer Init", "Ads");
 #if UNITY_ANDROID
         AppsFlyer.initSDK(devKey, Application.identifier, this);
 #elif UNITY_IOS

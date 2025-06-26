@@ -28,7 +28,6 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
         public AdRevenueTracker AdRevenueTracker;
 
         [Header("AppOpen")]
-        internal float timeCloseAOA;
         internal string appOpenLocation;
         internal bool IsCloseFirstAOA;
         internal bool isCanShowAOABackGame;
@@ -43,6 +42,7 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
         internal Action callBackInters;
         internal int intersRetry;
         internal string interLocation;
+        internal DateTime TimeCloseInterstitial { get; set; }
 
         [Header("Rewarded")]
         internal int rewardedRetry;
@@ -55,8 +55,11 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
             InterstitialAdManager = new InterstitialAdManager(this, AdConstants.InterstitialId);
             RewardedAdManager = new RewardedAdManager(this, AdConstants.RewardedId);
             BannerAdManager = new BannerAdManager(this, AdConstants.BannerId);
-            AppOpenAdManager = new AppOpenAdManager(this, AdConstants.BannerId);
+            AppOpenAdManager = new AppOpenAdManager(this, AdConstants.AppOpenId);
             AdRevenueTracker = new AdRevenueTracker();
+
+            TimeCloseAOA = DateTime.MinValue;
+            TimeCloseInterstitial = DateTime.MinValue;
 
             MaxSdkCallbacks.OnSdkInitializedEvent += sdkConfiguration =>
             {
@@ -79,9 +82,43 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
             MaxSdk.InitializeSdk();
         }
 
-        private void Start()
+        private void OnEnable()
         {
-            RemoteConfigManager.FetchDone += LogKeyAd;
+            RemoteConfigManager.ActionShowInfo += LogKeyAd;
+        }
+
+        private void OnApplicationPause(bool pauseStatus)
+        {
+            // if (!pauseStatus)
+            // {
+            //     Debug.Log("<color=yellow>Load AOA Pause</color>");
+            //     if (AppOpenAdManager != null)
+            //     {
+            //         AppOpenAdManager.ShowAppOpen(false);
+            //     }
+            //     else
+            //     {
+            //         Debug.LogWarning("AppOpenAdManager chưa được khởi tạo khi resume!");
+            //     }
+            // }
+
+            if (pauseStatus)
+            {
+                // Lưu lại trạng thái app đã từng vào nền
+                IsCloseFirstAOA = true;
+            }
+            else
+            {
+                // Chỉ show AOA khi quay lại từ nền, không phải lần mở app đầu
+                if (IsCloseFirstAOA && AppOpenAdManager != null && MaxSdk.IsInitialized())
+                {
+                    Debug.Log("<color=yellow>Load AOA Pause</color>");
+                    AppOpenAdManager.ShowAppOpen(false);
+
+                    // Reset nếu bạn không muốn lặp lại
+                    IsCloseFirstAOA = false;
+                }
+            }
         }
 
         [ContextMenu("Set ID")]
@@ -107,15 +144,15 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
         #region Log Key
         private void LogKeyAd()
         {
-            if (RemoteConfigManager.GetConfigValue<bool>("Ad_Debug_Key"))
+            if (RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig).ShowInfo)
             {
-                LogW.Log($"SDK MAX: {AdConstants.SdkKey}", "Key Ad");
-                LogW.Log($"App Open ID: {AdConstants.AppOpenId}", "Key Ad");
-                LogW.Log($"Banner ID: {AdConstants.BannerId}", "Key Ad");
-                LogW.Log($"Interstitial ID: {AdConstants.InterstitialId}", "Key Ad");
-                LogW.Log($"Rewarded: {AdConstants.RewardedId}", "Key Ad");
+                LogMessage.Log($"SDK MAX: {AdConstants.SdkKey}", "Key Ad");
+                LogMessage.Log($"App Open ID: {AdConstants.AppOpenId}", "Key Ad");
+                LogMessage.Log($"Banner ID: {AdConstants.BannerId}", "Key Ad");
+                LogMessage.Log($"Interstitial ID: {AdConstants.InterstitialId}", "Key Ad");
+                LogMessage.Log($"Rewarded: {AdConstants.RewardedId}", "Key Ad");
 #if USE_APPSFLYER
-                LogW.Log($"Appsflyer: {AppsFlyerManager.Instance.GetDevKeyAndAppId()}", "Key Ad");
+                LogMessage.Log($"Appsflyer: {AppsFlyerManager.Instance.GetDevKeyAndAppId()}", "Key Ad");
 #endif
 #if USE_ADJUST
             LogW.Log($"Adjust: {AdjustManager.Instance.GetTokenAdjust()}", "Key Ad");
@@ -128,6 +165,7 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
         {
             AdRevenueTracker.SendAllTracker(impressionData);
         }
+
     }
 
 

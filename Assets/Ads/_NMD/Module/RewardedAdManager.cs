@@ -57,6 +57,7 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
             if (MaxSdk.IsInitialized())
             {
                 MaxSdk.LoadRewardedAd(rewardId);
+                LogMessage.Log("Loading Rewarded Ad...", "Rewarded");
             }
         }
 
@@ -75,7 +76,7 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
 
         private void RewardedOnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            LogW.Log($"Ad Loaded", "Rewarded");
+            LogMessage.Log($"Ad Loaded", "Rewarded");
             ApplovinManager.rewardedRetry = 0;
         }
 
@@ -84,31 +85,31 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
             ApplovinManager.rewardedRetry++;
             double retryDelay = Math.Pow(2, Math.Min(6, ApplovinManager.rewardedRetry));
             ApplovinManager.Invoke(nameof(LoadRewardedAd), (float)retryDelay);
-            LogW.Log($"Ad Load Failed + {errorInfo.Message}", "Rewarded");
+            LogMessage.Log($"Ad Load Failed + {errorInfo.Message}", "Rewarded");
         }
 
         private void RewardedOnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
         {
             ApplovinManager.StartCoroutine(IELoadDelay(0.5f));
             ApplovinManager.isCanShowAOABackGame = true;
-            LogW.Log($"Ad Display Failed + {errorInfo.Message}", "Rewarded");
+            LogMessage.Log($"Ad Display Failed + {errorInfo.Message}", "Rewarded");
         }
 
         private void RewardedOnAdDisplayedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            LogW.Log("Ad Displayed", "Rewarded");
+            LogMessage.Log("Ad Displayed", "Rewarded");
         }
 
         private void RewardedOnAdClickedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            LogW.Log("Ad Clicked", "Rewarded");
+            LogMessage.Log("Ad Clicked", "Rewarded");
             FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads_click", ApplovinManager.rewardLocation);
         }
 
         private void RewardedOnAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            LogW.Log("Ad Hidden", "Rewarded");
-            ApplovinManager.timeCloseAOA = Time.unscaledTime;
+            LogMessage.Log("Ad Hidden", "Rewarded");
+            ApplovinManager.TimeCloseAOA = DateTime.UtcNow;
             ApplovinManager.StartCoroutine(IELoadDelay(0.5f));
             ApplovinManager.isCanShowAOABackGame = true;
         }
@@ -122,7 +123,7 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
             }
             ApplovinManager.isCanShowAOABackGame = true;
             FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads_completed", ApplovinManager.rewardLocation);
-            LogW.Log("Ad Completed", "Rewarded");
+            LogMessage.Log("Ad Completed", "Rewarded");
         }
 
         #endregion

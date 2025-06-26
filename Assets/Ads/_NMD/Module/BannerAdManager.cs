@@ -54,15 +54,15 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
         private void LoadBanner()
         {
             var adViewConfiguration = new AdViewConfiguration(ApplovinMamager.AdConstants.bannerPosition);
-            MaxSdk.SetBannerWidth(bannerId, MaxSdkUtils.IsTablet() ? 800 : 350);
+            // MaxSdk.SetBannerWidth(bannerId, MaxSdkUtils.IsTablet() ? 800 : 350);
             MaxSdk.CreateBanner(bannerId, adViewConfiguration);
-            MaxSdk.SetBannerBackgroundColor(bannerId, Color.clear);
+            MaxSdk.SetBannerBackgroundColor(bannerId, Color.black);
         }
 
 
         public void ShowBanner()
         {
-            if (RemoteConfigManager.GetConfigValue<bool>(RemoteKey.AdUseBanner))
+            if (RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig).ShowBanner)
             {
                 FirebaseAnalyticManager.Instance.LogAd("show_banner_ads", "");
                 MaxSdk.ShowBanner(bannerId);
@@ -76,12 +76,12 @@ using AppLovinMax.Scripts.IntegrationManager.Editor;
 
         private void OnBannerAdLoadedEvent(string adUnitId, AdInfo adInfo)
         {
-            LogW.Log($"Ad Loaded", "Banner");
+            LogMessage.Log($"Ad Loaded", "Banner");
         }
 
         private void OnBannerAdLoadFailedEvent(string adUnitId, ErrorInfo errorInfo)
         {
-            LogW.Log($"Ad Load Failed", "Banner");
+            LogMessage.Log($"Ad Load Failed: {errorInfo.Message}", "Banner");
         }
 
         private void OnBannerAdClickedEvent(string adUnitId, AdInfo adInfo)

@@ -12,21 +12,21 @@ namespace A
 
     public class RemoteConfigManager : MonoBehaviour
     {
-        public static event Action FetchDone;
+        public static event Action ActionFetchDone;
+        public static event Action ActionShowInfo;
         private static Dictionary<string, object> remoteConfigData;
 
-        private void Start()
-        {
-            FetchDone += LoadLocalRemoteConfigAndCompare;
-        }
+
         private void OnEnable()
         {
             FirebaseManager.InitDone += Init;
+            ActionFetchDone += LoadLocalRemoteConfigAndCompare;
         }
 
         private void OnDisable()
         {
             FirebaseManager.InitDone -= Init;
+            ActionFetchDone -= LoadLocalRemoteConfigAndCompare;
         }
         private void Init()
         {
@@ -78,7 +78,9 @@ namespace A
                     Debug.Log("Latest Fetch call still pending.");
                     break;
             }
-            if (FetchDone != null) FetchDone.Invoke();
+
+            ActionFetchDone?.Invoke();
+            ActionShowInfo?.Invoke();
         }
 
         void LoadLocalRemoteConfigAndCompare()
@@ -96,7 +98,7 @@ namespace A
                 Debug.LogError("RemoteConfig JSON not found in Resources: " + platformName);
                 return;
             }
-
+            Debug.Log("Set Remote Config to Dictionary");
             try
             {
                 remoteConfigData = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonFile.text);
@@ -123,6 +125,9 @@ namespace A
             {
                 Debug.LogError("Error parsing or comparing RemoteConfig: " + ex.Message);
             }
+
+            LogMessage.Log("Load Complete", "Firebase");
+
         }
         string RemoveAllWhitespace(string input)
         {
