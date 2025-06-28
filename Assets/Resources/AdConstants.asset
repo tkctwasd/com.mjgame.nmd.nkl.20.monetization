@@ -12,14 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19338b4e6535fb44f8c94e2e8eec234c, type: 3}
   m_Name: AdConstants
   m_EditorClassIdentifier: 
-  SdkKey: 4K78ykZ68hzpvAIqxA7WTnWox8oW5qoVtEhOaSAy0celB0L4ZGSJqTgnFmKwlSSkynk57q_ifORnmLmZiAbxEO
-  AdmobAndroidAppId: admob-android-id
-  AdmobIosAppId: ca-app-pub-4290354563418992~2803235618
-  GameName: Dungeon Run and Jump
-  PackageName: com.brrp.wasd2025
+  SdkKey: bZncTTqqX6Kebm0dMxUgLHPAC7HVzkQo4iVz2zT32odFJeB7qTQbIf2SfSB9Q65Q3lhWc0EI9OEDhFyxrxo7f2
+  AdmobAndroidAppId: ca-app-pub-2010884681696999~9913646868
+  AdmobIosAppId: 
+  GameName: 'Brainrot Arrested: Jail Escape'
+  PackageName: com.arrest.prison.breakout2025
   PrivacyPolicyURL: https://doc-hosting.flycricket.io/trang-vu-privacy-policy/9c368108-a94d-4659-a247-ece94ac95448/privacy
   TermsURL: https://doc-hosting.flycricket.io/trang-vu-terms-of-use/9a4b1518-9582-42e1-997f-6e124ea9d263/terms
-  AppOpenId: d055564632f5d6d9
-  BannerId: 671144ac4e3a3d5a
-  InterstitialId: d6064134ad07b00b
-  RewardedId: 7411abdf6bb90ec8
+  AppOpenId: 2cbba7ece8edbe13
+  BannerId: a7fd53713d051427
+  InterstitialId: 903fdeb893a69c9e
+  RewardedId: 57502118c4c417f0
+  bannerPosition: 7

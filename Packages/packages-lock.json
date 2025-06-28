@@ -1,12 +1,5 @@
 {
   "dependencies": {
-    "appsflyer-unity-plugin": {
-      "version": "https://github.com/AppsFlyerSDK/appsflyer-unity-plugin.git#upm",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "2546c1fb46a4cecc632fb0fbb25fb5cc5368f901"
-    },
     "com.applovin.mediation.adapters.google.android": {
       "version": "24040000.0.0",
       "depth": 0,

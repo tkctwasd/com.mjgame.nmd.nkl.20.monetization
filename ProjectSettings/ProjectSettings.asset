@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: DefaultCompany
-  productName: Dungeon Run and Jump
+  productName: 'Brainrot Arrested: Jail Escape'
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -163,7 +163,7 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    Android: com.game.adssdk
+    Android: com.arrest.prison.breakout2025
     Standalone: com.DefaultCompany.AdsUnity
     iPhone: com.brrp.wasd2025
   buildNumber:
@@ -843,7 +843,7 @@ PlayerSettings:
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Android: FIREBASE_ANALYTICS
+    Android: FIREBASE_ANALYTICS;USE_ADJUST
     Standalone: FIREBASE_ANALYTICS
     iPhone: FIREBASE_ANALYTICS;USE_APPSFLYER
   additionalCompilerArguments: {}
