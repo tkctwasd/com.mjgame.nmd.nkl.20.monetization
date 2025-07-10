@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Firebase.Analytics;
 using UnityEngine;
 using static MaxSdkBase;
@@ -28,7 +29,7 @@ public class AdRevenueTracker
         void SendRevenueMAXToAdjust(AdInfo adInfo)
         {
 #if USE_ADJUST
-                LogMessage.Log("AdjustRevenue " + Time.time + " " + adInfo.Revenue);
+                Debug.Log("Tracker".Ads("AdjustRevenue " + Time.time + " " + adInfo.Revenue));
                 var adRevenue = new AdjustSdk.AdjustAdRevenue("applovin_max_sdk");
                 adRevenue.SetRevenue(adInfo.Revenue, "USD");
                 adRevenue.AdRevenueNetwork = adInfo.NetworkName;
@@ -41,14 +42,14 @@ public class AdRevenueTracker
         void SendRevenueMAXToAppsflyer(AdInfo adInfo)
         {
 #if USE_APPSFLYER
-                LogMessage.Log("AppsflyerRevenue: " + Time.time + " " + adInfo.Revenue);
+                Debug.Log("TrackerAppsFlyer".Ads("AppsflyerRevenue: " + Time.time + " " + adInfo.Revenue));
                 Dictionary<string, string> additionalParams = new Dictionary<string, string>();
-                additionalParams.Add(AdRevenueScheme.COUNTRY, MaxSdk.GetSdkConfiguration().CountryCode);
-                additionalParams.Add(AdRevenueScheme.AD_UNIT, adInfo.AdUnitIdentifier);
-                additionalParams.Add(AdRevenueScheme.AD_TYPE, adInfo.AdFormat);
-                additionalParams.Add(AdRevenueScheme.PLACEMENT, adInfo.Placement);
-                var logRevenue = new AFAdRevenueData(adInfo.NetworkName, MediationNetwork.ApplovinMax, "USD", adInfo.Revenue);
-                AppsFlyer.logAdRevenue(logRevenue, additionalParams);
+                additionalParams.Add(AppsFlyerSDK.AdRevenueScheme.COUNTRY, MaxSdk.GetSdkConfiguration().CountryCode);
+                additionalParams.Add(AppsFlyerSDK.AdRevenueScheme.AD_UNIT, adInfo.AdUnitIdentifier);
+                additionalParams.Add(AppsFlyerSDK.AdRevenueScheme.AD_TYPE, adInfo.AdFormat);
+                additionalParams.Add(AppsFlyerSDK.AdRevenueScheme.PLACEMENT, adInfo.Placement);
+                var logRevenue = new AppsFlyerSDK.AFAdRevenueData(adInfo.NetworkName, AppsFlyerSDK.MediationNetwork.ApplovinMax, "USD", adInfo.Revenue);
+                AppsFlyerSDK.AppsFlyer.logAdRevenue(logRevenue, additionalParams);
 #endif
         }
 }

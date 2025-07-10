@@ -27,14 +27,14 @@ public class FirebaseAnalyticManager : MonoBehaviour
     {
         isReady = true;
         FirebaseAnalytics.SetAnalyticsCollectionEnabled(true);
-        LogMessage.Log(" is ready.", "FirebaseAnalytics");
+        Debug.Log("FirebaseAnalytics".Ads(" is ready."));
     }
 
     public void LogAd(string nameEvent, string placement, string error = "")
     {
         if (!isReady)
         {
-            LogMessage.Log("Firebase not ready, skip LogAd.", "[FirebaseAnalyticManager]");
+            Debug.Log("FirebaseAnalytics".Ads("Firebase not ready, skip LogAd."));
             return;
         }
 
@@ -80,7 +80,7 @@ public class FirebaseAnalyticManager : MonoBehaviour
         try
         {
             FirebaseAnalytics.LogEvent(eventName, parameters);
-            LogMessage.Log($"LogEvent: {eventName} with {parameters.Length} params", "[Firebase]");
+            Debug.Log("FirebaseAnalytics".Ads($"LogEvent: {eventName} with {parameters.Length} params"));
         }
         catch (Exception e)
         {

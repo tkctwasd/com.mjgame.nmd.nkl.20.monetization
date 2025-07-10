@@ -1,45 +1,28 @@
 {
   "project_info": {
-    "project_number": "796453936998",
-    "project_id": "and-brainrot-pris-wasd",
-    "storage_bucket": "and-brainrot-pris-wasd.firebasestorage.app"
+    "project_number": "481327022648",
+    "project_id": "ios-prison-2-wasd",
+    "storage_bucket": "ios-prison-2-wasd.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:796453936998:android:36420bd649f46da7d5b2a7",
+        "mobilesdk_app_id": "1:481327022648:ios:7e89537fddfbd00a849ccd",
         "android_client_info": {
-          "package_name": "com.arrest.prison.breakout2025"
+          "package_name": "com.carnival.escape.fun2025"
         }
       },
-      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCoXEp_E5q9Of_dfzIq94TbyUcdmFOm2bA"
+          "current_key": "AIzaSyAyq2Ii8DVvfpiP9X7Dj2V0_JfnrcEUy5Q"
         }
       ],
       "services": {
+        "analytics_service": {
+          "status": 0
+        },
         "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:796453936998:android:a5f49851fbb1c4b5d5b2a7",
-        "android_client_info": {
-          "package_name": "com.jail.breakout.castle.run2025"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCoXEp_E5q9Of_dfzIq94TbyUcdmFOm2bA"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
+          "status": 1
         }
       }
     }

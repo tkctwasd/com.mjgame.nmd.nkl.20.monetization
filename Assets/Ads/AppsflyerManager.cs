@@ -8,8 +8,6 @@ public class AppsFlyerManager : MonoBehaviour, IAppsFlyerConversionData
 {
     public static AppsFlyerManager Instance;
     public string devKey = "dev-key-appsflyer";
-
-    [Header("iOS")]
     public string appID = "id-app";
 
     private void Awake()
@@ -18,7 +16,7 @@ public class AppsFlyerManager : MonoBehaviour, IAppsFlyerConversionData
     }
     public void Init()
     {
-        LogMessage.Log("Appsflyer Init", "Ads");
+        Debug.Log("Appsflyer".Ads("Set Info"));
 #if UNITY_ANDROID
         AppsFlyer.initSDK(devKey, Application.identifier, this);
 #elif UNITY_IOS

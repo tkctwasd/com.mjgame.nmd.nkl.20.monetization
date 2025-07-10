@@ -1,6 +1,4 @@
 #if USE_ADJUST
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using AdjustSdk;
 
@@ -14,7 +12,7 @@ public class AdjustManager : MonoBehaviour
     }
     public void Init()
     {
-        LogMessage.Log("Adjust SetInfo", "Ads");
+        Debug.Log( "Adjust".Ads("SetInfo"));
 #if UNITY_ANDROID && UNITY_2019_2_OR_NEWER
         Application.deepLinkActivated += (deeplink) =>
         {

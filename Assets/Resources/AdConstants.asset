@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: AdConstants
   m_EditorClassIdentifier: 
   SdkKey: bZncTTqqX6Kebm0dMxUgLHPAC7HVzkQo4iVz2zT32odFJeB7qTQbIf2SfSB9Q65Q3lhWc0EI9OEDhFyxrxo7f2
-  AdmobAndroidAppId: ca-app-pub-2010884681696999~9913646868
-  AdmobIosAppId: 
-  GameName: 'Brainrot Arrested: Jail Escape'
-  PackageName: com.arrest.prison.breakout2025
-  PrivacyPolicyURL: https://doc-hosting.flycricket.io/trang-vu-privacy-policy/9c368108-a94d-4659-a247-ece94ac95448/privacy
-  TermsURL: https://doc-hosting.flycricket.io/trang-vu-terms-of-use/9a4b1518-9582-42e1-997f-6e124ea9d263/terms
-  AppOpenId: 2cbba7ece8edbe13
-  BannerId: a7fd53713d051427
-  InterstitialId: 903fdeb893a69c9e
-  RewardedId: 57502118c4c417f0
+  AdmobAndroidAppId: 
+  AdmobIosAppId: ca-app-pub-2010884681696999~5821259193
+  GameName: Carnival Escape Challenge
+  PackageName: com.carnival.escape.fun2025
+  PrivacyPolicyURL: 
+  TermsURL: 
+  AppOpenId: c34fe48b3ce0666f
+  BannerId: 4b921cf8e668fb80
+  InterstitialId: 8d7fe03a7bbeaf60
+  RewardedId: e6875de2e2f586af
   bannerPosition: 7

@@ -11,7 +11,6 @@ using UnityEngine;
 public class RemoteConfigManager : MonoBehaviour
 {
     public static event Action ActionFetchDone;
-    public static event Action ActionShowInfo;
     private static Dictionary<string, object> remoteConfigData;
     public static bool IsRemoteConfigComplete = false;
 
@@ -82,14 +81,14 @@ public class RemoteConfigManager : MonoBehaviour
                 Debug.Log("Latest Fetch call still pending.");
                 break;
         }
-
+#if UNITY_ANDROID || UNITY_IOS
         ActionFetchDone?.Invoke();
-        ActionShowInfo?.Invoke();
+#endif
     }
-    
+
     private void LoadLocalData()
     {
-        string platformName = "RemoteConfig_";
+        string platformName = "RemoteConfig";
 #if UNITY_ANDROID
         platformName = "RemoteConfig_Android";
 #elif UNITY_IOS
@@ -110,7 +109,7 @@ public class RemoteConfigManager : MonoBehaviour
         {
             Debug.LogError("Error parsing or comparing RemoteConfig: " + ex.Message);
         }
-        LogMessage.Log("Load Local Data Json", "RemoteConfig");
+        Debug.Log("FirebaseRemoteConfig".Ads("Load Local Data Json"));
     }
 
     void LocalRemoteConfigAndCompare()
@@ -140,7 +139,7 @@ public class RemoteConfigManager : MonoBehaviour
             Debug.LogError("Error parsing or comparing RemoteConfig: " + ex.Message);
         }
         IsRemoteConfigComplete = true;
-        LogMessage.Log("Load Complete", "FirebaseRemoteConfig");
+        Debug.Log("FirebaseRemoteConfig".Ads("Load Complete"));
     }
     string RemoveAllWhitespace(string input)
     {

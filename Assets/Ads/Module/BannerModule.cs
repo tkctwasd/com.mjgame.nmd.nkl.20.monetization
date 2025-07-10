@@ -1,11 +1,3 @@
-#if USE_ADJUST
-using AdjustSdk;
-using AppLovinMax.Scripts.IntegrationManager.Editor;
-
-#endif
-#if USE_APPSFLYER
-using AppsFlyerSDK;
-#endif
 using UnityEngine;
 using static MaxSdkBase;
 using System.Collections;
@@ -67,12 +59,12 @@ public class BannerModule
 
     private void OnBannerAdLoadedEvent(string adUnitId, AdInfo adInfo)
     {
-        LogMessage.Log($"Ad Loaded", "Banner");
+        Debug.Log("Banner".Ads($"Ad Loaded"));
     }
 
     private void OnBannerAdLoadFailedEvent(string adUnitId, ErrorInfo errorInfo)
     {
-        LogMessage.Log($"Ad Load Failed: {errorInfo.Message}", "Banner");
+        Debug.Log("Banner".Ads($"Ad Load Failed: {errorInfo.Message}"));
     }
 
     private void OnBannerAdClickedEvent(string adUnitId, AdInfo adInfo)

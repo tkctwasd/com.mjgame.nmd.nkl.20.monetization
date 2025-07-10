@@ -1,5 +1,8 @@
+#if UNITY_EDITOR
 using AppLovinMax.Scripts.IntegrationManager.Editor;
 using UnityEditor;
+#endif
+
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "AdConstants", menuName = "Ads/Ad Constants")]
@@ -48,7 +51,7 @@ public class AdConstants : ScriptableObject
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log("<color=green><b>✅ Ad info applied successfully!</b></color>");
+        Debug.Log("<color=green><b> Ad info applied successfully!</b></color>");
     }
 #endif
 

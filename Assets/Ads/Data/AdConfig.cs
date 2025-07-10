@@ -6,8 +6,10 @@ public class AdsConfig
     public bool ShowAppOpen = true;
     public bool ShowInterstitial = true;
     public bool ShowBanner = true;
+    public bool ShowReward = true;
     public int InterstitialCappingTime = 45;
     public int AppOpenCappingTime = 60;
+    public int InterstitialIndexStart = 2;
 }
 
 [Serializable]

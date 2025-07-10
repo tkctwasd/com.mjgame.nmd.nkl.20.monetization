@@ -1,11 +1,3 @@
-#if USE_ADJUST
-using AdjustSdk;
-using AppLovinMax.Scripts.IntegrationManager.Editor;
-
-#endif
-#if USE_APPSFLYER
-using AppsFlyerSDK;
-#endif
 using System;
 using UnityEngine;
 using static MaxSdkBase;
@@ -72,14 +64,9 @@ public class AdsManager : MonoBehaviour
         };
 
 #if USE_APPSFLYER
-        MaxSdk.SetUserId(AppsFlyer.getAppsFlyerId());
+        MaxSdk.SetUserId(AppsFlyerSDK.AppsFlyer.getAppsFlyerId());
 #endif
         MaxSdk.InitializeSdk();
-    }
-
-    private void OnEnable()
-    {
-        RemoteConfigManager.ActionShowInfo += LogKeyAd;
     }
 
     private void OnApplicationPause(bool pauseStatus)
@@ -92,33 +79,12 @@ public class AdsManager : MonoBehaviour
         {
             if (IsCloseFirstAOA && AppOpenAdModule != null && MaxSdk.IsInitialized())
             {
-                LogMessage.Log("AOA Load Pause", "AdsManager");
+                Debug.Log("AdsManager".Ads("AOA Load Pause"));
                 AppOpenAdModule.ShowAppOpen(false);
                 IsCloseFirstAOA = false;
             }
         }
     }
-
-    #region Log Key
-
-    private void LogKeyAd()
-    {
-        if (RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig).ShowInfo)
-        {
-            LogMessage.Log($"SDK MAX: {AdConstants.SdkKey}", "Key Ad");
-            LogMessage.Log($"App Open ID: {AdConstants.AppOpenId}", "Key Ad");
-            LogMessage.Log($"Banner ID: {AdConstants.BannerId}", "Key Ad");
-            LogMessage.Log($"Interstitial ID: {AdConstants.InterstitialId}", "Key Ad");
-            LogMessage.Log($"Rewarded: {AdConstants.RewardedId}", "Key Ad");
-#if USE_APPSFLYER
-            LogMessage.Log($"Appsflyer: {AppsFlyerManager.Instance.GetDevKeyAndAppId()}", "Key Ad");
-#endif
-#if USE_ADJUST
-            LogMessage.Log($"Adjust: {AdjustManager.Instance.GetTokenAdjust()}", "Key Ad");
-#endif
-        }
-    }
-    #endregion
 
     public void SendAdRevenueTracker(AdInfo impressionData)
     {

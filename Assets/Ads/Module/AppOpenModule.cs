@@ -1,12 +1,5 @@
-#if USE_ADJUST
-using AdjustSdk;
-using AppLovinMax.Scripts.IntegrationManager.Editor;
-
-#endif
-#if USE_APPSFLYER
-using AppsFlyerSDK;
-#endif
 using System;
+using UnityEngine;
 
 using static MaxSdkBase;
 
@@ -41,13 +34,13 @@ public class AppOpenModule
 
     private void OnAppOpenAdDisplayedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
     {
-        LogMessage.Log($"Ad Displayed", "AppOpen");
+        Debug.Log("AppOpen".Ads($"Ad Displayed"));
         ApplovinManager.isLogEventLoading = false;
         if (!ApplovinManager.IsShowFirstAOA) ApplovinManager.IsShowFirstAOA = true;
     }
     private void OnAppOpenAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
     {
-        LogMessage.Log($"Ad Display Failed: {errorInfo.Message}", "AppOpen");
+        Debug.Log("AppOpen".Ads($"Ad Display Failed: {errorInfo.Message}"));
         ApplovinManager.isLogEventLoading = false;
         // tai lai quang cao
         MaxSdk.LoadAppOpenAd(appOpenId);
@@ -55,7 +48,7 @@ public class AppOpenModule
 
     private void OnAppOpenAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
     {
-        LogMessage.Log($"Ad Hidden", "AppOpen");
+        Debug.Log("AppOpen".Ads($"Ad Hidden"));
         MaxSdk.LoadAppOpenAd(appOpenId);
         ApplovinManager.appOpenLocation = "";
         if (!ApplovinManager.IsCloseFirstAOA) ApplovinManager.IsCloseFirstAOA = true;
@@ -64,17 +57,17 @@ public class AppOpenModule
 
     private void OnAppOpenAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
     {
-        LogMessage.Log($"Ad Loaded", "AppOpen");
+        Debug.Log("AppOpen".Ads($"Ad Loaded"));
     }
 
     private void OnAppOpenAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
     {
-        LogMessage.Log($"Ad Load Failed: {errorInfo.Message}", "AppOpen");
+        Debug.Log("AppOpen".Ads($"Ad Load Failed: {errorInfo.Message}"));
     }
 
     private void OnAppOpenAdClickEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
     {
-        LogMessage.Log($"Ad Clicked", "AppOpen");
+        Debug.Log("AppOpen".Ads($"Ad Clicked"));
         if (!string.IsNullOrEmpty(ApplovinManager.appOpenLocation))
         {
             FirebaseAnalyticManager.Instance.LogAd("show_app_open_ads_click", ApplovinManager.appOpenLocation);
