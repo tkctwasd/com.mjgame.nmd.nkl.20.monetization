@@ -1,23 +1,18 @@
-namespace A
-{
 #if USE_ADJUST
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using AdjustSdk;
 
 public class AdjustManager : MonoBehaviour
 {
     public static AdjustManager Instance;
-    [SerializeField] string token = "id_adjust";
+    [SerializeField] string adjust = "id_adjust";
     private void Awake()
     {
         Instance = this;
     }
-
     public void Init()
     {
-        LogW.Log("Adjust SetInfo", "Ads");
+        Debug.Log( "Adjust".Ads("SetInfo"));
 #if UNITY_ANDROID && UNITY_2019_2_OR_NEWER
         Application.deepLinkActivated += (deeplink) =>
         {
@@ -28,7 +23,7 @@ public class AdjustManager : MonoBehaviour
             Adjust.ProcessDeeplink(new AdjustDeeplink(Application.absoluteURL));
         }
 #endif
-        AdjustConfig adjustConfig = new AdjustConfig(token, AdjustEnvironment.Production,
+        AdjustConfig adjustConfig = new AdjustConfig(adjust, AdjustEnvironment.Production,
           false);
         adjustConfig.LogLevel = AdjustLogLevel.Info;
         adjustConfig.IsSendingInBackgroundEnabled = false;
@@ -45,9 +40,7 @@ public class AdjustManager : MonoBehaviour
     }
     public string GetTokenAdjust()
     {
-        return token;
+        return adjust;
     }    
 }
 #endif
-
-}
