@@ -47,15 +47,15 @@ public class RemoteConfigManager : MonoBehaviour
     {
         if (fetchTask.IsCanceled)
         {
-            Debug.Log("Fetch canceled.");
+            Debug.Log("Fetch canceled.".Message());
         }
         else if (fetchTask.IsFaulted)
         {
-            Debug.Log("Fetch encountered an error.");
+            Debug.Log("Fetch encountered an error.".Message());
         }
         else if (fetchTask.IsCompleted)
         {
-            Debug.Log("Fetch completed successfully!");
+            Debug.Log("Fetch completed successfully!".Message());
         }
 
         var info = FirebaseRemoteConfig.DefaultInstance.Info;
@@ -81,9 +81,12 @@ public class RemoteConfigManager : MonoBehaviour
                 Debug.Log("Latest Fetch call still pending.");
                 break;
         }
-#if UNITY_ANDROID || UNITY_IOS
-        ActionFetchDone?.Invoke();
-#endif
+        // #if UNITY_ANDROID || UNITY_IOS
+        //         ActionFetchDone?.Invoke();
+        // #endif
+        // #if !UNITY_EDITOR
+        //                                                 ActionFetchDone?.Invoke();
+        // #endif
     }
 
     private void LoadLocalData()
@@ -109,7 +112,7 @@ public class RemoteConfigManager : MonoBehaviour
         {
             Debug.LogError("Error parsing or comparing RemoteConfig: " + ex.Message);
         }
-        Debug.Log("FirebaseRemoteConfig".Ads("Load Local Data Json"));
+        Debug.Log("FirebaseRemoteConfig".Ads("Load Local Data Json Complete"));
     }
 
     void LocalRemoteConfigAndCompare()

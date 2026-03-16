@@ -8,7 +8,7 @@ namespace AdjustSdk
 #if UNITY_ANDROID
     public class AdjustAndroid
     {
-        private const string sdkPrefix = "unity5.4.1";
+        private const string sdkPrefix = "unity5.5.1";
         private static bool isDeferredDeeplinkOpeningEnabled = true;
         private static AndroidJavaClass ajcAdjust = new AndroidJavaClass("com.adjust.sdk.Adjust");
         private static AndroidJavaObject ajoCurrentActivity = new AndroidJavaClass("com.unity3d.player.UnityPlayer").GetStatic<AndroidJavaObject>("currentActivity");
@@ -18,8 +18,7 @@ namespace AdjustSdk
         private static EventTrackingSucceededListener onEventTrackingSucceededListener;
         private static SessionTrackingFailedListener onSessionTrackingFailedListener;
         private static SessionTrackingSucceededListener onSessionTrackingSucceededListener;
-        private static VerificationResultListener onVerificationResultListener;
-        private static VerificationResultListener onVerifyAndTrackListener;
+
         private static DeeplinkResolutionListener onDeeplinkResolvedListener;
 
         public static void InitSdk(AdjustConfig adjustConfig)
@@ -137,6 +136,15 @@ namespace AdjustSdk
                 if (adjustConfig.FbAppId != null)
                 {
                     ajoAdjustConfig.Call("setFbAppId", adjustConfig.FbAppId);
+                }
+
+                // check if app set ID reading should be disabled
+                if (adjustConfig.IsAppSetIdReadingEnabled != null)
+                {
+                    if (adjustConfig.IsAppSetIdReadingEnabled == false)
+                    {
+                        ajoAdjustConfig.Call("disableAppSetIdReading");
+                    }
                 }
 
                 // check if user has set default tracker token
@@ -590,10 +598,22 @@ namespace AdjustSdk
             ajcAdjust.CallStatic("getAdid", onAdidReadProxy);
         }
 
+        public static void GetAdidWithTimeout(int timeoutInMilliseconds, Action<string> onAdidRead) 
+        {
+            AdidReadListener onAdidReadProxy = new AdidReadListener(onAdidRead);
+            ajcAdjust.CallStatic("getAdidWithTimeout", ajoCurrentActivity, (long)timeoutInMilliseconds, onAdidReadProxy);
+        }
+
         public static void GetAttribution(Action<AdjustAttribution> onAttributionRead) 
         {
             AttributionReadListener onAttributionReadProxy = new AttributionReadListener(onAttributionRead);
             ajcAdjust.CallStatic("getAttribution", onAttributionReadProxy);
+        }
+
+        public static void GetAttributionWithTimeout(int timeoutInMilliseconds, Action<AdjustAttribution> onAttributionRead) 
+        {
+            AttributionReadListener onAttributionReadProxy = new AttributionReadListener(onAttributionRead);
+            ajcAdjust.CallStatic("getAttributionWithTimeout", ajoCurrentActivity, (long)timeoutInMilliseconds, onAttributionReadProxy);
         }
 
         public static void GetSdkVersion(Action<string> onSdkVersionRead) 
@@ -645,12 +665,12 @@ namespace AdjustSdk
             AdjustPlayStorePurchase purchase,
             Action<AdjustPurchaseVerificationResult> verificationInfoCallback)
         {
-            onVerificationResultListener = new VerificationResultListener(verificationInfoCallback);
+            VerificationResultListener verificationResultListener = new VerificationResultListener(verificationInfoCallback);
             using (AndroidJavaObject ajoPurchase = new AndroidJavaObject("com.adjust.sdk.AdjustPlayStorePurchase",
                 purchase.ProductId,
                 purchase.PurchaseToken))
             {
-                ajcAdjust.CallStatic("verifyPlayStorePurchase", ajoPurchase, onVerificationResultListener);
+                ajcAdjust.CallStatic("verifyPlayStorePurchase", ajoPurchase, verificationResultListener);
             }
         }
 
@@ -681,7 +701,7 @@ namespace AdjustSdk
             AdjustEvent adjustEvent,
             Action<AdjustPurchaseVerificationResult> verificationInfoCallback)
         {
-            onVerifyAndTrackListener = new VerificationResultListener(verificationInfoCallback);
+            VerificationResultListener verifyAndTrackListener = new VerificationResultListener(verificationInfoCallback);
             using (AndroidJavaObject ajoAdjustEvent =
                 new AndroidJavaObject("com.adjust.sdk.AdjustEvent", adjustEvent.EventToken))
             {
@@ -737,7 +757,7 @@ namespace AdjustSdk
                     ajoAdjustEvent.Call("setPurchaseToken", adjustEvent.PurchaseToken);
                 }
 
-                ajcAdjust.CallStatic("verifyAndTrackPlayStorePurchase", ajoAdjustEvent, onVerifyAndTrackListener);
+                ajcAdjust.CallStatic("verifyAndTrackPlayStorePurchase", ajoAdjustEvent, verifyAndTrackListener);
             }
         }
 

@@ -4,13 +4,13 @@ using System.Collections;
 
 public class BannerModule
 {
-    AdsManager ApplovinMamager;
+    AdsManager ApplovinManager;
     string bannerId = "banner-id";
 
 
     public BannerModule(AdsManager applovin, string bannerId)
     {
-        ApplovinMamager = applovin;
+        ApplovinManager = applovin;
         this.bannerId = bannerId;
     }
 
@@ -25,7 +25,7 @@ public class BannerModule
         MaxSdkCallbacks.Banner.OnAdExpandedEvent += OnBannerAdExpandedEvent;
         MaxSdkCallbacks.Banner.OnAdCollapsedEvent += OnBannerAdCollapsedEvent;
 
-        ApplovinMamager.StartCoroutine(IELoadDelay(0.5f));
+        ApplovinManager.StartCoroutine(IELoadDelay(0.5f));
     }
 
     private IEnumerator IELoadDelay(float time)
@@ -36,10 +36,10 @@ public class BannerModule
 
     private void LoadBanner()
     {
-        var adViewConfiguration = new AdViewConfiguration(ApplovinMamager.AdConstants.bannerPosition);
+        var adViewConfiguration = new AdViewConfiguration(ApplovinManager.AdConstants.bannerPosition);
         // MaxSdk.SetBannerWidth(bannerId, MaxSdkUtils.IsTablet() ? 800 : 350);
         MaxSdk.CreateBanner(bannerId, adViewConfiguration);
-        MaxSdk.SetBannerBackgroundColor(bannerId, Color.black);
+        MaxSdk.SetBannerBackgroundColor(bannerId, Color.clear);
     }
 
 
@@ -81,7 +81,7 @@ public class BannerModule
     #region RevenuePaidEvent
     private void OnAdRevenuePaidEvent(string adUnitId, AdInfo impressionData)
     {
-        ApplovinMamager.SendAdRevenueTracker(impressionData);
+        ApplovinManager.SendAdRevenueTracker(impressionData);
     }
     #endregion
 }

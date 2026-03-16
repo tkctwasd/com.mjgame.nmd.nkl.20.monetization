@@ -1,20 +1,20 @@
 {
   "project_info": {
-    "project_number": "481327022648",
-    "project_id": "ios-prison-2-wasd",
-    "storage_bucket": "ios-prison-2-wasd.firebasestorage.app"
+    "project_number": "314307399309",
+    "project_id": "ios-speed-escape-wasd",
+    "storage_bucket": "ios-speed-escape-wasd.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:481327022648:ios:7e89537fddfbd00a849ccd",
+        "mobilesdk_app_id": "1:314307399309:ios:f7ca0f70a59e4d266f9cc4",
         "android_client_info": {
-          "package_name": "com.carnival.escape.fun2025"
+          "package_name": "com.escape.speed.run2026"
         }
       },
       "api_key": [
         {
-          "current_key": "AIzaSyAyq2Ii8DVvfpiP9X7Dj2V0_JfnrcEUy5Q"
+          "current_key": "AIzaSyBNH72gk5apopdMC-I5jF6eTst9RDXE-mE"
         }
       ],
       "services": {

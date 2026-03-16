@@ -8,7 +8,7 @@ namespace AdjustSdk
 #if UNITY_IOS
     public class AdjustiOS
     {
-        private const string sdkPrefix = "unity5.4.1";
+        private const string sdkPrefix = "unity5.5.1";
 
         // app callbacks as method parameters
         private static List<Action<bool>> appIsEnabledGetterCallbacks;
@@ -19,8 +19,10 @@ namespace AdjustSdk
         private static List<Action<string>> appLastDeeplinkGetterCallbacks;
         private static List<Action<string>> appSdkVersionGetterCallbacks;
         private static List<Action<int>> appAttCallbacks;
-        private static Action<AdjustPurchaseVerificationResult> appPurchaseVerificationCallback;
-        private static Action<AdjustPurchaseVerificationResult> appVerifyAndTrackCallback;
+        private static Dictionary<int, Action<AdjustPurchaseVerificationResult>> appPurchaseVerificationCallbacks;
+        private static Dictionary<int, Action<AdjustPurchaseVerificationResult>> appVerifyAndTrackCallbacks;
+        private static int nextPurchaseVerificationCallbackId = 0;
+        private static int nextVerifyAndTrackCallbackId = 0;
         private static Action<string> appResolvedDeeplinkCallback;
         private static Action<string> appSkanErrorCallback;
 
@@ -61,6 +63,7 @@ namespace AdjustSdk
             int isSendingInBackgroundEnabled,
             int isAdServicesEnabled,
             int isIdfaReadingEnabled,
+            int isIdfvReadingEnabled,
             int isSkanAttributionEnabled,
             int isLinkMeEnabled,
             int isCostDataInAttributionEnabled,
@@ -120,9 +123,17 @@ namespace AdjustSdk
         [DllImport("__Internal")]
         private static extern void _AdjustGetAttribution(AdjustDelegateAttributionGetter callback);
 
+        private delegate void AdjustDelegateAttributionGetterWithTimeout(string attribution);
+        [DllImport("__Internal")]
+        private static extern void _AdjustGetAttributionWithTimeout(int timeoutInMilliseconds, AdjustDelegateAttributionGetterWithTimeout callback);
+
         private delegate void AdjustDelegateAdidGetter(string adid);
         [DllImport("__Internal")]
         private static extern void _AdjustGetAdid(AdjustDelegateAdidGetter callback);
+
+        private delegate void AdjustDelegateAdidGetterWithTimeout(string adid);
+        [DllImport("__Internal")]
+        private static extern void _AdjustGetAdidWithTimeout(int timeoutInMilliseconds, AdjustDelegateAdidGetterWithTimeout callback);
 
         private delegate void AdjustDelegateIdfaGetter(string idfa);
         [DllImport("__Internal")]
@@ -228,14 +239,15 @@ namespace AdjustSdk
         [DllImport("__Internal")]
         private static extern void _AdjustTrackSubsessionEnd();
 
-        private delegate void AdjustDelegatePurchaseVerificationCallback(string verificationResult);
+        private delegate void AdjustDelegatePurchaseVerificationCallback(string verificationResult, int callbackId);
         [DllImport("__Internal")]
         private static extern void _AdjustVerifyAppStorePurchase(
             string transactionId,
             string productId,
+            int callbackId,
             AdjustDelegatePurchaseVerificationCallback callback);
 
-        private delegate void AdjustDelegateVerifyAndTrackCallback(string verificationResult);
+        private delegate void AdjustDelegateVerifyAndTrackCallback(string verificationResult, int callbackId);
         [DllImport("__Internal")]
         private static extern void _AdjustVerifyAndTrackAppStorePurchase(
             string eventToken,
@@ -247,7 +259,8 @@ namespace AdjustSdk
             string deduplicationId,
             string jsonCallbackParameters,
             string jsonPartnerParameters,
-            AdjustDelegatePurchaseVerificationCallback callback);
+            int verificationCallbackId,
+            AdjustDelegateVerifyAndTrackCallback callback);
 
         [DllImport("__Internal")]
         private static extern void _AdjustEndFirstSessionDelay();
@@ -286,6 +299,7 @@ namespace AdjustSdk
             int isSendingInBackgroundEnabled = AdjustUtils.ConvertBool(adjustConfig.IsSendingInBackgroundEnabled);
             int isAdServicesEnabled = AdjustUtils.ConvertBool(adjustConfig.IsAdServicesEnabled);
             int isIdfaReadingEnabled = AdjustUtils.ConvertBool(adjustConfig.IsIdfaReadingEnabled);
+            int isIdfvReadingEnabled = AdjustUtils.ConvertBool(adjustConfig.IsIdfvReadingEnabled);
             int allowSuppressLogLevel = AdjustUtils.ConvertBool(adjustConfig.AllowSuppressLogLevel);
             int isDeferredDeeplinkOpeningEnabled = AdjustUtils.ConvertBool(adjustConfig.IsDeferredDeeplinkOpeningEnabled);
             int isSkanAttributionEnabled = AdjustUtils.ConvertBool(adjustConfig.IsSkanAttributionEnabled);
@@ -323,6 +337,7 @@ namespace AdjustSdk
                 isSendingInBackgroundEnabled,
                 isAdServicesEnabled,
                 isIdfaReadingEnabled,
+                isIdfvReadingEnabled,
                 isSkanAttributionEnabled,
                 isLinkMeEnabled,
                 isCostDataInAttributionEnabled,
@@ -534,6 +549,16 @@ namespace AdjustSdk
             _AdjustGetAttribution(AttributionGetterMonoPInvoke);
         }
 
+        public static void GetAttributionWithTimeout(int timeoutInMilliseconds, Action<AdjustAttribution> callback)
+        {
+            if (appAttributionGetterCallbacks == null)
+            {
+                appAttributionGetterCallbacks = new List<Action<AdjustAttribution>>();
+            }
+            appAttributionGetterCallbacks.Add(callback);
+            _AdjustGetAttributionWithTimeout(timeoutInMilliseconds, AttributionGetterWithTimeoutMonoPInvoke);
+        }
+
         public static void GetAdid(Action<string> callback)
         {
             if (appAdidGetterCallbacks == null)
@@ -542,6 +567,16 @@ namespace AdjustSdk
             }
             appAdidGetterCallbacks.Add(callback);
             _AdjustGetAdid(AdidGetterMonoPInvoke);
+        }
+
+        public static void GetAdidWithTimeout(int timeoutInMilliseconds, Action<string> callback)
+        {
+            if (appAdidGetterCallbacks == null)
+            {
+                appAdidGetterCallbacks = new List<Action<string>>();
+            }
+            appAdidGetterCallbacks.Add(callback);
+            _AdjustGetAdidWithTimeout(timeoutInMilliseconds, AdidGetterWithTimeoutMonoPInvoke);
         }
 
         public static void GetIdfa(Action<string> callback)
@@ -595,11 +630,19 @@ namespace AdjustSdk
         {
             string transactionId = purchase.TransactionId;
             string productId = purchase.ProductId;
-            appPurchaseVerificationCallback = callback;
+            
+            if (appPurchaseVerificationCallbacks == null)
+            {
+                appPurchaseVerificationCallbacks = new Dictionary<int, Action<AdjustPurchaseVerificationResult>>();
+            }
+            
+            int callbackId = ++nextPurchaseVerificationCallbackId;
+            appPurchaseVerificationCallbacks[callbackId] = callback;
             
             _AdjustVerifyAppStorePurchase(
                 transactionId,
                 productId,
+                callbackId,
                 PurchaseVerificationCallbackMonoPInvoke);
         }
 
@@ -622,7 +665,14 @@ namespace AdjustSdk
             string deduplicationId = adjustEvent.DeduplicationId;
             string stringJsonCallbackParameters = AdjustUtils.ConvertReadOnlyCollectionOfPairsToJson(adjustEvent.CallbackParameters);
             string stringJsonPartnerParameters = AdjustUtils.ConvertReadOnlyCollectionOfPairsToJson(adjustEvent.PartnerParameters);
-            appVerifyAndTrackCallback = callback;
+            
+            if (appVerifyAndTrackCallbacks == null)
+            {
+                appVerifyAndTrackCallbacks = new Dictionary<int, Action<AdjustPurchaseVerificationResult>>();
+            }
+            
+            int verificationCallbackId = ++nextVerifyAndTrackCallbackId;
+            appVerifyAndTrackCallbacks[verificationCallbackId] = callback;
 
             _AdjustVerifyAndTrackAppStorePurchase(
                 eventToken,
@@ -634,6 +684,7 @@ namespace AdjustSdk
                 deduplicationId,
                 stringJsonCallbackParameters,
                 stringJsonPartnerParameters,
+                verificationCallbackId,
                 VerifyAndTrackCallbackMonoPInvoke);
         }
 
@@ -777,7 +828,35 @@ namespace AdjustSdk
                 {
                     if (callback != null)
                     {
+                        // regular getter never returns null, so attribution should always be valid
                         callback.Invoke(new AdjustAttribution(attribution));
+                    }
+                }
+                appAttributionGetterCallbacks.Clear();
+            });
+        }
+
+        [AOT.MonoPInvokeCallback(typeof(AdjustDelegateAttributionGetterWithTimeout))]
+        private static void AttributionGetterWithTimeoutMonoPInvoke(string attribution)
+        {
+            if (appAttributionGetterCallbacks == null)
+            {
+                return;
+            }
+
+            AdjustThreadDispatcher.RunOnMainThread(() =>
+            {
+                foreach (Action<AdjustAttribution> callback in appAttributionGetterCallbacks)
+                {
+                    if (callback != null)
+                    {
+                        // timeout version can return null, so handle it properly
+                        AdjustAttribution adjustAttribution = null;
+                        if (attribution != null)
+                        {
+                            adjustAttribution = new AdjustAttribution(attribution);
+                        }
+                        callback.Invoke(adjustAttribution);
                     }
                 }
                 appAttributionGetterCallbacks.Clear();
@@ -798,6 +877,28 @@ namespace AdjustSdk
                 {
                     if (callback != null)
                     {
+                        callback.Invoke(adid);
+                    }
+                }
+                appAdidGetterCallbacks.Clear();
+            });
+        }
+
+        [AOT.MonoPInvokeCallback(typeof(AdjustDelegateAdidGetterWithTimeout))]
+        private static void AdidGetterWithTimeoutMonoPInvoke(string adid)
+        {
+            if (appAdidGetterCallbacks == null)
+            {
+                return;
+            }
+
+            AdjustThreadDispatcher.RunOnMainThread(() =>
+            {
+                foreach (Action<string> callback in appAdidGetterCallbacks)
+                {
+                    if (callback != null)
+                    {
+                        // timeout version can return null, so pass it through as-is
                         callback.Invoke(adid);
                     }
                 }
@@ -911,37 +1012,47 @@ namespace AdjustSdk
         }
 
         [AOT.MonoPInvokeCallback(typeof(AdjustDelegatePurchaseVerificationCallback))]
-        private static void PurchaseVerificationCallbackMonoPInvoke(string verificationResult)
+        private static void PurchaseVerificationCallbackMonoPInvoke(string verificationResult, int callbackId)
         {
-            if (appPurchaseVerificationCallback == null)
+            if (appPurchaseVerificationCallbacks == null || !appPurchaseVerificationCallbacks.ContainsKey(callbackId))
             {
                 return;
             }
 
             AdjustThreadDispatcher.RunOnMainThread(() =>
             {
-                if (appPurchaseVerificationCallback != null)
+                if (appPurchaseVerificationCallbacks != null && appPurchaseVerificationCallbacks.ContainsKey(callbackId))
                 {
-                    appPurchaseVerificationCallback.Invoke(new AdjustPurchaseVerificationResult(verificationResult));
-                    appPurchaseVerificationCallback = null;
+                    Action<AdjustPurchaseVerificationResult> callback = appPurchaseVerificationCallbacks[callbackId];
+                    appPurchaseVerificationCallbacks.Remove(callbackId);
+                    
+                    if (callback != null)
+                    {
+                        callback.Invoke(new AdjustPurchaseVerificationResult(verificationResult));
+                    }
                 }
             });
         }
 
         [AOT.MonoPInvokeCallback(typeof(AdjustDelegateVerifyAndTrackCallback))]
-        private static void VerifyAndTrackCallbackMonoPInvoke(string verificationResult)
+        private static void VerifyAndTrackCallbackMonoPInvoke(string verificationResult, int callbackId)
         {
-            if (appVerifyAndTrackCallback == null)
+            if (appVerifyAndTrackCallbacks == null || !appVerifyAndTrackCallbacks.ContainsKey(callbackId))
             {
                 return;
             }
 
             AdjustThreadDispatcher.RunOnMainThread(() =>
             {
-                if (appVerifyAndTrackCallback != null)
+                if (appVerifyAndTrackCallbacks != null && appVerifyAndTrackCallbacks.ContainsKey(callbackId))
                 {
-                    appVerifyAndTrackCallback.Invoke(new AdjustPurchaseVerificationResult(verificationResult));
-                    appVerifyAndTrackCallback = null;
+                    Action<AdjustPurchaseVerificationResult> callback = appVerifyAndTrackCallbacks[callbackId];
+                    appVerifyAndTrackCallbacks.Remove(callbackId);
+                    
+                    if (callback != null)
+                    {
+                        callback.Invoke(new AdjustPurchaseVerificationResult(verificationResult));
+                    }
                 }
             });
         }

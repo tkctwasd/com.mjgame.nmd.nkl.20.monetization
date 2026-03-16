@@ -7,46 +7,50 @@ public class AdsManager : MonoBehaviour
     [Header("References")]
     public static AdsManager Instance = null;
     public AdConstants AdConstants;
-    public AppOpenModule AppOpenAdModule;
-    public BannerModule BannerAdModule;
+    public AppOpenModule AppOpenModule;
+    public BannerModule BannerModule;
+    public MRECModule MRECModule;
     public InterstitialModule InterstitialModule;
     public RewardedModule RewardedModule;
     public AdRevenueTracker AdRevenueTracker;
 
-    [Header("AppOpen")]
-    internal string appOpenLocation;
-    internal bool IsCloseFirstAOA;
-    internal bool isCanShowAOABackGame;
-    internal bool IsShowFirstAOA;
-    internal bool isLogEventLoading;
-    internal DateTime TimeCloseAOA { get; set; }
+    [Header("Ads")]
+    internal bool IsShowAds;
+    internal DateTime TimeStart;
 
-    [Header("Banner")]
-    internal Action callBackReward;
+    [Header("AppOpen")]
+    internal bool IsCloseFirstAOA;
+    internal bool IsCanShowAOABackGame;
+    internal bool IsShowFirstAOA;
+    internal DateTime LastTimeShowAOA;
+    internal Action callAOADismissed;
 
     [Header("Interstitial")]
-    internal Action callBackInters;
-    internal int intersRetry;
-    internal string interLocation;
-    internal DateTime TimeCloseInterstitial { get; set; }
+    internal DateTime LastTimeShowInterstitial;
 
     [Header("Rewarded")]
-    internal int rewardedRetry;
-    internal string rewardLocation;
+    internal DateTime LastTimeShowReward;
+
+    [Header("MREC")]
+    internal bool ActiveMREC = false;
 
     void Awake()
     {
         Instance = this;
 
+
         InterstitialModule = new InterstitialModule(this, AdConstants.InterstitialId);
         RewardedModule = new RewardedModule(this, AdConstants.RewardedId);
-        BannerAdModule = new BannerModule(this, AdConstants.BannerId);
-        AppOpenAdModule = new AppOpenModule(this, AdConstants.AppOpenId);
+        BannerModule = new BannerModule(this, AdConstants.BannerId);
+        MRECModule = new MRECModule(this, AdConstants.MRECId);
+        AppOpenModule = new AppOpenModule(this, AdConstants.AppOpenId);
 
         AdRevenueTracker = new AdRevenueTracker();
 
-        TimeCloseAOA = DateTime.MinValue;
-        TimeCloseInterstitial = DateTime.MinValue;
+        LastTimeShowAOA = DateTime.MinValue;
+        LastTimeShowInterstitial = DateTime.MinValue;
+        LastTimeShowReward = DateTime.MinValue;
+        TimeStart = DateTime.UtcNow;
 
         MaxSdkCallbacks.OnSdkInitializedEvent += sdkConfiguration =>
         {
@@ -57,9 +61,10 @@ public class AdsManager : MonoBehaviour
 #if USE_ADJUST
             AdjustManager.Instance.Init();
 #endif
-            AppOpenAdModule.Initialize();
+            AppOpenModule.Initialize();
             InterstitialModule.Initialize();
-            BannerAdModule.Initialize();
+            BannerModule.Initialize();
+            MRECModule.Initialize();
             RewardedModule.Initialize();
         };
 
@@ -67,23 +72,56 @@ public class AdsManager : MonoBehaviour
         MaxSdk.SetUserId(AppsFlyerSDK.AppsFlyer.getAppsFlyerId());
 #endif
         MaxSdk.InitializeSdk();
+
+        callAOADismissed += OnAOADismissed;
     }
 
     private void OnApplicationPause(bool pauseStatus)
     {
         if (pauseStatus)
         {
-            IsCloseFirstAOA = true;
+            if (!IsShowAds)
+            {
+                IsCloseFirstAOA = true;
+            }
         }
         else
         {
-            if (IsCloseFirstAOA && AppOpenAdModule != null && MaxSdk.IsInitialized())
+            if (IsCloseFirstAOA && !IsShowAds)
             {
-                Debug.Log("AdsManager".Ads("AOA Load Pause"));
-                AppOpenAdModule.ShowAppOpen(false);
-                IsCloseFirstAOA = false;
+                Debug.Log(AppOpenModule.CanShowAOA(false));
+                if (AppOpenModule != null && MaxSdk.IsInitialized() && AppOpenModule.CanShowAOA(false))
+                {
+                    MRECModule.HideMREC(true);
+                    BannerModule.HideBanner();
+                    Debug.Log("AdsManager".Ads("Back to game from background - Show Resume"));
+                    UIManager.Instance.ShowPanel<PanelResume>();
+                }
+            }
+            IsCloseFirstAOA = false;
+            IsShowAds = false;
+        }
+    }
+
+
+    public void OnAOADismissed()
+    {
+        var adsConfig = RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig);
+        if (ActiveMREC && adsConfig.ShowMREC)
+        {
+            Debug.Log("MREC".Ads("Resume after AOA Dismissed"));
+            MRECModule.ResumeMREC();
+            if (!adsConfig.SwitchBannerMREC)
+            {
+                Debug.Log("MREC-Banner".Ads("Keep Banner show because SwitchBannerMREC = false [Resume]"));
+                BannerModule.ShowBanner();
             }
         }
+        else
+        {
+            BannerModule.ShowBanner();
+        }
+        UIManager.Instance.GetPanel<PanelResume>().Complete();
     }
 
     public void SendAdRevenueTracker(AdInfo impressionData)

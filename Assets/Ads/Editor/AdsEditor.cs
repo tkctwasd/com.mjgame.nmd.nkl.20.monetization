@@ -27,4 +27,38 @@ public static class AdsSymbolEditor
         Debug.Log($"Toggled {symbol}, new define symbols: {string.Join(";", defines)}");
     }
 }
+
+
+[CustomEditor(typeof(AdsManager))]
+public class AdsManagerEditor : Editor
+{
+    public override void OnInspectorGUI()
+    {
+        DrawDefaultInspector();
+
+        AdsManager adsManager = (AdsManager)target;
+
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Debug Ads", EditorStyles.boldLabel);
+
+        GUI.enabled = Application.isPlaying;
+
+        if (GUILayout.Button("Resume (2s)", GUILayout.Height(30)))
+        {
+            adsManager.StartCoroutine(SimulatePauseRoutineIE(adsManager));
+        }
+    }
+
+    private System.Collections.IEnumerator SimulatePauseRoutineIE(AdsManager adsManager)
+    {
+        Debug.Log("<color=yellow>Editor: Simulating App Pause...</color>");
+
+        adsManager.SendMessage("OnApplicationPause", true);
+
+        yield return new WaitForSecondsRealtime(2f);
+
+        Debug.Log("<color=green>Editor: Simulating App Resume...</color>");
+        adsManager.SendMessage("OnApplicationPause", false);
+    }
+}
 #endif

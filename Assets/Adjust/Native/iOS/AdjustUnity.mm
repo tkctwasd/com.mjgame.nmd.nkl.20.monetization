@@ -100,6 +100,7 @@ extern "C"
         int isSendingInBackgroundEnabled,
         int isAdServicesEnabled,
         int isIdfaReadingEnabled,
+        int isIdfvReadingEnabled,
         int isSkanAttributionEnabled,
         int isLinkMeEnabled,
         int isCostDataInAttributionEnabled,
@@ -192,6 +193,13 @@ extern "C"
         if (isIdfaReadingEnabled != -1) {
             if ((BOOL)isIdfaReadingEnabled == NO) {
                 [adjustConfig disableIdfaReading];
+            }
+        }
+
+        // IDFV reading
+        if (isIdfvReadingEnabled != -1) {
+            if ((BOOL)isIdfvReadingEnabled == NO) {
+                [adjustConfig disableIdfvReading];
             }
         }
 
@@ -426,10 +434,57 @@ extern "C"
         }];
     }
 
+    void _AdjustGetAttributionWithTimeout(int timeoutInMilliseconds, AdjustDelegateAttributionGetter callback) {
+        [Adjust attributionWithTimeout:timeoutInMilliseconds completionHandler:^(ADJAttribution * _Nullable attribution) {
+            if (attribution != nil) {
+                NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+                addValueOrEmpty(dictionary, @"trackerToken", attribution.trackerToken);
+                addValueOrEmpty(dictionary, @"trackerName", attribution.trackerName);
+                addValueOrEmpty(dictionary, @"network", attribution.network);
+                addValueOrEmpty(dictionary, @"campaign", attribution.campaign);
+                addValueOrEmpty(dictionary, @"creative", attribution.creative);
+                addValueOrEmpty(dictionary, @"adgroup", attribution.adgroup);
+                addValueOrEmpty(dictionary, @"clickLabel", attribution.clickLabel);
+                addValueOrEmpty(dictionary, @"costType", attribution.costType);
+                addValueOrEmpty(dictionary, @"costAmount", attribution.costAmount);
+                addValueOrEmpty(dictionary, @"costCurrency", attribution.costCurrency);
+                if (attribution.jsonResponse != nil) {
+                    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:attribution.jsonResponse 
+                                                                       options:0
+                                                                         error:nil];
+                    NSString *strJsonResponse = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+                    addValueOrEmpty(dictionary, @"jsonResponse", strJsonResponse);
+                }
+
+                NSData *dataAttribution = [NSJSONSerialization dataWithJSONObject:dictionary
+                                                                          options:0
+                                                                            error:nil];
+                NSString *stringAttribution = [[NSString alloc] initWithBytes:[dataAttribution bytes]
+                                                                       length:[dataAttribution length]
+                                                                     encoding:NSUTF8StringEncoding];
+                const char* attributionCString = [stringAttribution UTF8String];
+                callback(attributionCString);
+            } else {
+                // pass NULL when attribution is nil - C# callback will handle it
+                callback(NULL);
+            }
+        }];
+    }
+
     void _AdjustGetAdid(AdjustDelegateAdidGetter callback) {
         [Adjust adidWithCompletionHandler:^(NSString * _Nullable adid) {
             // TODO: nil checks
             callback([adid UTF8String]);
+        }];
+    }
+
+    void _AdjustGetAdidWithTimeout(int timeoutInMilliseconds, AdjustDelegateAdidGetter callback) {
+        [Adjust adidWithTimeout:timeoutInMilliseconds completionHandler:^(NSString * _Nullable adid) {
+            if (adid != nil) {
+                callback([adid UTF8String]);
+            } else {
+                callback(NULL);
+            }
         }];
     }
 
@@ -683,7 +738,9 @@ extern "C"
 
     void _AdjustRequestAppTrackingAuthorization(AdjustDelegateAttCallback callback) {
         [Adjust requestAppTrackingAuthorizationWithCompletionHandler:^(NSUInteger status) {
-            callback((int)status);
+            // NSUIntegerMax represents error in native world
+            int mappedStatus = (status == NSUIntegerMax) ? -1 : (int)status;
+            callback(mappedStatus);
         }];
     }
 
@@ -712,6 +769,7 @@ extern "C"
 
     void _AdjustVerifyAppStorePurchase(const char* transactionId,
                                        const char* productId,
+                                       int callbackId,
                                        AdjustDelegatePurchaseVerificationCallback callback) {
         NSString *strTransactionId;
         NSString *strProductId;
@@ -746,7 +804,7 @@ extern "C"
                                                                      length:[dataVerificationInfo length]
                                                                    encoding:NSUTF8StringEncoding];
             const char* verificationInfoCString = [strVerificationInfo UTF8String];
-            callback(verificationInfoCString);
+            callback(verificationInfoCString, callbackId);
         }];
     }
 
@@ -773,6 +831,7 @@ extern "C"
         const char* deduplicationId,
         const char* jsonCallbackParameters,
         const char* jsonPartnerParameters,
+        int verificationCallbackId,
         AdjustDelegateVerifyAndTrackCallback callback) {
         NSString *strEventToken = isStringValid(eventToken) == true ? [NSString stringWithUTF8String:eventToken] : nil;
         ADJEvent *event = [[ADJEvent alloc] initWithEventToken:strEventToken];
@@ -844,7 +903,7 @@ extern "C"
                                                                      length:[dataVerificationInfo length]
                                                                    encoding:NSUTF8StringEncoding];
             const char* verificationInfoCString = [strVerificationInfo UTF8String];
-            callback(verificationInfoCString);
+            callback(verificationInfoCString, verificationCallbackId);
         }];
     }
 

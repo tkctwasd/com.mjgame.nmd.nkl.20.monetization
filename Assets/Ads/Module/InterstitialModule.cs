@@ -7,6 +7,9 @@ public class InterstitialModule
 {
     public AdsManager ApplovinManager;
     private string intersId = "inters-id";
+    internal Action callBackInters;
+    internal int intersRetry;
+    internal string interLocation;
     public InterstitialModule(AdsManager applovinMaxManager, string intersId)
     {
         ApplovinManager = applovinMaxManager;
@@ -44,44 +47,54 @@ public class InterstitialModule
         }
     }
 
+    public bool CanShowInterstitial()
+    {
+        var config = RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig);
+        if (!config.ShowInterstitial)
+            return false;
+
+        bool delayTime = (DateTime.UtcNow - ApplovinManager.TimeStart).TotalSeconds >= config.TimeDelayInterstitial;
+
+        bool passedCappingTime = (DateTime.UtcNow - ApplovinManager.LastTimeShowInterstitial).TotalSeconds >= config.InterstitialCappingTime;
+
+        bool timestampInterReward = (DateTime.UtcNow - ApplovinManager.LastTimeShowReward).TotalSeconds >= config.TimestampInterReward;
+        bool timestampInterAOA = (DateTime.UtcNow - ApplovinManager.LastTimeShowAOA).TotalSeconds >= config.TimestampInterAppOpen;
+
+        return MaxSdk.IsInitialized() && MaxSdk.IsInterstitialReady(intersId) && passedCappingTime && delayTime && timestampInterAOA && timestampInterReward;
+    }
+
+
     public void ShowInterstitial(string location, Action callBack)
     {
-        if (!RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig).ShowInterstitial)
-        {
-            callBack?.Invoke();
-            return;
-        }
-
-        ApplovinManager.interLocation = location;
+        interLocation = location;
         FirebaseAnalyticManager.Instance.LogAd("show_interstitial_ads", location);
-        ApplovinManager.isCanShowAOABackGame = false;
+        ApplovinManager.IsCanShowAOABackGame = false;
 
-        bool passedCappingTime = (DateTime.UtcNow - ApplovinManager.TimeCloseInterstitial).TotalSeconds >= RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig).InterstitialCappingTime;
-
-        if (MaxSdk.IsInterstitialReady(intersId) && passedCappingTime)
+        if (CanShowInterstitial())
         {
             FirebaseAnalyticManager.Instance.LogAd("show_interstitial_success", location);
-            ApplovinManager.callBackInters = callBack;
+            callBackInters = callBack;
+            ApplovinManager.IsShowAds = true;
             MaxSdk.ShowInterstitial(intersId);
         }
         else
         {
             LoadInterstitial();
-            ApplovinManager.isCanShowAOABackGame = true;
+            ApplovinManager.IsCanShowAOABackGame = true;
             callBack?.Invoke();
         }
     }
 
     private void InterstitialOnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
     {
-        ApplovinManager.intersRetry = 0;
+        intersRetry = 0;
         Debug.Log("Interstitial".Ads($"Ad Loaded"));
     }
 
     private void InterstitialOnAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
     {
-        ApplovinManager.intersRetry++;
-        double retryDelay = Math.Pow(2, Math.Min(6, ApplovinManager.intersRetry));
+        intersRetry++;
+        double retryDelay = Math.Pow(2, Math.Min(6, intersRetry));
         ApplovinManager.StartCoroutine(IELoadDelay((float)retryDelay));
         Debug.Log("Interstitial".Ads($"Ad Load Failed: {errorInfo.Message}"));
     }
@@ -93,12 +106,13 @@ public class InterstitialModule
 
     private void InterstitialOnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
     {
-        if (ApplovinManager.callBackInters != null)
+        if (callBackInters != null)
         {
-            ApplovinManager.callBackInters?.Invoke();
-            ApplovinManager.callBackInters = null;
+            callBackInters?.Invoke();
+            callBackInters = null;
         }
-        ApplovinManager.isCanShowAOABackGame = true;
+        ApplovinManager.IsShowAds = false;
+        ApplovinManager.IsCanShowAOABackGame = true;
         ApplovinManager.StartCoroutine(IELoadDelay(0.5f));
         Debug.Log("Interstitial".Ads($"Ad Display Failed"));
     }
@@ -106,21 +120,19 @@ public class InterstitialModule
     private void InterstitialOnAdClickedEvent(string adUnitID, MaxSdkBase.AdInfo adInfo)
     {
         Debug.Log("Interstitial".Ads($"Ad Click"));
-        if (!string.IsNullOrEmpty(ApplovinManager.interLocation))
+        if (!string.IsNullOrEmpty(interLocation))
         {
-            FirebaseAnalyticManager.Instance.LogAd("show_interstitial_click", ApplovinManager.interLocation);
+            FirebaseAnalyticManager.Instance.LogAd("show_interstitial_click", interLocation);
         }
     }
 
     private void InterstitialOnAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
     {
-        if (ApplovinManager.callBackInters != null)
-        {
-            ApplovinManager.callBackInters.Invoke();
-            ApplovinManager.callBackInters = null;
-            ApplovinManager.TimeCloseInterstitial = DateTime.UtcNow;
-        }
-        ApplovinManager.isCanShowAOABackGame = true;
+        callBackInters?.Invoke();
+        callBackInters = null;
+        ApplovinManager.LastTimeShowInterstitial = DateTime.UtcNow;
+        ApplovinManager.LastTimeShowAOA = DateTime.UtcNow;
+        ApplovinManager.IsCanShowAOABackGame = true;
         ApplovinManager.StartCoroutine(IELoadDelay(0.5f));
         Debug.Log("Interstitial".Ads($"Ad Hidden"));
     }

@@ -34,6 +34,7 @@ namespace AdjustSdk
         // iOS specific
         public bool? IsAdServicesEnabled { get; set; }
         public bool? IsIdfaReadingEnabled { get; set; }
+        public bool? IsIdfvReadingEnabled { get; set; }
         public bool? IsSkanAttributionEnabled { get; set; }
         public bool? IsLinkMeEnabled { get; set; }
         public int? AttConsentWaitingInterval { get; set; }
@@ -43,6 +44,7 @@ namespace AdjustSdk
         public bool? IsPreinstallTrackingEnabled { get; set; }
         public string PreinstallFilePath { get; set; }
         public string FbAppId { get; set; }
+        public bool? IsAppSetIdReadingEnabled { get; set; }
 
         public AdjustConfig(string appToken, AdjustEnvironment environment)
         {

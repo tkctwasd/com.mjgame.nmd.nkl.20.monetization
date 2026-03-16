@@ -24,11 +24,15 @@ public class AdConstants : ScriptableObject
     [Header("Ad Unit ID")]
     [ColorLabel(1f, 0.65f, 0f)] public string AppOpenId = "app-open-id";
     [ColorLabel(1f, 0.65f, 0f)] public string BannerId = "banner-id";
+    [ColorLabel(1f, 0.65f, 0f)] public string MRECId = "mrec-id";
     [ColorLabel(1f, 0.65f, 0f)] public string InterstitialId = "interstitial-id";
     [ColorLabel(1f, 0.65f, 0f)] public string RewardedId = "rewarded-id";
 
     [Header("Banner")]
     public MaxSdkBase.AdViewPosition bannerPosition = MaxSdkBase.AdViewPosition.BottomCenter;
+
+    [Header("MREC")]
+    public MaxSdkBase.AdViewPosition mrecPosition = MaxSdkBase.AdViewPosition.TopLeft;
 
 
 #if UNITY_EDITOR

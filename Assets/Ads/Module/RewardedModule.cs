@@ -7,6 +7,9 @@ public class RewardedModule
 {
     public AdsManager ApplovinManager;
     private string rewardId = "reward-id";
+    internal Action callBackReward;
+    internal int rewardedRetry;
+    internal string rewardLocation;
 
     #region Rewarded
 
@@ -41,50 +44,58 @@ public class RewardedModule
         if (MaxSdk.IsInitialized())
         {
             MaxSdk.LoadRewardedAd(rewardId);
-            Debug.Log("Rewarded".Ads("Loading Rewarded Ad..."));
         }
+    }
+
+    private bool CanShowReward()
+    {
+        var config = RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig);
+        if (!config.ShowReward)
+            return false;
+        return MaxSdk.IsInitialized() && MaxSdk.IsRewardedAdReady(rewardId);
     }
 
     public void ShowRewarded(string location, Action callBack)
     {
-        ApplovinManager.rewardLocation = location;
-        ApplovinManager.isCanShowAOABackGame = false;
+        rewardLocation = location;
+        ApplovinManager.IsCanShowAOABackGame = false;
 
         FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads", location);
 
-        // show reward
-        if (!RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig).ShowReward)
-        {
-            Debug.Log("Rewarded".Ads("Rewarded ads are disabled in the config."));
-            callBack?.Invoke();
-            return;
-        }
-        if (MaxSdk.IsRewardedAdReady(rewardId))
+        if (CanShowReward())
         {
             FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads_sucess", location);
-            ApplovinManager.callBackReward = callBack;
+            callBackReward = callBack;
+            ApplovinManager.IsShowAds = true;
             MaxSdk.ShowRewardedAd(rewardId);
+        }
+        else
+        {
+            Debug.Log("Rewarded".Ads("Rewarded ads are disabled in the config."));
+            ApplovinManager.IsCanShowAOABackGame = true;
+            callBack?.Invoke();
         }
     }
 
     private void RewardedOnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
     {
         Debug.Log("Rewarded".Ads($"Ad Loaded"));
-        ApplovinManager.rewardedRetry = 0;
+        rewardedRetry = 0;
     }
 
     private void RewardedOnAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
     {
-        ApplovinManager.rewardedRetry++;
-        double retryDelay = Math.Pow(2, Math.Min(6, ApplovinManager.rewardedRetry));
+        rewardedRetry++;
+        double retryDelay = Math.Pow(2, Math.Min(6, rewardedRetry));
         ApplovinManager.Invoke(nameof(LoadRewardedAd), (float)retryDelay);
         Debug.Log("Rewarded".Ads($"Ad Load Failed + {errorInfo.Message}"));
     }
 
     private void RewardedOnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
     {
+        ApplovinManager.IsShowAds = false;
         ApplovinManager.StartCoroutine(IELoadDelay(0.5f));
-        ApplovinManager.isCanShowAOABackGame = true;
+        ApplovinManager.IsCanShowAOABackGame = true;
         Debug.Log("Rewarded".Ads($"Ad Display Failed + {errorInfo.Message}"));
     }
 
@@ -96,26 +107,27 @@ public class RewardedModule
     private void RewardedOnAdClickedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
     {
         Debug.Log("Rewarded".Ads("Ad Clicked"));
-        FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads_click", ApplovinManager.rewardLocation);
+        FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads_click", rewardLocation);
     }
 
     private void RewardedOnAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
     {
         Debug.Log("Rewarded".Ads("Ad Hidden"));
-        ApplovinManager.TimeCloseAOA = DateTime.UtcNow;
+        ApplovinManager.LastTimeShowReward = DateTime.UtcNow;
+        ApplovinManager.LastTimeShowAOA = DateTime.UtcNow;
         ApplovinManager.StartCoroutine(IELoadDelay(0.5f));
-        ApplovinManager.isCanShowAOABackGame = true;
+        ApplovinManager.IsCanShowAOABackGame = true;
     }
 
     private void RewardedOnAdReceivedRewardEvent(string adUnitId, MaxSdkBase.Reward reward, MaxSdkBase.AdInfo adInfo)
     {
-        if (ApplovinManager.callBackReward != null)
+        if (callBackReward != null)
         {
-            ApplovinManager.callBackReward?.Invoke();
-            ApplovinManager.callBackReward = null;
+            callBackReward?.Invoke();
+            callBackReward = null;
         }
-        ApplovinManager.isCanShowAOABackGame = true;
-        FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads_completed", ApplovinManager.rewardLocation);
+        ApplovinManager.IsCanShowAOABackGame = true;
+        FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads_completed", rewardLocation);
         Debug.Log("Rewarded".Ads("Ad Completed"));
     }
 

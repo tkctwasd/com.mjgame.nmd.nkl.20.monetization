@@ -13,14 +13,16 @@ MonoBehaviour:
   m_Name: AdConstants
   m_EditorClassIdentifier: 
   SdkKey: bZncTTqqX6Kebm0dMxUgLHPAC7HVzkQo4iVz2zT32odFJeB7qTQbIf2SfSB9Q65Q3lhWc0EI9OEDhFyxrxo7f2
-  AdmobAndroidAppId: 
-  AdmobIosAppId: ca-app-pub-2010884681696999~5821259193
-  GameName: Carnival Escape Challenge
-  PackageName: com.carnival.escape.fun2025
-  PrivacyPolicyURL: 
-  TermsURL: 
-  AppOpenId: c34fe48b3ce0666f
-  BannerId: 4b921cf8e668fb80
-  InterstitialId: 8d7fe03a7bbeaf60
-  RewardedId: e6875de2e2f586af
+  AdmobAndroidAppId: admob-android-id
+  AdmobIosAppId: ca-app-pub-2010884681696999~5024547493
+  GameName: Your Game Name
+  PackageName: com.escape.speed.run2026
+  PrivacyPolicyURL: https://doc-hosting.flycricket.io/minh-dong-nguyen-privacy-policy/f538c2e5-dff0-4fad-b6ef-3c66c63d2f89/privacy
+  TermsURL: https://doc-hosting.flycricket.io/minh-dong-nguyen-terms-of-use/2a8f400d-d625-457d-971a-8fcf80acaa69/terms
+  AppOpenId: 6fce91a973939e1a
+  BannerId: 55acf61cb5d1ef97
+  MRECId: e248afb72a037de5
+  InterstitialId: 6c3d0090d3f0f573
+  RewardedId: aec93f540d6f7dac
   bannerPosition: 7
+  mrecPosition: 0

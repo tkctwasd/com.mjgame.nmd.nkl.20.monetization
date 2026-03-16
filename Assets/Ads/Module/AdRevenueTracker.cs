@@ -6,9 +6,9 @@ public class AdRevenueTracker
 {
         public void SendAllTracker(AdInfo adInfo)
         {
-                SendRevenueMAXToFirebase(adInfo);
-                SendRevenueMAXToAdjust(adInfo);
-                SendRevenueMAXToAppsflyer(adInfo);
+                // SendRevenueMAXToFirebase(adInfo);
+                // SendRevenueMAXToAdjust(adInfo);
+                // SendRevenueMAXToAppsflyer(adInfo);
         }
         void SendRevenueMAXToFirebase(AdInfo adInfo)
         {

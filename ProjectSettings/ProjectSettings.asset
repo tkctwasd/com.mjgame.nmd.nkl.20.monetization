@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: DefaultCompany
-  productName: Carnival Escape Challenge
+  productName: Your Game Name
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -165,7 +165,7 @@ PlayerSettings:
   applicationIdentifier:
     Android: com.arrest.prison.breakout2025
     Standalone: com.carnival.escape.fun2025
-    iPhone: com.carnival.escape.fun2025
+    iPhone: com.escape.speed.run2026
   buildNumber:
     Standalone: 0
     VisionOS: 0
@@ -190,7 +190,7 @@ PlayerSettings:
   VertexChannelCompressionMask: 4054
   iPhoneSdkVersion: 988
   iOSSimulatorArchitecture: 0
-  iOSTargetOSVersionString: 13.0
+  iOSTargetOSVersionString: 15.0
   tvOSSdkVersion: 0
   tvOSSimulatorArchitecture: 0
   tvOSRequireExtendedGameController: 0
@@ -843,9 +843,23 @@ PlayerSettings:
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Android: FIREBASE_ANALYTICS;USE_ADJUST;USE_APPSFLYER
-    Standalone: FIREBASE_ANALYTICS
-    iPhone: FIREBASE_ANALYTICS;USE_ADJUST;USE_APPSFLYER
+    Android: FIREBASE_ANALYTICS;USE_ADJUST;USE_APPSFLYER;DOTWEEN
+    EmbeddedLinux: DOTWEEN
+    GameCoreScarlett: DOTWEEN
+    GameCoreXboxOne: DOTWEEN
+    LinuxHeadlessSimulation: DOTWEEN
+    Nintendo Switch: DOTWEEN
+    PS4: DOTWEEN
+    PS5: DOTWEEN
+    QNX: DOTWEEN
+    Stadia: DOTWEEN
+    Standalone: FIREBASE_ANALYTICS;DOTWEEN
+    VisionOS: DOTWEEN
+    WebGL: DOTWEEN
+    Windows Store Apps: DOTWEEN
+    XboxOne: DOTWEEN
+    iPhone: FIREBASE_ANALYTICS;DOTWEEN;USE_APPSFLYER
+    tvOS: DOTWEEN
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend: {}
