@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -81,11 +82,11 @@ public class RemoteConfigManager : MonoBehaviour
                 Debug.Log("Latest Fetch call still pending.");
                 break;
         }
-        // #if UNITY_ANDROID || UNITY_IOS
-        //         ActionFetchDone?.Invoke();
-        // #endif
+#if UNITY_ANDROID || UNITY_IOS
+        ActionFetchDone?.Invoke();
+#endif
         // #if !UNITY_EDITOR
-        //                                                 ActionFetchDone?.Invoke();
+        //                                                         ActionFetchDone?.Invoke();
         // #endif
     }
 
@@ -148,7 +149,6 @@ public class RemoteConfigManager : MonoBehaviour
     {
         return new string(input.Where(c => !char.IsWhiteSpace(c)).ToArray());
     }
-
     public static T GetConfigValue<T>(string key)
     {
         if (remoteConfigData == null || !remoteConfigData.ContainsKey(key))
@@ -162,10 +162,7 @@ public class RemoteConfigManager : MonoBehaviour
                 return tValue;
 
             if (data is JObject jObject)
-            {
-                string jsonStr = jObject.ToString();
-                return JsonConvert.DeserializeObject<T>(jsonStr);
-            }
+                return JsonConvert.DeserializeObject<T>(jObject.ToString());
 
             string strVal = data?.ToString();
 
@@ -174,26 +171,40 @@ public class RemoteConfigManager : MonoBehaviour
 
             if (typeof(T) == typeof(bool))
             {
-                if (bool.TryParse(strVal, out bool b))
-                    return (T)(object)b;
-                if (long.TryParse(strVal, out long l))
-                    return (T)(object)(l != 0);
+                if (bool.TryParse(strVal, out bool b)) return (T)(object)b;
+                if (long.TryParse(strVal, out long l)) return (T)(object)(l != 0);
             }
 
             if (typeof(T) == typeof(int))
             {
-                if (int.TryParse(strVal, out int i))
-                    return (T)(object)i;
-                if (long.TryParse(strVal, out long l))
-                    return (T)(object)(int)l;
+                if (int.TryParse(strVal, out int i)) return (T)(object)i;
+                if (long.TryParse(strVal, out long l)) return (T)(object)(int)l;
+                if (float.TryParse(strVal, NumberStyles.Float, CultureInfo.InvariantCulture, out float f))
+                    return (T)(object)(int)f;
             }
 
-            if (typeof(T).IsClass && strVal.TrimStart().StartsWith("{"))
+            if (typeof(T) == typeof(long))
             {
-                return JsonConvert.DeserializeObject<T>(strVal);
+                if (long.TryParse(strVal, NumberStyles.Integer, CultureInfo.InvariantCulture, out long l))
+                    return (T)(object)l;
             }
 
-            return (T)Convert.ChangeType(data, typeof(T));
+            if (typeof(T) == typeof(float))
+            {
+                if (float.TryParse(strVal, NumberStyles.Float, CultureInfo.InvariantCulture, out float f))
+                    return (T)(object)f;
+            }
+
+            if (typeof(T) == typeof(double))
+            {
+                if (double.TryParse(strVal, NumberStyles.Float, CultureInfo.InvariantCulture, out double d))
+                    return (T)(object)d;
+            }
+
+            if (typeof(T).IsClass && (strVal.TrimStart().StartsWith("{") || strVal.TrimStart().StartsWith("[")))
+                return JsonConvert.DeserializeObject<T>(strVal);
+
+            return (T)Convert.ChangeType(data, typeof(T), CultureInfo.InvariantCulture);
         }
         catch (Exception ex)
         {

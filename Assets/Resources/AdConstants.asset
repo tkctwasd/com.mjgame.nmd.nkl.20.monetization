@@ -9,20 +9,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 19338b4e6535fb44f8c94e2e8eec234c, type: 3}
+  m_Script: {fileID: 11500000, guid: c501dfea40adc5e46886763b4272fab3, type: 3}
   m_Name: AdConstants
   m_EditorClassIdentifier: 
-  SdkKey: bZncTTqqX6Kebm0dMxUgLHPAC7HVzkQo4iVz2zT32odFJeB7qTQbIf2SfSB9Q65Q3lhWc0EI9OEDhFyxrxo7f2
+  SdkKey: sdk-key
   AdmobAndroidAppId: admob-android-id
-  AdmobIosAppId: ca-app-pub-2010884681696999~5024547493
+  AdmobIosAppId: admob-ios-id
   GameName: Your Game Name
-  PackageName: com.escape.speed.run2026
-  PrivacyPolicyURL: https://doc-hosting.flycricket.io/minh-dong-nguyen-privacy-policy/f538c2e5-dff0-4fad-b6ef-3c66c63d2f89/privacy
-  TermsURL: https://doc-hosting.flycricket.io/minh-dong-nguyen-terms-of-use/2a8f400d-d625-457d-971a-8fcf80acaa69/terms
-  AppOpenId: 6fce91a973939e1a
-  BannerId: 55acf61cb5d1ef97
-  MRECId: e248afb72a037de5
-  InterstitialId: 6c3d0090d3f0f573
-  RewardedId: aec93f540d6f7dac
+  PackageName: com.yourcompany.yourgame
+  PrivacyPolicyURL: https://yourcompany.com/privacy
+  TermsURL: https://yourcompany.com/terms
+  AppOpenId: app-open-id
+  BannerId: banner-id
+  MRECId: mrec-id
+  InterstitialId: interstitial-id
+  RewardedId: rewarded-id
   bannerPosition: 7
   mrecPosition: 0

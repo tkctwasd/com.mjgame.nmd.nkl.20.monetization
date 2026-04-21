@@ -853,12 +853,12 @@ PlayerSettings:
     PS5: DOTWEEN
     QNX: DOTWEEN
     Stadia: DOTWEEN
-    Standalone: FIREBASE_ANALYTICS;DOTWEEN
+    Standalone: FIREBASE_ANALYTICS;DOTWEEN;USE_APPSFLYER;USE_ADJUST
     VisionOS: DOTWEEN
     WebGL: DOTWEEN
     Windows Store Apps: DOTWEEN
     XboxOne: DOTWEEN
-    iPhone: FIREBASE_ANALYTICS;DOTWEEN;USE_APPSFLYER
+    iPhone: FIREBASE_ANALYTICS;DOTWEEN;USE_APPSFLYER;USE_ADJUST
     tvOS: DOTWEEN
   additionalCompilerArguments: {}
   platformArchitecture: {}

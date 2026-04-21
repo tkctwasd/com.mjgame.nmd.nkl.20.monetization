@@ -47,22 +47,21 @@ public class RewardedModule
         }
     }
 
-    private bool CanShowReward()
-    {
-        var config = RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig);
-        if (!config.ShowReward)
-            return false;
-        return MaxSdk.IsInitialized() && MaxSdk.IsRewardedAdReady(rewardId);
-    }
-
     public void ShowRewarded(string location, Action callBack)
     {
         rewardLocation = location;
         ApplovinManager.IsCanShowAOABackGame = false;
 
         FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads", location);
+        var config = RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig);
+        if (!config.ShowReward)
+        {
+            ApplovinManager.IsCanShowAOABackGame = true;
+            callBack?.Invoke();
+            return;
+        }
 
-        if (CanShowReward())
+        if (MaxSdk.IsInitialized() && MaxSdk.IsRewardedAdReady(rewardId))
         {
             FirebaseAnalyticManager.Instance.LogAd("show_rewarded_ads_sucess", location);
             callBackReward = callBack;
@@ -71,9 +70,8 @@ public class RewardedModule
         }
         else
         {
-            Debug.Log("Rewarded".Ads("Rewarded ads are disabled in the config."));
+            Debug.Log("Rewarded".Ads("Rewarded ad not ready"));
             ApplovinManager.IsCanShowAOABackGame = true;
-            callBack?.Invoke();
         }
     }
 

@@ -18,7 +18,6 @@ public class AppOpenModule
     {
         ApplovinManager = applovin;
         this.appOpenId = appOpenId;
-        ApplovinManager.LastTimeShowAOA = DateTime.MinValue;
         isLogEventLoading = false;
         ApplovinManager.IsCanShowAOABackGame = true;
     }
