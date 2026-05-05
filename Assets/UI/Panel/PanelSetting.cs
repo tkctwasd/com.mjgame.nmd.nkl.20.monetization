@@ -20,9 +20,9 @@ public class PanelSetting : UIPanel
     public override void Hide()
     {
         base.Hide();
-        AdsManager.Instance.InterstitialModule.ShowInterstitial("si", () =>
+        AdsManager.Instance.MRECModule.HideMREC();
+        AdsManager.Instance.InterstitialModule.ShowInterstitial("inter", () =>
         {
-            AdsManager.Instance.MRECModule.HideMREC();
         });
     }
 }

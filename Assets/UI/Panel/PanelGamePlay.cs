@@ -22,7 +22,7 @@ public class PanelGamePlay : UIPanel
     });
     btShowBanner.onClick.AddListener(() =>
     {
-      AdsManager.Instance.RewardedModule.ShowRewarded("", () =>
+      AdsManager.Instance.RewardedModule.ShowRewarded("reward", () =>
       {
       });
     });
