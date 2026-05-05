@@ -10,9 +10,9 @@ public class RemoveAdsButton : IAPButton
 {
     protected override IEnumerator Start()
     {
-        // Gán productId từ IAPConstants
+        // Gán productId từ project-specific config if available.
         if (IAPManager.Instance != null)
-            ProductId = IAPManager.Instance.IAPConstants.RemoveAdsId;
+            ProductId = IAPManager.Instance.RemoveAdsProductId;
 
         yield return base.Start();
 

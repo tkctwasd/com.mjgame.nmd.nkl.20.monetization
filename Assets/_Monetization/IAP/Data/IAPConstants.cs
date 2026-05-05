@@ -2,6 +2,10 @@
 //  IAPConstants.cs
 //  ScriptableObject chứa tất cả Product ID — tương tự AdConstants.
 //  Tạo asset: Assets > Create > IAP > IAP Constants
+//
+//  Lưu ý: bộ core mới hỗ trợ project-specific config qua IAPProductConfig.
+//  Nếu bạn muốn giữ core chung và chỉ thay product IDs cho mỗi project,
+//  hãy tạo asset IAPProductConfig và gán nó vào IAPManager.
 // ─────────────────────────────────────────────────────────────────────────────
 using System.Collections.Generic;
 using UnityEngine;

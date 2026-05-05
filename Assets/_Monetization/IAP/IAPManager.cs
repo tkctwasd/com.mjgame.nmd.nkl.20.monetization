@@ -22,6 +22,7 @@ public class IAPManager : MonoBehaviour
     public static IAPManager Instance;
 
     public IAPConstants IAPConstants;
+    public IAPProductConfig IAPProductConfig;
 
     // ── IAP v5 Services (tách riêng thay vì 1 StoreController duy nhất) ──
     IStoreService m_StoreService;
@@ -53,6 +54,7 @@ public class IAPManager : MonoBehaviour
         Instance = this;
         m_Callbacks = new IAPCallbacks(this);
         CreateServices();
+        LoadConfigIfMissing();
     }
 
     void Start()
@@ -61,6 +63,18 @@ public class IAPManager : MonoBehaviour
             onSuccess: OnUnityServicesReady,
             onError: msg => Debug.LogError("IAPManager".IAP($"Unity Services failed: {msg}"))
         );
+    }
+
+    void LoadConfigIfMissing()
+    {
+        if (IAPProductConfig == null)
+        {
+            IAPProductConfig = Resources.Load<IAPProductConfig>("IAPProductConfig");
+            if (IAPProductConfig != null)
+            {
+                Debug.Log("IAPManager".IAP("Loaded project-specific IAPProductConfig from Resources."));
+            }
+        }
     }
 
     void OnUnityServicesReady()
@@ -109,16 +123,23 @@ public class IAPManager : MonoBehaviour
     {
         var products = new List<ProductDefinition>();
 
-        // Non-Consumable
-        products.Add(new ProductDefinition(IAPConstants.RemoveAdsId, ProductType.NonConsumable));
-
-        // Consumable
-        foreach (var id in IAPConstants.ConsumableIds)
-            products.Add(new ProductDefinition(id, ProductType.Consumable));
-
-        // Subscription
-        foreach (var id in IAPConstants.SubscriptionIds)
-            products.Add(new ProductDefinition(id, ProductType.Subscription));
+        if (IAPProductConfig != null && IAPProductConfig.products.Count > 0)
+        {
+            products.AddRange(IAPProductConfig.CreateProductDefinitions());
+        }
+        else if (IAPConstants != null)
+        {
+            // Fallback legacy config
+            products.Add(new ProductDefinition(IAPConstants.RemoveAdsId, ProductType.NonConsumable));
+            foreach (var id in IAPConstants.ConsumableIds)
+                products.Add(new ProductDefinition(id, ProductType.Consumable));
+            foreach (var id in IAPConstants.SubscriptionIds)
+                products.Add(new ProductDefinition(id, ProductType.Subscription));
+        }
+        else
+        {
+            Debug.LogError("IAPManager".IAP("No IAP configuration assigned. Please assign IAPProductConfig or IAPConstants."));
+        }
 
         m_CatalogProvider.AddProducts(products);
         Debug.Log("IAPManager".IAP($"Catalog built: {products.Count} products"));
@@ -295,7 +316,10 @@ public class IAPManager : MonoBehaviour
     }
 
     /// <summary>Kiểm tra nhanh Remove Ads.</summary>
-    public bool IsRemoveAdsPurchased() => IsPurchased(IAPConstants.RemoveAdsId);
+    public string RemoveAdsProductId =>
+        IAPProductConfig?.RemoveAdsProductId ?? IAPConstants?.RemoveAdsId;
+
+    public bool IsRemoveAdsPurchased() => !string.IsNullOrEmpty(RemoveAdsProductId) && IsPurchased(RemoveAdsProductId);
 
     /// <summary>
     /// Restore purchases (iOS bắt buộc).
@@ -431,6 +455,9 @@ public class IAPManager : MonoBehaviour
 {
     public static IAPManager Instance;
     public IAPConstants IAPConstants;
+    public IAPProductConfig IAPProductConfig;
+
+    public string RemoveAdsProductId => IAPProductConfig?.RemoveAdsProductId ?? IAPConstants?.RemoveAdsId;
 
     public bool IsConnected      => false;
     public bool IsProductsReady  => false;
