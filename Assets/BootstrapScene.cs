@@ -14,6 +14,7 @@ public static class BootstrapScene
         TryLoad("PoolManager");
         TryLoad("MainCamController");
         TryLoad("AppReviewManager");
+        TryLoad("IAPManager");
         // TryLoad("Hacking");
         Debug.Log("<color=yellow>[BootstrapScene]</color> <color=white> Load Instance </color><color=green>Complete</color>");
     }

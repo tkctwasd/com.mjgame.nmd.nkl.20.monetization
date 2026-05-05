@@ -858,7 +858,7 @@ PlayerSettings:
     WebGL: DOTWEEN
     Windows Store Apps: DOTWEEN
     XboxOne: DOTWEEN
-    iPhone: FIREBASE_ANALYTICS;DOTWEEN;USE_APPSFLYER;USE_ADJUST
+    iPhone: FIREBASE_ANALYTICS;DOTWEEN;USE_APPSFLYER;USE_ADJUST;USE_IAP
     tvOS: DOTWEEN
   additionalCompilerArguments: {}
   platformArchitecture: {}

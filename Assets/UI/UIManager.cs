@@ -114,4 +114,10 @@ public class UIManager : Singleton<UIManager>
 
         return false;
     }
+
+      internal void ClosePanel(PanelShop panelShop)
+      {
+            throw new NotImplementedException();
+      }
+
 }

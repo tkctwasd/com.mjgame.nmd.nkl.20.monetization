@@ -7,6 +7,7 @@ public class PanelGamePlay : UIPanel
 {
   public Button btnSetting;
   public Button btShowBanner;
+  public Button btnShop;
   void OnEnable()
   {
     AdsManager.Instance.BannerModule.ShowBanner();
@@ -25,6 +26,10 @@ public class PanelGamePlay : UIPanel
       AdsManager.Instance.RewardedModule.ShowRewarded("reward", () =>
       {
       });
+    });
+    btnShop.onClick.AddListener(() =>
+    {
+      UIManager.Instance.ShowPanel<PanelShop>();
     });
   }
 }
