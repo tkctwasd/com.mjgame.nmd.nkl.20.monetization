@@ -13,6 +13,5 @@
             "DurationLoading": 10,
             "TimeLoadAppOpen": 6,
             "TimeDelayInterstitial": 30
-      },
-      "time_auto": 0.5
+      }
 }
