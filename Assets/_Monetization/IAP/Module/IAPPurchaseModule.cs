@@ -9,16 +9,16 @@ public class IAPPurchaseModule
 {
       readonly IProductService ProductService;
       readonly IPurchaseService PurchaseService;
-      readonly IAPConstants ProductConfig;
+      readonly IAPProducts IAPProducts;
       readonly Func<bool> IsConnected;
       readonly Func<bool> IsProductsReady;
       readonly Func<bool> IsPurchasesReady;
 
-      public IAPPurchaseModule(IProductService productService, IPurchaseService purchaseService, IAPConstants productConfig, Func<bool> isConnected, Func<bool> isProductsReady, Func<bool> isPurchasesReady)
+      public IAPPurchaseModule(IProductService productService, IPurchaseService purchaseService, IAPProducts productConfig, Func<bool> isConnected, Func<bool> isProductsReady, Func<bool> isPurchasesReady)
       {
             ProductService = productService;
             PurchaseService = purchaseService;
-            ProductConfig = productConfig;
+            IAPProducts = productConfig;
             IsConnected = isConnected;
             IsProductsReady = isProductsReady;
             IsPurchasesReady = isPurchasesReady;
@@ -46,7 +46,7 @@ public class IAPPurchaseModule
                   Debug.LogWarning("IAPPurchaseModule".IAP($"Product not found: {productId}"));
                   return;
             }
-            LogAnalyticsIAP.LogPurchaseAttempt(productId);
+            // IAPAnalytic.LogPurchaseAttempt(productId);
             PurchaseProduct(product);
             Debug.Log("IAPPurchaseModule".IAP($"PurchaseProduct: {productId}"));
       }
@@ -139,7 +139,7 @@ public class IAPPurchaseModule
             return false;
       }
 
-      public string RemoveAdsProductId => ProductConfig?.RemoveAdsProductId;
+      public string RemoveAdsProductId => IAPProducts?.RemoveAdsProductId;
 
       public bool IsRemoveAdsPurchased()
       {
@@ -153,10 +153,10 @@ public class IAPPurchaseModule
 
       public void RestorePurchases(Action<bool> callback = null)
       {
-            LogAnalyticsIAP.LogRestoreStart();
+            IAPAnalytic.LogRestoreStart();
             PurchaseService?.RestoreTransactions((success, error) =>
             {
-                  LogAnalyticsIAP.LogRestoreComplete(success);
+                  IAPAnalytic.LogRestoreComplete(success);
                   if (!success)
                         Debug.LogWarning($"[IAPPurchaseModule] RestorePurchases failed: {error}");
                   else

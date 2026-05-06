@@ -5,22 +5,22 @@ using UnityEngine.Purchasing;
 
 public class IAPCallbacks
 {
-    readonly IAPManager m_Manager;
+    readonly IAPManager InAppPurchaseManager;
 
     public IAPCallbacks(IAPManager manager)
     {
-        m_Manager = manager;
+        InAppPurchaseManager = manager;
     }
 
 
     public void OnProductsFetched(List<Product> products)
     {
         Debug.Log("IAPCallbacks".IAP($"OnProductsFetched: {products.Count} products"));
-        m_Manager.IsProductsReady = true;
-        m_Manager.NotifyProductsReady(products);
+        InAppPurchaseManager.IsProductsReady = true;
+        InAppPurchaseManager.NotifyProductsReady(products);
 
         // Sau khi có products → fetch purchases để restore entitlement
-        m_Manager.FetchExistingPurchases();
+        InAppPurchaseManager.FetchExistingPurchases();
     }
 
     public void OnProductsFetchFailed(ProductFetchFailed failure)
@@ -31,12 +31,12 @@ public class IAPCallbacks
 
     public void OnPurchasesFetched(Orders existingOrders)
     {
-        m_Manager.IsPurchasesReady = true;
+        InAppPurchaseManager.IsPurchasesReady = true;
         Debug.Log("IAPCallbacks".IAP(
             $"OnPurchasesFetched - Confirmed: {existingOrders.ConfirmedOrders.Count}" +
             $" | Pending: {existingOrders.PendingOrders.Count}"));
 
-        m_Manager.NotifyPurchasesReady(existingOrders);
+        InAppPurchaseManager.NotifyPurchasesReady(existingOrders);
     }
 
     public void OnPurchasesFetchFailed(PurchasesFetchFailureDescription failure)
@@ -44,10 +44,6 @@ public class IAPCallbacks
         Debug.LogError("IAPCallbacks".IAP($"OnPurchasesFetchFailed: {failure.FailureReason} | {failure.Message}"));
     }
 
-    /// <summary>
-    /// Gọi khi có purchase MỚI (người dùng vừa mua) hoặc pending chưa confirm.
-    /// Thay thế ProcessPurchase của IAP v4.
-    /// </summary>
 
     public void OnPurchasePending(PendingOrder pendingOrder)
     {
@@ -57,12 +53,12 @@ public class IAPCallbacks
             Debug.Log("IAPCallbacks".IAP($"OnPurchasePending: {product.definition.id}"));
 
             // Track purchase attempt only. Success event is sent after confirmation.
-            LogAnalyticsIAP.LogPurchaseAttempt(product.definition.id);
+            IAPAnalytic.LogPurchaseAttempt(product.definition.id);
         }
 
         // Confirm ngay (auto-confirm).
         // Nếu game bạn cần server-side verify trước, hãy delay ConfirmPurchase lại.
-        m_Manager.ConfirmPurchase(pendingOrder);
+        InAppPurchaseManager.ConfirmPurchase(pendingOrder);
     }
 
     public void OnPurchaseConfirmed(Order order)
@@ -80,7 +76,7 @@ public class IAPCallbacks
 
     void OnConfirmed(ConfirmedOrder order)
     {
-        m_Manager.SendIAPRevenueTracker(order);
+        InAppPurchaseManager.SendIAPRevenueTracker(order);
 
         foreach (var item in order.CartOrdered.Items())
         {
@@ -88,7 +84,7 @@ public class IAPCallbacks
             Debug.Log("IAPCallbacks".IAP($"OnConfirmed: {productId} | TX: {order.Info.TransactionID}"));
 
             // Giao hàng cho người chơi
-            m_Manager.DeliverProduct(productId, order);
+            InAppPurchaseManager.DeliverProduct(productId, order);
         }
     }
 
@@ -107,10 +103,10 @@ public class IAPCallbacks
             var productId = item.Product.definition.id;
             Debug.LogWarning("IAPCallbacks".IAP($"OnPurchaseFailed: {productId} | {failedOrder.FailureReason}"));
 
-            LogAnalyticsIAP.LogPurchaseFailure(productId, failedOrder.FailureReason.ToString());
+            IAPAnalytic.LogPurchaseFailure(productId, failedOrder.FailureReason.ToString());
         }
 
-        m_Manager.NotifyPurchaseFailed(failedOrder);
+        InAppPurchaseManager.NotifyPurchaseFailed(failedOrder);
     }
 
     public void OnPurchaseDeferred(DeferredOrder deferredOrder)
@@ -123,7 +119,7 @@ public class IAPCallbacks
 
     public void OnStoreDisconnected(StoreConnectionFailureDescription desc)
     {
-        m_Manager.IsConnected = false;
+        InAppPurchaseManager.IsConnected = false;
         Debug.LogError("IAPCallbacks".IAP($"OnStoreDisconnected: {desc.isRetryable} | {desc.message}"));
     }
 }

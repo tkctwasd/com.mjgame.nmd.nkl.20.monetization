@@ -64,11 +64,11 @@ public class AppOpenModule
         {
             if (!isLoading || !isLogEventLoading)
             {
-                FirebaseAnalyticManager.Instance.LogAd("show_app_open_ads", appOpenLocation);
+                AdAnalytic.LogAd("show_app_open_ads", appOpenLocation);
                 if (isLoading) isLogEventLoading = true;
             }
 
-            FirebaseAnalyticManager.Instance.LogAd("show_app_open_ads_success", appOpenLocation);
+            AdAnalytic.LogAd("show_app_open_ads_success", appOpenLocation);
 
             ApplovinManager.IsShowAds = true;
             MaxSdk.ShowAppOpenAd(appOpenId);
@@ -123,7 +123,7 @@ public class AppOpenModule
         Debug.Log("AppOpen".Ads($"Ad Clicked"));
         if (!string.IsNullOrEmpty(appOpenLocation))
         {
-            FirebaseAnalyticManager.Instance.LogAd("show_app_open_ads_click", appOpenLocation);
+            AdAnalytic.LogAd("show_app_open_ads_click", appOpenLocation);
         }
     }
 

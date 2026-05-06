@@ -34,7 +34,7 @@ public class IAPRevenueTracker
     {
         try
         {
-            LogAnalyticsIAP.LogPurchaseSuccess(product, price, currency, transactionId);
+            IAPAnalytic.LogPurchaseSuccess(product, price, currency, transactionId);
         }
         catch (Exception e)
         {
@@ -68,13 +68,13 @@ public class IAPRevenueTracker
         try
         {
             var p = new Dictionary<string, string>
-        {
-            { AFInAppEvents.REVENUE, price.ToString(System.Globalization.CultureInfo.InvariantCulture) },
-            { AFInAppEvents.CURRENCY, currency },
-            { AFInAppEvents.CONTENT_ID, product.definition.id },
-            { AFInAppEvents.QUANTITY, "1" },
-            { AFInAppEvents.ORDER_ID, transactionId }
-        };
+            {
+                { AFInAppEvents.REVENUE, price.ToString(System.Globalization.CultureInfo.InvariantCulture) },
+                { AFInAppEvents.CURRENCY, currency },
+                { AFInAppEvents.CONTENT_ID, product.definition.id },
+                { AFInAppEvents.QUANTITY, "1" },
+                { AFInAppEvents.ORDER_ID, transactionId }
+            };
             AppsFlyerSDK.AppsFlyer.sendEvent(AFInAppEvents.PURCHASE, p);
             Debug.Log("IAPRevenueTracker".IAP($"[Appsflyer] {product.definition.id}"));
         }

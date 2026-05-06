@@ -47,7 +47,7 @@ public class BannerModule
     {
         if (RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig).ShowBanner)
         {
-            FirebaseAnalyticManager.Instance.LogAd("show_banner_ads", "");
+            AdAnalytic.LogAd("show_banner_ads", "");
             MaxSdk.ShowBanner(bannerId);
         }
     }
@@ -69,7 +69,7 @@ public class BannerModule
 
     private void OnBannerAdClickedEvent(string adUnitId, AdInfo adInfo)
     {
-        FirebaseAnalyticManager.Instance.LogAd("show_banner_ads_click", "");
+        AdAnalytic.LogAd("show_banner_ads_click", "");
     }
 
     private void OnBannerAdExpandedEvent(string adUnitId, AdInfo adInfo) { }

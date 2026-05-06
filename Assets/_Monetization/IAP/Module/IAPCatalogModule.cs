@@ -6,20 +6,20 @@ using UnityEngine.Purchasing.Extension;
 
 public class IAPCatalogModule
 {
-    readonly IAPConstants m_ProductConfig;
+    readonly IAPProducts IAPProducts;
 
-    public IAPCatalogModule(IAPConstants productConfig)
+    public IAPCatalogModule(IAPProducts product)
     {
-        m_ProductConfig = productConfig;
+        IAPProducts = product;
     }
 
     public void BuildCatalog(ICatalogProvider catalogProvider)
     {
         var products = new List<ProductDefinition>();
 
-        if (m_ProductConfig != null && m_ProductConfig.products.Count > 0)
+        if (IAPProducts != null && IAPProducts.products.Count > 0)
         {
-            products.AddRange(m_ProductConfig.CreateProductDefinitions());
+            products.AddRange(IAPProducts.CreateProductDefinitions());
         }
         else
         {

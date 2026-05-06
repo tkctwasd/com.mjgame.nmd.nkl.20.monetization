@@ -5,10 +5,15 @@ using UnityEngine;
 using UnityEngine.Purchasing;
 
 
-[CreateAssetMenu(fileName = "IAPConstants", menuName = "IAP/IAP Constants")]
-public class IAPConstants : ScriptableObject
+[CreateAssetMenu(fileName = "IAPProducts", menuName = "IAP/IAP Products")]
+public class IAPProducts : ScriptableObject
 {
-    public List<IAPProduct> products = new List<IAPProduct>();
+    public List<IAPProduct> products = new List<IAPProduct>()
+    {
+            new IAPProduct("com.yourgame.money_small", ProductType.Consumable),
+            new IAPProduct("com.yourgame.remove_ads", ProductType.NonConsumable),
+            new IAPProduct("com.yourgame.monthly_vip", ProductType.Subscription)
+    };
 
     public IEnumerable<ProductDefinition> CreateProductDefinitions()
     {

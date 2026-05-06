@@ -9,7 +9,7 @@ public class IAPManager : MonoBehaviour
 {
     public static IAPManager Instance;
 
-    public IAPConstants IAPProductConfig;
+    public IAPProducts IAPProducts;
     IStoreService StoreService;
     IProductService ProductService;
     IPurchaseService PurchaseService;
@@ -30,7 +30,6 @@ public class IAPManager : MonoBehaviour
     void Awake()
     {
         Instance = this;
-        LoadConfigIfMissing();
         m_Callbacks = new IAPCallbacks(this);
         CreateServices();
         CreateModules();
@@ -46,28 +45,16 @@ public class IAPManager : MonoBehaviour
 
     void CreateModules()
     {
-        CatalogModule = new IAPCatalogModule(IAPProductConfig);
+        CatalogModule = new IAPCatalogModule(IAPProducts);
         PurchaseModule = new IAPPurchaseModule(
             ProductService,
             PurchaseService,
-            IAPProductConfig,
+            IAPProducts,
             () => IsConnected,
             () => IsProductsReady,
             () => IsPurchasesReady
         );
         RevenueTrackerModule = new IAPRevenueTracker();
-    }
-
-    void LoadConfigIfMissing()
-    {
-        if (IAPProductConfig == null)
-        {
-            IAPProductConfig = Resources.Load<IAPConstants>("IAPProductConfig");
-            if (IAPProductConfig != null)
-            {
-                Debug.Log("IAPManager".IAP("Loaded project-specific IAPProductConfig from Resources."));
-            }
-        }
     }
 
     void OnUnityServicesReady()

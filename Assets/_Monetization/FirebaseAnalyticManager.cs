@@ -30,46 +30,6 @@ public class FirebaseAnalyticManager : MonoBehaviour
         Debug.Log("FirebaseAnalytics".Ads(" is ready."));
     }
 
-    [Obsolete("Use AdAnalytic.LogAd instead")]
-    public void LogAd(string nameEvent, string placement, string error = "")
-    {
-        if (!isReady)
-        {
-            Debug.Log("FirebaseAnalytics".Ads("Firebase not ready, skip LogAd."));
-            return;
-        }
-
-        placement ??= "";
-        error ??= "";
-
-        try
-        {
-            if (string.IsNullOrEmpty(placement))
-            {
-                if (string.IsNullOrEmpty(error))
-                {
-                    FirebaseAnalytics.LogEvent(nameEvent, new Parameter("placement", "empty"));
-                    LogMessage.Log("placement empty", nameEvent);
-                }
-                else
-                {
-                    FirebaseAnalytics.LogEvent(nameEvent, new Parameter("error", error));
-                    LogMessage.Log($"error only: {error}", nameEvent);
-                }
-            }
-            else
-            {
-                FirebaseAnalytics.LogEvent(nameEvent,
-                    new Parameter("placement", placement),
-                    new Parameter("error", error));
-                LogMessage.Log($"{placement} {error}", nameEvent);
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"[Firebase LogAd ERROR] {e.GetType().Name}: {e.Message}\n{e.StackTrace}");
-        }
-    }
     public void LogEvent(string eventName, Parameter[] parameters)
     {
         if (!isReady)

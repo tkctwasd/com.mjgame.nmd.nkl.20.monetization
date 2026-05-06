@@ -45,7 +45,7 @@ public class MRECModule
         var adsConfig = RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig);
         if (adsConfig.ShowMREC)
         {
-            FirebaseAnalyticManager.Instance.LogAd("show_mrec_ads", "");
+            AdAnalytic.LogAd("show_mrec_ads", "");
             Debug.Log("MREC".Ads("Show"));
             ApplovinManager.ActiveMREC = true;
             MaxSdk.ShowMRec(mrecId);
@@ -94,7 +94,7 @@ public class MRECModule
 
     private void OnMRECAdClickedEvent(string adUnitId, AdInfo adInfo)
     {
-        FirebaseAnalyticManager.Instance.LogAd("show_mrec_ads_click", "");
+        AdAnalytic.LogAd("show_mrec_ads_click", "");
     }
 
     private void OnMRECAdExpandedEvent(string adUnitId, AdInfo adInfo) { }

@@ -67,12 +67,12 @@ public class InterstitialModule
     public void ShowInterstitial(string location, Action callBack)
     {
         interLocation = location;
-        FirebaseAnalyticManager.Instance.LogAd("show_interstitial_ads", location);
+        AdAnalytic.LogAd("show_interstitial_ads", location);
         ApplovinManager.IsCanShowAOABackGame = false;
 
         if (CanShowInterstitial())
         {
-            FirebaseAnalyticManager.Instance.LogAd("show_interstitial_success", location);
+            AdAnalytic.LogAd("show_interstitial_success", location);
             callBackInters = callBack;
             ApplovinManager.IsShowAds = true;
             MaxSdk.ShowInterstitial(intersId);
@@ -122,7 +122,7 @@ public class InterstitialModule
         Debug.Log("Interstitial".Ads($"Ad Click"));
         if (!string.IsNullOrEmpty(interLocation))
         {
-            FirebaseAnalyticManager.Instance.LogAd("show_interstitial_click", interLocation);
+            AdAnalytic.LogAd("show_interstitial_click", interLocation);
         }
     }
 
