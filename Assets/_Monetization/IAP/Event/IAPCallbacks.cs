@@ -1,8 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-//  IAPCallbacks.cs
-//  Tách toàn bộ event handler ra khỏi IAPManager để dễ đọc và bảo trì.
-//  Pattern theo IAPPaywallCallbacks của Unity IAP v5 sample chính thức.
-// ─────────────────────────────────────────────────────────────────────────────
 #if USE_IAP
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,7 +12,6 @@ public class IAPCallbacks
         m_Manager = manager;
     }
 
-    // ── Product ──────────────────────────────────────────────────────────────
 
     public void OnProductsFetched(List<Product> products)
     {
@@ -34,7 +28,6 @@ public class IAPCallbacks
         Debug.LogError("IAPCallbacks".IAP($"OnProductsFetchFailed: {failure.FailureReason}"));
     }
 
-    // ── Purchase ─────────────────────────────────────────────────────────────
 
     public void OnPurchasesFetched(Orders existingOrders)
     {
@@ -55,6 +48,7 @@ public class IAPCallbacks
     /// Gọi khi có purchase MỚI (người dùng vừa mua) hoặc pending chưa confirm.
     /// Thay thế ProcessPurchase của IAP v4.
     /// </summary>
+
     public void OnPurchasePending(PendingOrder pendingOrder)
     {
         foreach (var item in pendingOrder.CartOrdered.Items())
@@ -62,8 +56,8 @@ public class IAPCallbacks
             var product = item.Product;
             Debug.Log("IAPCallbacks".IAP($"OnPurchasePending: {product.definition.id}"));
 
-            // Track analytics
-            m_Manager.LogPurchaseAnalytics(pendingOrder);
+            // Track purchase attempt only. Success event is sent after confirmation.
+            LogAnalyticsIAP.LogPurchaseAttempt(product.definition.id);
         }
 
         // Confirm ngay (auto-confirm).
@@ -86,6 +80,8 @@ public class IAPCallbacks
 
     void OnConfirmed(ConfirmedOrder order)
     {
+        m_Manager.SendIAPRevenueTracker(order);
+
         foreach (var item in order.CartOrdered.Items())
         {
             var productId = item.Product.definition.id;
@@ -111,7 +107,7 @@ public class IAPCallbacks
             var productId = item.Product.definition.id;
             Debug.LogWarning("IAPCallbacks".IAP($"OnPurchaseFailed: {productId} | {failedOrder.FailureReason}"));
 
-            FirebaseAnalyticManager.Instance?.LogAd("iap_purchase_failed", productId);
+            LogAnalyticsIAP.LogPurchaseFailure(productId, failedOrder.FailureReason.ToString());
         }
 
         m_Manager.NotifyPurchaseFailed(failedOrder);
@@ -124,8 +120,6 @@ public class IAPCallbacks
             Debug.Log("IAPCallbacks".IAP($"OnPurchaseDeferred: {item.Product.definition.id}"));
         }
     }
-
-    // ── Store ─────────────────────────────────────────────────────────────────
 
     public void OnStoreDisconnected(StoreConnectionFailureDescription desc)
     {

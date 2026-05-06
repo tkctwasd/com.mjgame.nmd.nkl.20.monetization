@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-//  RemoveAdsButton.cs
-//  Ví dụ kế thừa IAPButton cho nút Remove Ads.
-// ─────────────────────────────────────────────────────────────────────────────
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Purchasing;
@@ -12,7 +8,7 @@ public class RemoveAdsButton : IAPButton
     {
         // Gán productId từ project-specific config if available.
         if (IAPManager.Instance != null)
-            ProductId = IAPManager.Instance.RemoveAdsProductId;
+            ProductId = IAPManager.Instance.PurchaseModule.RemoveAdsProductId;
 
         yield return base.Start();
 
@@ -41,7 +37,7 @@ public class RemoveAdsButton : IAPButton
 
     void RefreshVisibility()
     {
-        bool purchased = IAPManager.Instance != null && IAPManager.Instance.IsRemoveAdsPurchased();
+        bool purchased = IAPManager.Instance != null && IAPManager.Instance.PurchaseModule.IsRemoveAdsPurchased();
         gameObject.SetActive(!purchased);
     }
 

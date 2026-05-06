@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-//  IAPService.cs
-//  Khởi tạo Unity Services với environment "production".
-// ─────────────────────────────────────────────────────────────────────────────
 #if USE_IAP
 using System;
 using Unity.Services.Core;

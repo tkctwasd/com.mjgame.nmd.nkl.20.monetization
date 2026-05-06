@@ -18,8 +18,6 @@ public static class LogMessage
         return $"<b><color=#9D00FF>[IAP]</color> <color=#FF00AF>[{module}]</color></b> {message}";
     }
 
-
-
     public static string Message(this string component, string message = "")
     {
         return $"<color=yellow><b>[{component}]</b></color> {message}";

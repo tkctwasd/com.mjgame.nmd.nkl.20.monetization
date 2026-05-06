@@ -1,8 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-//  IAPButton.cs
-//  Base component gán vào Button trong UI.
-//  Kế thừa class này để xử lý logic riêng cho từng loại sản phẩm.
-// ─────────────────────────────────────────────────────────────────────────────
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -56,7 +51,6 @@ public class IAPButton : MonoBehaviour
         }
     }
 
-    // ── Event handlers ───────────────────────────────────────────────────────
 
     void OnProductsReady(System.Collections.Generic.List<UnityEngine.Purchasing.Product> products)
         => RefreshUI();
@@ -79,11 +73,9 @@ public class IAPButton : MonoBehaviour
         OnPurchaseFailed(ProductId);
     }
 
-    // ── UI ───────────────────────────────────────────────────────────────────
-
     protected virtual void RefreshUI()
     {
-        var product = IAPManager.Instance?.FindProduct(ProductId);
+        var product = IAPManager.Instance?.PurchaseModule.FindProduct(ProductId);
         if (product == null) return;
 
         if (titleText != null) titleText.text = product.metadata.localizedTitle;
@@ -99,7 +91,7 @@ public class IAPButton : MonoBehaviour
             return;
         }
         SetLoading(true);
-        IAPManager.Instance?.Purchase(ProductId);
+        IAPManager.Instance?.PurchaseModule?.Purchase(ProductId);
     }
 
     void SetLoading(bool isLoading)
@@ -108,7 +100,6 @@ public class IAPButton : MonoBehaviour
         if (loadingOverlay != null) loadingOverlay.SetActive(isLoading);
     }
 
-    // ── Overrideable ─────────────────────────────────────────────────────────
 
     /// <summary>Override để xử lý sau khi purchase confirmed và delivered.</summary>
     protected virtual void OnPurchaseSuccess(string productId, UnityEngine.Purchasing.ConfirmedOrder order)

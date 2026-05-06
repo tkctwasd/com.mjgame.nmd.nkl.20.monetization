@@ -30,6 +30,7 @@ public class FirebaseAnalyticManager : MonoBehaviour
         Debug.Log("FirebaseAnalytics".Ads(" is ready."));
     }
 
+    [Obsolete("Use AdAnalytic.LogAd instead")]
     public void LogAd(string nameEvent, string placement, string error = "")
     {
         if (!isReady)

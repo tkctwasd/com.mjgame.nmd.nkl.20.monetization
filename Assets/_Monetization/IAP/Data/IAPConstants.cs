@@ -1,31 +1,44 @@
-// ─────────────────────────────────────────────────────────────────────────────
-//  IAPConstants.cs
-//  ScriptableObject chứa tất cả Product ID — tương tự AdConstants.
-//  Tạo asset: Assets > Create > IAP > IAP Constants
-//
-//  Lưu ý: bộ core mới hỗ trợ project-specific config qua IAPProductConfig.
-//  Nếu bạn muốn giữ core chung và chỉ thay product IDs cho mỗi project,
-//  hãy tạo asset IAPProductConfig và gán nó vào IAPManager.
-// ─────────────────────────────────────────────────────────────────────────────
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Purchasing;
+
 
 [CreateAssetMenu(fileName = "IAPConstants", menuName = "IAP/IAP Constants")]
 public class IAPConstants : ScriptableObject
 {
-    [Header("Non-Consumable")]
-    [ColorLabel(1f, 0.65f, 0f)] public string RemoveAdsId = "com.yourcompany.game.removeads";
+    public List<IAPProduct> products = new List<IAPProduct>();
 
-    [Header("Consumable")]
-    [ColorLabel(0f, 0.65f, 1f)]
-    public List<string> ConsumableIds = new()
+    public IEnumerable<ProductDefinition> CreateProductDefinitions()
     {
-        "com.yourcompany.game.coins_small",
-    };
+        return products
+            .Where(entry => !string.IsNullOrWhiteSpace(entry.ProductId))
+            .Select(entry => new ProductDefinition(entry.ProductId, entry.ProductType));
+    }
 
-    [Header("Subscription")]
-    public List<string> SubscriptionIds = new()
+    public string RemoveAdsProductId => products.FirstOrDefault(entry => entry.RemoveAds)?.ProductId;
+}
+
+[Serializable]
+public class IAPProduct
+{
+    public string ProductId;
+    public ProductType ProductType;
+
+    public bool RemoveAds = false;
+
+    public string Title;
+
+    [TextArea(2, 4)]
+    public string Description;
+    public string LocalizedPrice;
+
+    public IAPProduct() { }
+
+    public IAPProduct(string productId, ProductType productType)
     {
-        "com.yourcompany.game.weekly",
-    };
+        ProductId = productId;
+        ProductType = productType;
+    }
 }
