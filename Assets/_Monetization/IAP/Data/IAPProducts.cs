@@ -10,9 +10,22 @@ public class IAPProducts : ScriptableObject
 {
     public List<IAPProduct> products = new List<IAPProduct>()
     {
-            new IAPProduct("com.yourgame.money_small", ProductType.Consumable),
-            new IAPProduct("com.yourgame.remove_ads", ProductType.NonConsumable),
+            new IAPProduct("com.yourgame.money_small", ProductType.Consumable)
+            {
+                Title = "Small Money Pack",
+                Description = "A small bundle of money for quick upgrades.",
+            },
+            new IAPProduct("com.yourgame.remove_ads", ProductType.NonConsumable)
+            {
+                RemoveAds = true,
+                Title = "Remove Ads",
+                Description = "Permanently remove ads from the game.",
+            },
             new IAPProduct("com.yourgame.monthly_vip", ProductType.Subscription)
+            {
+                Title = "Monthly VIP",
+                Description = "Subscribe for VIP perks for 30 days.",
+            }
     };
 
     public IEnumerable<ProductDefinition> CreateProductDefinitions()

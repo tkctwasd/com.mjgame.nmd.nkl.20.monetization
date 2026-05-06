@@ -7,9 +7,9 @@ using UnityEngine.UI;
 public class IAPButton : MonoBehaviour
 {
     [Header("Product")]
-    public string ProductId;
+    [ColorLabel] public string ProductId;
+    [Space]
 
-    [Header("UI (optional)")]
     [SerializeField] protected TextMeshProUGUI titleText;
     [SerializeField] protected TextMeshProUGUI descriptionText;
     [SerializeField] protected TextMeshProUGUI priceText;
@@ -83,21 +83,28 @@ public class IAPButton : MonoBehaviour
         if (priceText != null) priceText.text = product.metadata.localizedPriceString;
     }
 
-    void OnClick()
+    public virtual void OnClick()
     {
         if (string.IsNullOrEmpty(ProductId))
         {
             Debug.LogWarning("[IAPButton] ProductId is empty!");
             return;
         }
+
+        IAPAnalytic.LogPurchaseBtnClick(ProductId);
         SetLoading(true);
         IAPManager.Instance?.PurchaseModule?.Purchase(ProductId);
     }
 
-    void SetLoading(bool isLoading)
+    public void SetLoadingState(bool isLoading)
     {
         if (button != null) button.interactable = !isLoading;
         if (loadingOverlay != null) loadingOverlay.SetActive(isLoading);
+    }
+
+    void SetLoading(bool isLoading)
+    {
+        SetLoadingState(isLoading);
     }
 
 

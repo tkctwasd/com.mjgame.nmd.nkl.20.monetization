@@ -5,8 +5,30 @@ using Firebase.Analytics;
 
 public static class IAPAnalytic
 {
+      public static void LogPurchaseBtnClick(string productId)
+      {
+            if (FirebaseAnalyticManager.Instance == null)
+            {
+                  Debug.LogWarning("[IAPAnalytic] Firebase not ready, skip LogPurchaseBtnClick.");
+                  return;
+            }
+
+            FirebaseAnalyticManager.Instance.LogEvent("iap_purchase_btn_click", new[]
+            {
+                  new Parameter("product_id", productId)
+            });
+
+            Debug.Log("IAPAnalytic".IAP($"LogPurchaseBtnClick: {productId}"));
+      }
+
       public static void LogPurchaseAttempt(string productId)
       {
+            if (FirebaseAnalyticManager.Instance == null)
+            {
+                  Debug.LogWarning("[IAPAnalytic] Firebase not ready, skip LogPurchaseAttempt.");
+                  return;
+            }
+
             FirebaseAnalyticManager.Instance.LogEvent("iap_purchase_attempt", new[]
             {
                   new Parameter("product_id", productId)

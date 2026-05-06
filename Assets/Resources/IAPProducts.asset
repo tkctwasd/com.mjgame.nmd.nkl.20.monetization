@@ -16,18 +16,18 @@ MonoBehaviour:
   - ProductId: com.yourgame.money_small
     ProductType: 0
     RemoveAds: 0
-    Title: 
-    Description: 
+    Title: Small Money Pack
+    Description: A small bundle of money for quick upgrades.
     LocalizedPrice: 
   - ProductId: com.yourgame.remove_ads
     ProductType: 1
-    RemoveAds: 0
-    Title: 
-    Description: 
+    RemoveAds: 1
+    Title: Remove Ads
+    Description: Permanently remove ads from the game.
     LocalizedPrice: 
   - ProductId: com.yourgame.monthly_vip
     ProductType: 2
     RemoveAds: 0
-    Title: 
-    Description: 
+    Title: Monthly VIP
+    Description: Subscribe for VIP perks for 30 days.
     LocalizedPrice: 
