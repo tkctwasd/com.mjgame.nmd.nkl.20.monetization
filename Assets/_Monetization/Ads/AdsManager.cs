@@ -89,8 +89,9 @@ public class AdsManager : MonoBehaviour
         {
             if (IsCloseFirstAOA && !IsShowAds)
             {
-                Debug.Log(AppOpenModule.CanShowAOA(false));
-                if (AppOpenModule != null && MaxSdk.IsInitialized() && AppOpenModule.CanShowAOA(false))
+                bool canshowAOA = AppOpenModule.CanShowAOA(true);
+                Debug.Log(canshowAOA);
+                if (AppOpenModule != null && MaxSdk.IsInitialized() && canshowAOA)
                 {
                     MRECModule.HideMREC(true);
                     BannerModule.HideBanner();

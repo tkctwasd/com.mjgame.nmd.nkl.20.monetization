@@ -30,7 +30,7 @@ public class AdAnalytic
                         new Parameter("placement", "empty")
                     };
 
-                    LogMessage.Log("placement empty", nameEvent);
+                    LogMessage.Ads("placement empty", nameEvent);
                 }
                 else
                 {
@@ -39,7 +39,7 @@ public class AdAnalytic
                         new Parameter("error", error)
                     };
 
-                    LogMessage.Log($"error only: {error}", nameEvent);
+                    LogMessage.Ads($"error only: {error}", nameEvent);
                 }
             }
             else
@@ -50,11 +50,10 @@ public class AdAnalytic
                     new Parameter("error", error)
                 };
 
-                LogMessage.Log($"{placement} {error}", nameEvent);
+                LogMessage.Ads($"{placement} {error}", nameEvent);
             }
 
             FirebaseAnalyticManager.Instance.LogEvent(nameEvent, parameters);
-            Debug.Log("LogAnalyticsAd".Ads($"LogAd: {nameEvent} | {placement} | {error}"));
         }
         catch (Exception e)
         {

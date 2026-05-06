@@ -27,7 +27,7 @@ public class FirebaseAnalyticManager : MonoBehaviour
     {
         isReady = true;
         FirebaseAnalytics.SetAnalyticsCollectionEnabled(true);
-        Debug.Log("FirebaseAnalytics".Ads(" is ready."));
+        Debug.Log("FirebaseAnalytics".Firebase(" is ready."));
     }
 
     public void LogEvent(string eventName, Parameter[] parameters)
@@ -41,7 +41,7 @@ public class FirebaseAnalyticManager : MonoBehaviour
         try
         {
             FirebaseAnalytics.LogEvent(eventName, parameters);
-            Debug.Log("FirebaseAnalytics".Ads($"LogEvent: {eventName} with {parameters.Length} params"));
+            Debug.Log("FirebaseAnalytics".Firebase($"LogEvent: {eventName} with {parameters.Length} params"));
         }
         catch (Exception e)
         {
@@ -76,7 +76,7 @@ public class LogEventParameter
     {
         if (FirebaseAnalyticManager.Instance == null)
         {
-            LogMessage.Log("FirebaseAnalyticManager.Instance is null, skip send.", "LogEventParameter");
+            LogMessage.Firebase("LogEventParameter", "FirebaseAnalyticManager.Instance is null, skip send.");
             return;
         }
         FirebaseAnalyticManager.Instance?.LogEvent(EventName, parameters.ToArray());

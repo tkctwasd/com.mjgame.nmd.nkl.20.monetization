@@ -23,7 +23,7 @@ public class IAPManager : MonoBehaviour
     public bool IsPurchasesReady { get; internal set; }
     public event Action<List<Product>> OnProductsReady;
     public event Action<Orders> OnPurchasesReady;
-    public event Action<string, ConfirmedOrder> OnProductDelivered; 
+    public event Action<string, ConfirmedOrder> OnProductDelivered;
     public event Action<FailedOrder> OnPurchaseFailedEvent;
     public event Action<bool> OnRestoreComplete;
 
@@ -31,12 +31,12 @@ public class IAPManager : MonoBehaviour
     {
         Instance = this;
         m_Callbacks = new IAPCallbacks(this);
-        CreateServices();
-        CreateModules();
     }
 
     void Start()
     {
+        CreateServices();
+        CreateModules();
         IAPService.Initialize(
             onSuccess: OnUnityServicesReady,
             onError: msg => Debug.LogError("IAPManager".IAP($"Unity Services failed: {msg}"))
@@ -57,7 +57,7 @@ public class IAPManager : MonoBehaviour
         RevenueTrackerModule = new IAPRevenueTracker();
     }
 
-    void OnUnityServicesReady()
+    async void OnUnityServicesReady()
     {
         BuildCatalog();
         ConnectToStore();

@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Purchasing;
 
-public class RemoveAdsButton : IAPButton
+public class RemoveAdsButton : IAPButtonUI
 {
     protected override IEnumerator Start()
     {

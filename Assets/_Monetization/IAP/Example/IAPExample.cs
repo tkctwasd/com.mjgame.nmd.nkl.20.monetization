@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PanelShop : UIPanel
+public class IAPExample : UIPanel
 {
       public Button btnClose;
 

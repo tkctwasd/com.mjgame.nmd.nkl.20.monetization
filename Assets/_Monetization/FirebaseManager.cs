@@ -8,8 +8,6 @@ public class FirebaseManager : MonoBehaviour
 {
     public static FirebaseManager Instance;
     public static event Action InitDone;
-
-    private float timeInit;
     internal bool IsInitialized = false;
 
     void Awake()
@@ -19,31 +17,31 @@ public class FirebaseManager : MonoBehaviour
 
     private IEnumerator Start()
     {
-        while (!IsInitialized && (timeInit < 60f))
+
+        var task = Firebase.FirebaseApp.CheckAndFixDependenciesAsync();
+
+        yield return new WaitUntil(() => task.IsCompleted);
+
+        try
         {
-            timeInit += 1f;
-            try
+            if (task.Result == Firebase.DependencyStatus.Available)
             {
-                Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
-                {
-                    Firebase.DependencyStatus dependencyStatus = task.Result;
-                    if (dependencyStatus == Firebase.DependencyStatus.Available)
-                    {
-                        Debug.Log("Firebase is ready!");
-                        IsInitialized = true;
-                        Firebase.FirebaseApp app = Firebase.FirebaseApp.DefaultInstance;
+                Firebase.FirebaseApp app = Firebase.FirebaseApp.DefaultInstance;
 
-                        InitDone?.Invoke();
-                    }
-                    else
-                    {
-                        Debug.Log("Could not resolve all Firebase dependencies: " + dependencyStatus);
-                    }
-                });
+                IsInitialized = true;
 
+                Debug.Log("FirebaseManager".Firebase("Firebase is ready!"));
+
+                InitDone?.Invoke();
             }
-            catch (System.Exception) { }
-            yield return new WaitForSeconds(1f);
+            else
+            {
+                Debug.LogError("FirebaseManager".Firebase($"Could not resolve all Firebase dependencies: {task.Result}"));
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("FirebaseManager".Firebase($"Init exception: {e.Message}"));
         }
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Button))]
-public class IAPButton : MonoBehaviour
+public class IAPButtonUI : MonoBehaviour
 {
     [Header("Product")]
     [ColorLabel] public string ProductId;

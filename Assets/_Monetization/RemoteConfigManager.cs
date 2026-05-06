@@ -48,15 +48,15 @@ public class RemoteConfigManager : MonoBehaviour
     {
         if (fetchTask.IsCanceled)
         {
-            Debug.Log("Fetch canceled.".Message());
+            Debug.Log("FirebaseRemoteConfig".Firebase("Fetch canceled."));
         }
         else if (fetchTask.IsFaulted)
         {
-            Debug.Log("Fetch encountered an error.".Message());
+            Debug.Log("FirebaseRemoteConfig".Firebase("Fetch encountered an error."));
         }
         else if (fetchTask.IsCompleted)
         {
-            Debug.Log("Fetch completed successfully!".Message());
+            Debug.Log("FirebaseRemoteConfig".Firebase("Fetch completed successfully!"));
         }
 
         var info = FirebaseRemoteConfig.DefaultInstance.Info;
@@ -64,22 +64,22 @@ public class RemoteConfigManager : MonoBehaviour
         {
             case LastFetchStatus.Success:
                 FirebaseRemoteConfig.DefaultInstance.ActivateAsync();
-                Debug.Log(String.Format("Remote data loaded and ready (last fetch time {0}).",
-                                       info.FetchTime));
+                Debug.Log("FirebaseRemoteConfig".Firebase(String.Format("Remote data loaded and ready (last fetch time {0}).",
+                                       info.FetchTime)));
                 break;
             case LastFetchStatus.Failure:
                 switch (info.LastFetchFailureReason)
                 {
                     case FetchFailureReason.Error:
-                        Debug.Log("Fetch failed for unknown reason");
+                        Debug.Log("FirebaseRemoteConfig".Firebase("Fetch failed for unknown reason"));
                         break;
                     case FetchFailureReason.Throttled:
-                        Debug.Log("Fetch throttled until " + info.ThrottledEndTime);
+                        Debug.Log("FirebaseRemoteConfig".Firebase("Fetch throttled until " + info.ThrottledEndTime));
                         break;
                 }
                 break;
             case LastFetchStatus.Pending:
-                Debug.Log("Latest Fetch call still pending.");
+                Debug.Log("FirebaseRemoteConfig".Firebase("Latest Fetch call still pending."));
                 break;
         }
 #if UNITY_ANDROID || UNITY_IOS
@@ -113,7 +113,7 @@ public class RemoteConfigManager : MonoBehaviour
         {
             Debug.LogError("Error parsing or comparing RemoteConfig: " + ex.Message);
         }
-        Debug.Log("FirebaseRemoteConfig".Ads("Load Local Data Json Complete"));
+        Debug.Log("FirebaseRemoteConfig".Firebase("Load Local Data Json Complete"));
     }
 
     void LocalRemoteConfigAndCompare()
@@ -140,10 +140,10 @@ public class RemoteConfigManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError("Error parsing or comparing RemoteConfig: " + ex.Message);
+            Debug.LogError("FirebaseRemoteConfig".Firebase("Error parsing or comparing RemoteConfig: " + ex.Message));
         }
         IsRemoteConfigComplete = true;
-        Debug.Log("FirebaseRemoteConfig".Ads("Load Complete"));
+        Debug.Log("FirebaseRemoteConfig".Firebase("Load Complete"));
     }
     string RemoveAllWhitespace(string input)
     {
