@@ -26,6 +26,7 @@ public class IAPCallbacks
     public void OnProductsFetchFailed(ProductFetchFailed failure)
     {
         Debug.LogError("IAPCallbacks".IAP($"OnProductsFetchFailed: {failure.FailureReason}"));
+        InAppPurchaseManager.NotifyProductsFetchFailed();
     }
 
 

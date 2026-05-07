@@ -111,19 +111,10 @@ public class IAPExample : UIPanel
 
       void SetLoading(bool loading, string productId)
       {
-            if (smallPackButton != null && smallPackButton.ProductId == productId)
-                  smallPackButton.SetLoadingState(loading);
-
-            if (removeAdsPackButton != null && removeAdsPackButton.ProductId == productId)
-                  removeAdsPackButton.SetLoadingState(loading);
-
-            if (vipPackButton != null && vipPackButton.ProductId == productId)
-                  vipPackButton.SetLoadingState(loading);
       }
 }
 
 #else
 using UnityEngine;
 public class PanelShop : MonoBehaviour { }
-public class IAPPackButton : MonoBehaviour { }
 #endif

@@ -1,6 +1,7 @@
-using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Purchasing;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Button))]
@@ -14,109 +15,117 @@ public class IAPButtonUI : MonoBehaviour
     [SerializeField] protected TextMeshProUGUI descriptionText;
     [SerializeField] protected TextMeshProUGUI priceText;
     [SerializeField] private GameObject loadingOverlay;
-
     protected Button button;
 
     protected virtual void Awake()
     {
         button = GetComponent<Button>();
         button.onClick.AddListener(OnClick);
+        SetButtonLoading(true);
     }
 
-    protected virtual IEnumerator Start()
+    protected virtual void Start()
     {
-        // Đợi products sẵn sàng rồi mới điền UI
-        yield return new WaitUntil(() =>
-            IAPManager.Instance != null && IAPManager.Instance.IsProductsReady);
-        RefreshUI();
+        if (IAPManager.Instance != null && IAPManager.Instance.IsProductsReady)
+            RefreshUI();
     }
 
     protected virtual void OnEnable()
     {
-        if (IAPManager.Instance != null)
-        {
-            IAPManager.Instance.OnProductsReady += OnProductsReady;
-            IAPManager.Instance.OnProductDelivered += OnProductDelivered;
-            IAPManager.Instance.OnPurchaseFailedEvent += OnPurchaseFailed;
-        }
+        if (IAPManager.Instance == null) return;
+        IAPManager.Instance.OnProductsReady += OnProductsReady;
+        IAPManager.Instance.OnProductsFetchFailed += OnProductsFetchFailed;
+        IAPManager.Instance.OnProductDelivered += OnProductDelivered;
+        IAPManager.Instance.OnPurchaseFailedEvent += OnPurchaseFailed;
     }
 
     protected virtual void OnDisable()
     {
-        if (IAPManager.Instance != null)
-        {
-            IAPManager.Instance.OnProductsReady -= OnProductsReady;
-            IAPManager.Instance.OnProductDelivered -= OnProductDelivered;
-            IAPManager.Instance.OnPurchaseFailedEvent -= OnPurchaseFailed;
-        }
+        if (IAPManager.Instance == null) return;
+        IAPManager.Instance.OnProductsReady -= OnProductsReady;
+        IAPManager.Instance.OnProductsFetchFailed -= OnProductsFetchFailed;
+        IAPManager.Instance.OnProductDelivered -= OnProductDelivered;
+        IAPManager.Instance.OnPurchaseFailedEvent -= OnPurchaseFailed;
     }
 
+    void OnProductsReady(List<Product> products) => RefreshUI();
 
-    void OnProductsReady(System.Collections.Generic.List<UnityEngine.Purchasing.Product> products)
-        => RefreshUI();
+    void OnProductsFetchFailed()
+    {
+        Debug.LogWarning("IAPButtonUI".IAP($"Products fetch failed. Button [{ProductId}] unavailable."));
+    }
 
-    void OnProductDelivered(string productId, UnityEngine.Purchasing.ConfirmedOrder order)
+    void OnProductDelivered(string productId, ConfirmedOrder order)
     {
         if (productId != ProductId) return;
-        SetLoading(false);
+        EndPurchaseFlow();
         OnPurchaseSuccess(productId, order);
     }
 
-    void OnPurchaseFailed(UnityEngine.Purchasing.FailedOrder failed)
+    void OnPurchaseFailed(FailedOrder failed)
     {
         bool mine = false;
         foreach (var item in failed.CartOrdered.Items())
             if (item.Product.definition.id == ProductId) { mine = true; break; }
         if (!mine) return;
 
-        SetLoading(false);
+        EndPurchaseFlow();
         OnPurchaseFailed(ProductId);
     }
-
     protected virtual void RefreshUI()
     {
         var product = IAPManager.Instance?.PurchaseModule.FindProduct(ProductId);
-        if (product == null) return;
+        if (product == null)
+        {
+            SetButtonLoading(true);
+            return;
+        }
 
-        if (titleText != null) titleText.text = product.metadata.localizedTitle;
+        if (titleText != null)       titleText.text       = product.metadata.localizedTitle;
         if (descriptionText != null) descriptionText.text = product.metadata.localizedDescription;
-        if (priceText != null) priceText.text = product.metadata.localizedPriceString;
+        if (priceText != null)       priceText.text       = product.metadata.localizedPriceString;
+
+        SetButtonLoading(false);
     }
 
     public virtual void OnClick()
     {
         if (string.IsNullOrEmpty(ProductId))
         {
-            Debug.LogWarning("[IAPButton] ProductId is empty!");
+            Debug.LogWarning("[IAPButtonUI] ProductId is empty!");
             return;
         }
 
         IAPAnalytic.LogPurchaseBtnClick(ProductId);
-        SetLoading(true);
+        BeginPurchaseFlow();
         IAPManager.Instance?.PurchaseModule?.Purchase(ProductId);
     }
 
-    public void SetLoadingState(bool isLoading)
+    void BeginPurchaseFlow()
     {
-        if (button != null) button.interactable = !isLoading;
+        SetButtonLoading(true);
+        if (UIManager.Instance != null) UIManager.Instance.ShowPanel<PanelOverlay>();
+    }
+
+    void EndPurchaseFlow()
+    {
+        SetButtonLoading(false);
+        if (UIManager.Instance != null) UIManager.Instance.HidePanel<PanelOverlay>();
+    }
+
+    public void SetButtonLoading(bool isLoading)
+    {
+        if (button != null)         button.interactable = !isLoading;
         if (loadingOverlay != null) loadingOverlay.SetActive(isLoading);
     }
 
-    void SetLoading(bool isLoading)
+    protected virtual void OnPurchaseSuccess(string productId, ConfirmedOrder order)
     {
-        SetLoadingState(isLoading);
+        Debug.Log("IAPButtonUI".IAP($"Purchase success: {productId}"));
     }
 
-
-    /// <summary>Override để xử lý sau khi purchase confirmed và delivered.</summary>
-    protected virtual void OnPurchaseSuccess(string productId, UnityEngine.Purchasing.ConfirmedOrder order)
-    {
-        Debug.Log("IAPButton".IAP($"Purchase success: {productId}"));
-    }
-
-    /// <summary>Override để xử lý khi mua thất bại.</summary>
     protected virtual void OnPurchaseFailed(string productId)
     {
-        Debug.LogWarning("IAPButton".IAP($"Purchase failed: {productId}"));
+        Debug.LogWarning("IAPButtonUI".IAP($"Purchase failed: {productId}"));
     }
 }

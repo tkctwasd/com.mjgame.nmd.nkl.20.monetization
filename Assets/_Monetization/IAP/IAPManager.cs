@@ -22,6 +22,7 @@ public class IAPManager : MonoBehaviour
     public bool IsProductsReady { get; internal set; }
     public bool IsPurchasesReady { get; internal set; }
     public event Action<List<Product>> OnProductsReady;
+    public event Action OnProductsFetchFailed;
     public event Action<Orders> OnPurchasesReady;
     public event Action<string, ConfirmedOrder> OnProductDelivered;
     public event Action<FailedOrder> OnPurchaseFailedEvent;
@@ -112,6 +113,11 @@ public class IAPManager : MonoBehaviour
         OnProductsReady?.Invoke(products);
     }
 
+    internal void NotifyProductsFetchFailed()
+    {
+        OnProductsFetchFailed?.Invoke();
+    }
+
     internal void NotifyPurchasesReady(Orders orders)
     {
         OnPurchasesReady?.Invoke(orders);
@@ -167,6 +173,7 @@ public class IAPManager : MonoBehaviour
     public bool IsPurchasesReady => false;
 
     public event Action<List<Product>>              OnProductsReady;
+    public event Action                             OnProductsFetchFailed;
     public event Action<Orders>                     OnPurchasesReady;
     public event Action<string, ConfirmedOrder>     OnProductDelivered;
     public event Action<FailedOrder>                OnPurchaseFailedEvent;
