@@ -11,7 +11,7 @@ using UnityEngine.Purchasing;
 /// Editor window để test toàn bộ IAP flow trong Editor Play Mode và trên device.
 /// Menu: Tools/Monetization/IAP Test Window
 /// </summary>
-public class IAPTestWindow : EditorWindow
+public class IAPTestEditor : EditorWindow
 {
     // ── Colors ───────────────────────────────────────────────────────────────
     static readonly Color ColPass = new(0.35f, 0.85f, 0.35f);
@@ -50,7 +50,7 @@ public class IAPTestWindow : EditorWindow
 
     // ── Open ─────────────────────────────────────────────────────────────────
     [MenuItem("Tools/IAP/IAP Test")]
-    public static void Open() => GetWindow<IAPTestWindow>("IAP Tester");
+    public static void Open() => GetWindow<IAPTestEditor>("IAP Tester");
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
     void OnEnable()
