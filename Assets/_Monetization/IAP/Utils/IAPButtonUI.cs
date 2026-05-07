@@ -81,9 +81,9 @@ public class IAPButtonUI : MonoBehaviour
             return;
         }
 
-        if (titleText != null)       titleText.text       = product.metadata.localizedTitle;
+        if (titleText != null) titleText.text = product.metadata.localizedTitle;
         if (descriptionText != null) descriptionText.text = product.metadata.localizedDescription;
-        if (priceText != null)       priceText.text       = product.metadata.localizedPriceString;
+        if (priceText != null) priceText.text = product.metadata.localizedPriceString;
 
         SetButtonLoading(false);
     }
@@ -115,7 +115,7 @@ public class IAPButtonUI : MonoBehaviour
 
     public void SetButtonLoading(bool isLoading)
     {
-        if (button != null)         button.interactable = !isLoading;
+        if (button != null) button.interactable = !isLoading;
         if (loadingOverlay != null) loadingOverlay.SetActive(isLoading);
     }
 
