@@ -11,7 +11,7 @@ public static class IAPTestPacksEditor
 {
     const string Prefix = "com.yourgame.test";
 
-    [MenuItem("Tools/IAP/Fill Test Packs")]
+    [MenuItem("Tools/IAP/Test Packs/Product")]
     static void FillTestPacks()
     {
         var asset = LoadProductsAsset();

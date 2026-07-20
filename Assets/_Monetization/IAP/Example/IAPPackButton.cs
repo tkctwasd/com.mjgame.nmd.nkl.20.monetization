@@ -56,7 +56,8 @@ public class IAPPackButton : IAPButtonUI
         // Local trước: đúng ngay lúc mở app và cả khi offline.
         // Store chỉ dùng để bù cho máy mới cài lại, lúc local chưa có gì.
         bool owned = MonetizationEntitlements.IsOwned(ProductId)
-                     || (IAPManager.Instance != null
+                     || (!MonetizationEntitlements.TrustLocalOnly
+                         && IAPManager.Instance != null
                          && IAPManager.Instance.PurchaseModule != null
                          && IAPManager.Instance.PurchaseModule.IsPurchased(ProductId));
 

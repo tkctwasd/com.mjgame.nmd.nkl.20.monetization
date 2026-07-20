@@ -156,8 +156,14 @@ public class MonetizationEntitlements : MonoBehaviour
     {
         foreach (var reward in rewards)
         {
-            if (reward.RewardType == IAPRewardType.Subscription && reward.SubscriptionDays > 0)
-                return DateTime.UtcNow.AddDays(reward.SubscriptionDays);
+            if (reward.RewardType != IAPRewardType.Subscription || reward.SubscriptionDays <= 0)
+                continue;
+
+            // Rút ngắn hạn khi đang test, để không phải chờ hết ngày thật.
+            if (TestSubscriptionMinutes > 0f)
+                return DateTime.UtcNow.AddMinutes(TestSubscriptionMinutes);
+
+            return DateTime.UtcNow.AddDays(reward.SubscriptionDays);
         }
 
         return null; // vĩnh viễn
@@ -266,6 +272,41 @@ public class MonetizationEntitlements : MonoBehaviour
     #endregion
 
     #region Debug
+
+    const string KeyTestSubMinutes = "test_sub_minutes";
+
+    /// <summary>
+    /// Ép mọi subscription hết hạn sau X phút thay vì SubscriptionDays.
+    /// 0 = tắt, dùng số ngày thật khai trong IAPProducts.
+    ///
+    /// CHỈ rút ngắn hạn phía client. Gói trên store vẫn là weekly và store vẫn coi là đang active,
+    /// nên đây là để test logic hết hạn của game, không phải test luồng gia hạn của store.
+    /// </summary>
+    public static float TestSubscriptionMinutes
+    {
+        get
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            return PlayerPrefs.GetFloat(KeyTestSubMinutes, 0f);
+#else
+            return 0f; // không bao giờ bật ở bản release
+#endif
+        }
+        set
+        {
+            PlayerPrefs.SetFloat(KeyTestSubMinutes, Mathf.Max(0f, value));
+            PlayerPrefs.Save();
+            Debug.Log("Entitlements".IAP(value > 0f
+                ? $"<color=orange>TEST: subscription hết hạn sau {value} phút.</color>"
+                : "<color=orange>TEST: subscription dùng lại số ngày thật.</color>"));
+        }
+    }
+
+    /// <summary>
+    /// Khi đang test rút ngắn hạn thì chỉ tin dữ liệu local, bỏ qua store —
+    /// vì store vẫn báo sub còn active nên nút sẽ không bao giờ mở lại.
+    /// </summary>
+    public static bool TrustLocalOnly => TestSubscriptionMinutes > 0f;
 
     /// <summary>Xoá sạch quyền lợi + số dư. Dùng khi test lại từ đầu.</summary>
     public static void ResetForTesting()
