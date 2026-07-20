@@ -18,7 +18,7 @@ public static class IAPTestDurationEditor
     [MenuItem(Menu + "1 phút", true)]
     static bool OneMinuteCheck() => Check(1f);
 
-    [MenuItem(Menu + "Tắt (dùng SubscriptionDays thật)", true)]
+    [MenuItem(Menu + "Off", true)]
     static bool OffCheck() => Check(0f);
 
     static void Set(float minutes)

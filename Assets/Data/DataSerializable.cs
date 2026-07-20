@@ -8,6 +8,7 @@ public class DataGamePlay
 {
     public double Money;
     public int Gem;
+    public int Shield;
 
     public void AddMoney(double money)
     {
@@ -16,6 +17,10 @@ public class DataGamePlay
     public void AddGem(int gem)
     {
         Gem += gem;
+    }
+    public void AddShield(int shield)
+    {
+        Shield += shield;
     }
 
 }
@@ -28,10 +33,8 @@ public class DataMonetization
     public bool IsRemoveAdsPurchased;
 
     public long RemoveAdsExpiryTicks;
-    public double Money;
-    public int Gem;
-    public int Shield;
 
+    // Tiền tệ nằm ở DataGamePlay. Ở đây chỉ giữ quyền lợi và sổ giao dịch.
     public List<string> GrantedTransactionIds = new();
     public List<OwnedProduct> OwnedProducts = new();
 

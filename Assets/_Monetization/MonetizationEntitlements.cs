@@ -134,7 +134,7 @@ public class MonetizationEntitlements : MonoBehaviour
 
         Debug.Log("Entitlements".IAP(
             $"<color=green>Cấp thưởng '{productId}'</color> | tx={transactionId} | " +
-            $"Money={data.Money} Gem={data.Gem} Shield={data.Shield} RemoveAds={data.HasRemoveAds}"));
+            $"Money={Money} Gem={Gem} Shield={Shield} RemoveAds={data.HasRemoveAds}"));
 
         OnChanged?.Invoke();
     }
@@ -171,18 +171,21 @@ public class MonetizationEntitlements : MonoBehaviour
 
     static void Apply(DataMonetization data, IAPReward reward, DateTime? expiry)
     {
+        // Tiền tệ đổ thẳng vào ví game (DataGamePlay), không giữ bản sao bên monetization.
+        var wallet = Wallet;
+
         switch (reward.RewardType)
         {
             case IAPRewardType.Money:
-                data.Money += reward.Money;
+                if (wallet != null) wallet.AddMoney(reward.Money);
                 break;
 
             case IAPRewardType.Gem:
-                data.Gem += reward.Gem;
+                if (wallet != null) wallet.AddGem(reward.Gem);
                 break;
 
             case IAPRewardType.Shield:
-                data.Shield += reward.ShieldCount;
+                if (wallet != null) wallet.AddShield(reward.ShieldCount);
                 break;
 
             case IAPRewardType.RemoveAds:
@@ -214,6 +217,10 @@ public class MonetizationEntitlements : MonoBehaviour
 
     static DataMonetization Data =>
         DataSave.Instance != null ? DataSave.Instance.DataMonetization : null;
+
+    /// <summary>Ví thật của game. Reward tiền tệ cộng thẳng vào đây.</summary>
+    static DataGamePlay Wallet =>
+        DataSave.Instance != null ? DataSave.Instance.DataGamePlay : null;
 
     static IAPProducts Products =>
         IAPManager.Instance != null ? IAPManager.Instance.IAPProducts : null;
@@ -247,9 +254,9 @@ public class MonetizationEntitlements : MonoBehaviour
         return data != null ? data.GetExpiry(productId) : null;
     }
 
-    public static double Money => Data != null ? Data.Money : 0;
-    public static int Gem => Data != null ? Data.Gem : 0;
-    public static int Shield => Data != null ? Data.Shield : 0;
+    public static double Money => Wallet != null ? Wallet.Money : 0;
+    public static int Gem => Wallet != null ? Wallet.Gem : 0;
+    public static int Shield => Wallet != null ? Wallet.Shield : 0;
 
     /// <summary>Hạn remove-ads để hiển thị. null = vĩnh viễn hoặc chưa mua.</summary>
     public static DateTime? RemoveAdsExpiry
