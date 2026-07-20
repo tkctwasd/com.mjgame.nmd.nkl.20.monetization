@@ -115,9 +115,4 @@ public class UIManager : Singleton<UIManager>
         return false;
     }
 
-      internal void ClosePanel(IAPExample panelShop)
-      {
-            throw new NotImplementedException();
-      }
-
 }

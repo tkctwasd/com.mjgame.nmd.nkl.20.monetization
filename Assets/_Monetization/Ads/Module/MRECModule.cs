@@ -39,11 +39,20 @@ public class MRECModule
         MaxSdk.CreateMRec(mrecId, adViewConfiguration);
     }
 
+    public bool CanShowMREC()
+    {
+        if (ApplovinManager.IsRemoveAdsPurchased)
+            return false;
+
+        var config = RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig);
+        return config.ShowMREC;
+    }
 
     public void ShowMREC()
     {
         var adsConfig = RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig);
-        if (adsConfig.ShowMREC)
+
+        if (CanShowMREC())
         {
             AdAnalytic.LogAd("show_mrec_ads", "");
             Debug.Log("MREC".Ads("Show"));
@@ -61,7 +70,7 @@ public class MRECModule
     public void ResumeMREC()
     {
         var adsConfig = RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig);
-        if (ApplovinManager.ActiveMREC && adsConfig.ShowMREC)
+        if (ApplovinManager.ActiveMREC && CanShowMREC())
         {
             Debug.Log("MREC".Ads("Resume"));
             MaxSdk.ShowMRec(mrecId);

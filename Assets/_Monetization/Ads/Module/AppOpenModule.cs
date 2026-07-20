@@ -37,6 +37,8 @@ public class AppOpenModule
 
     public bool CanShowAOA(bool isLoading)
     {
+        if (ApplovinManager.IsRemoveAdsPurchased) return false;
+
         var config = RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig);
         if (config == null || !config.ShowAppOpen) return false;
 

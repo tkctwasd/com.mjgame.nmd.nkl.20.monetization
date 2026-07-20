@@ -47,11 +47,12 @@ public class IAPRevenueTracker
 #if USE_ADJUST
         try
         {
-            var token = AdjustManager.Instance?.GetTokenAdjust();
+            var token = "ba36o4yrlp8g";
             if (string.IsNullOrEmpty(token)) return;
             var adjustEvent = new AdjustSdk.AdjustEvent(token);
             adjustEvent.SetRevenue(price, currency);
-            // adjustEvent.AddCallbackParameter("transaction_id", transactionId);
+            adjustEvent.AddCallbackParameter("transaction_id", transactionId);
+            adjustEvent.AddCallbackParameter("product_id", product.definition.id);
             AdjustSdk.Adjust.TrackEvent(adjustEvent);
             Debug.Log("IAPRevenueTracker".IAP($"[Adjust] {product.definition.id}"));
         }

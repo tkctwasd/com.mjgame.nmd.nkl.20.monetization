@@ -49,6 +49,9 @@ public class InterstitialModule
 
     public bool CanShowInterstitial()
     {
+        if (ApplovinManager.IsRemoveAdsPurchased)
+            return false;
+
         var config = RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig);
         if (!config.ShowInterstitial)
             return false;

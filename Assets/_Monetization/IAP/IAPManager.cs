@@ -142,6 +142,15 @@ public class IAPManager : MonoBehaviour
         PurchaseModule?.ConfirmPurchase(pendingOrder);
     }
 
+    public void RestorePurchases(Action<bool> callback = null)
+    {
+        PurchaseModule?.RestorePurchases(success =>
+        {
+            callback?.Invoke(success);
+            OnRestoreComplete?.Invoke(success);
+        });
+    }
+
     internal void FetchExistingPurchases()
     {
         PurchaseModule?.FetchExistingPurchases();
@@ -163,10 +172,10 @@ using UnityEngine.Purchasing;
 public class IAPManager : MonoBehaviour
 {
     public static IAPManager Instance;
-    public IAPProductConfig IAPProductConfig;
+    public IAPProducts IAPProducts;
     public IAPPurchaseModule PurchaseModule { get; private set; }
 
-    public string RemoveAdsProductId => IAPProductConfig?.RemoveAdsProductId;
+    public string RemoveAdsProductId => IAPProducts?.RemoveAdsProductId;
 
     public bool IsConnected      => false;
     public bool IsProductsReady  => false;

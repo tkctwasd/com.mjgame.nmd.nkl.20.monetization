@@ -34,6 +34,13 @@ public class AdConstants : ScriptableObject
     [Header("MREC")]
     public MaxSdkBase.AdViewPosition mrecPosition = MaxSdkBase.AdViewPosition.TopLeft;
 
+    [Header("Adjust")]
+    [ColorLabel(0.185f, 0.65f, 1f)] public string adjust = "id_adjust";
+    
+    [Header("Appsflyer")]
+    [ColorLabel(0.185f, 0.96f, 1)] public string appsflyer = "id-appsflyer";
+    [ColorLabel(0.185f, 0.96f, 1)] public string devKey = "dev-key-appsflyer";
+
 
 #if UNITY_EDITOR
     [Button(20)]

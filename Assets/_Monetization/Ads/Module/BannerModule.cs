@@ -42,10 +42,19 @@ public class BannerModule
         MaxSdk.SetBannerBackgroundColor(bannerId, Color.clear);
     }
 
+    public bool CanShowBanner()
+    {
+        if (ApplovinManager.IsRemoveAdsPurchased)
+            return false;
+
+        var config = RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig);
+        return config.ShowBanner;
+    }
+
 
     public void ShowBanner()
     {
-        if (RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig).ShowBanner)
+        if (CanShowBanner())
         {
             AdAnalytic.LogAd("show_banner_ads", "");
             MaxSdk.ShowBanner(bannerId);

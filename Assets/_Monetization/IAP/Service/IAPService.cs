@@ -21,7 +21,8 @@ public static class IAPService
         }
         catch (Exception e)
         {
-            Debug.LogError("IAPService".IAP($"Init failed: {e.Message}"));
+            Debug.Log(e);
+            Debug.LogError("IAPService".IAP($"Init failed:\n{e.Message}"));
             onError?.Invoke(e.Message);
         }
     }

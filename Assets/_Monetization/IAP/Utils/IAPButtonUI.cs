@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -37,7 +38,10 @@ public class IAPButtonUI : MonoBehaviour
         IAPManager.Instance.OnProductsFetchFailed += OnProductsFetchFailed;
         IAPManager.Instance.OnProductDelivered += OnProductDelivered;
         IAPManager.Instance.OnPurchaseFailedEvent += OnPurchaseFailed;
+        IAPManager.Instance.OnRestoreComplete += OnRestoreComplete;
     }
+
+
 
     protected virtual void OnDisable()
     {
@@ -46,6 +50,7 @@ public class IAPButtonUI : MonoBehaviour
         IAPManager.Instance.OnProductsFetchFailed -= OnProductsFetchFailed;
         IAPManager.Instance.OnProductDelivered -= OnProductDelivered;
         IAPManager.Instance.OnPurchaseFailedEvent -= OnPurchaseFailed;
+        IAPManager.Instance.OnRestoreComplete -= OnRestoreComplete;
     }
 
     void OnProductsReady(List<Product> products) => RefreshUI();
@@ -82,7 +87,7 @@ public class IAPButtonUI : MonoBehaviour
         }
 
         if (titleText != null) titleText.text = product.metadata.localizedTitle;
-        if (descriptionText != null) descriptionText.text = product.metadata.localizedDescription;
+        // if (descriptionText != null) descriptionText.text = product.metadata.localizedDescription;
         if (priceText != null) priceText.text = product.metadata.localizedPriceString;
 
         SetButtonLoading(false);
@@ -128,4 +133,14 @@ public class IAPButtonUI : MonoBehaviour
     {
         Debug.LogWarning("IAPButtonUI".IAP($"Purchase failed: {productId}"));
     }
+
+    public void SetInteractable(bool v)
+    {
+        if (button != null) button.interactable = v;
+    }
+
+    public virtual void OnRestoreComplete(bool success)
+    {
+    }
+
 }

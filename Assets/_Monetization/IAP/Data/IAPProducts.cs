@@ -28,14 +28,34 @@ public class IAPProducts : ScriptableObject
             }
     };
 
+    private void OnValidate()
+    {
+        foreach (var product in products)
+        {
+            foreach (var reward in product.Rewards)
+            {
+                reward.ResetValidate();
+            }
+        }
+    }
+
     public IEnumerable<ProductDefinition> CreateProductDefinitions()
     {
         return products
-            .Where(entry => !string.IsNullOrWhiteSpace(entry.ProductId))
-            .Select(entry => new ProductDefinition(entry.ProductId, entry.ProductType));
+            .Where(x => !string.IsNullOrWhiteSpace(x.ProductId))
+            .Select(x => new ProductDefinition(x.ProductId, x.ProductType));
     }
 
-    public string RemoveAdsProductId => products.FirstOrDefault(entry => entry.RemoveAds)?.ProductId;
+    public List<IAPReward> GetRewardsByProductId(string productId)
+    {
+        Debug.Log($"Getting rewards for productId: {productId}");
+        var product = products.FirstOrDefault(p => p.ProductId == productId);
+        return product != null ? product.Rewards : new List<IAPReward>();
+    }
+    public string RemoveAdsProductId =>
+        products.FirstOrDefault(x =>
+            x.Rewards.Exists(r => r.RewardType == IAPRewardType.RemoveAds))
+        ?.ProductId;
 }
 
 [Serializable]
@@ -52,11 +72,54 @@ public class IAPProduct
     public string Description;
     public string LocalizedPrice;
 
+    public List<IAPReward> Rewards = new();
+
     public IAPProduct() { }
 
     public IAPProduct(string productId, ProductType productType)
     {
         ProductId = productId;
         ProductType = productType;
+    }
+}
+
+
+public enum IAPRewardType
+{
+    Money,
+    Gem,
+    Brainrot,
+    RemoveAds,
+    Subscription,
+
+    TictacBlock,
+}
+
+[Serializable]
+public class IAPReward
+{
+    public IAPRewardType RewardType;
+
+    [ShowIf(nameof(RewardType), (int)IAPRewardType.Money)]
+    public double Money;
+
+    [ShowIf(nameof(RewardType), (int)IAPRewardType.Gem)]
+    public int Gem;
+
+    [ShowIf(nameof(RewardType), (int)IAPRewardType.Brainrot)]
+    public GameObject prefab;
+    [ShowIf(nameof(RewardType), (int)IAPRewardType.Brainrot)]
+    public string BrainrotName;
+
+    [ShowIf(nameof(RewardType), (int)IAPRewardType.Subscription)]
+    public int SubscriptionDays;
+
+    public void ResetValidate()
+    {
+
+        if (RewardType == IAPRewardType.Brainrot && prefab != null)
+        {
+            BrainrotName = prefab.name;
+        }
     }
 }

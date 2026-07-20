@@ -18,7 +18,6 @@ public class AdsConfig
     public int TimeLoadAppOpen = 5;
     public int TimeDelayInterstitial = 5;
 }
-
 public static class RemoteKey
 {
     public static string AdsConfig = "AdsConfig";
@@ -31,4 +30,3 @@ public class PopupRate
     public bool CanShowRate = false;
     public bool ShowAppleStore = false;
 }
-

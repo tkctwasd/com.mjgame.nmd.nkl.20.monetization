@@ -104,6 +104,7 @@ public class AdsManager : MonoBehaviour
         }
     }
 
+    public bool IsRemoveAdsPurchased => IAPManager.Instance?.PurchaseModule?.IsRemoveAdsPurchased() == true || DataSave.Instance?.DataMonetization?.IsRemoveAdsPurchased == true;
 
     public void OnAOADismissed()
     {
@@ -129,4 +130,6 @@ public class AdsManager : MonoBehaviour
     {
         AdRevenueTracker.SendAllTracker(impressionData);
     }
+
+
 }
