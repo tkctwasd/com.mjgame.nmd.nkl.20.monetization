@@ -53,6 +53,19 @@ public class IAPButtonUI : MonoBehaviour
         IAPManager.Instance.OnRestoreComplete -= OnRestoreComplete;
     }
 
+    /// <summary>
+    /// Gán ProductId lúc runtime (dùng khi spawn button từ code thay vì kéo thả trong scene).
+    /// Gọi ngay sau Instantiate, trước khi Start chạy.
+    /// </summary>
+    public void Setup(string productId)
+    {
+        ProductId = productId;
+        RefreshUI();
+    }
+
+    /// <summary>Vẽ lại UI theo trạng thái store hiện tại.</summary>
+    public void Refresh() => RefreshUI();
+
     void OnProductsReady(List<Product> products) => RefreshUI();
 
     void OnProductsFetchFailed()

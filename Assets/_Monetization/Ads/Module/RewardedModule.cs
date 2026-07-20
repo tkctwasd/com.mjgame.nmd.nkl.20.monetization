@@ -85,7 +85,7 @@ public class RewardedModule
     {
         rewardedRetry++;
         double retryDelay = Math.Pow(2, Math.Min(6, rewardedRetry));
-        ApplovinManager.Invoke(nameof(LoadRewardedAd), (float)retryDelay);
+        ApplovinManager.StartCoroutine(IELoadDelay((float)retryDelay));
         Debug.Log("Rewarded".Ads($"Ad Load Failed + {errorInfo.Message}"));
     }
 

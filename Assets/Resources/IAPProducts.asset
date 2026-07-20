@@ -13,24 +13,151 @@ MonoBehaviour:
   m_Name: IAPProducts
   m_EditorClassIdentifier: 
   products:
-  - ProductId: com.yourgame.money_small
+  - ProductId: com.yourgame.test.con_gem10
     ProductType: 0
     RemoveAds: 0
-    Title: Small Money Pack
-    Description: A small bundle of money for quick upgrades.
+    Title: '[TEST] 10 Gem'
+    Description: "Consumable \u2014 mua nhi\u1EC1u l\u1EA7n, m\u1ED7i l\u1EA7n +10
+      gem."
     LocalizedPrice: 
-    Rewards: []
-  - ProductId: com.yourgame.remove_ads
+    Rewards:
+    - RewardType: 1
+      Money: 0
+      Gem: 10
+      prefab: {fileID: 0}
+      BrainrotName: 
+      SubscriptionDays: 0
+      ShieldCount: 0
+  - ProductId: com.yourgame.test.con_coin10
+    ProductType: 0
+    RemoveAds: 0
+    Title: '[TEST] 10 Coin'
+    Description: "Consumable \u2014 ki\u1EC3m tra lo\u1EA1i ti\u1EC1n t\u1EC7 th\u1EE9
+      hai."
+    LocalizedPrice: 
+    Rewards:
+    - RewardType: 0
+      Money: 10
+      Gem: 0
+      prefab: {fileID: 0}
+      BrainrotName: 
+      SubscriptionDays: 0
+      ShieldCount: 0
+  - ProductId: com.yourgame.test.non_gem10
     ProductType: 1
-    RemoveAds: 1
-    Title: Remove Ads
-    Description: Permanently remove ads from the game.
+    RemoveAds: 0
+    Title: "[TEST] 10 Gem (m\u1ED9t l\u1EA7n)"
+    Description: "NonConsumable c\u1EA5p ti\u1EC1n t\u1EC7 \u2014 CA B\u1EAAY: restore
+      kh\xF4ng \u0111\u01B0\u1EE3c c\u1EA5p l\u1EA1i gem."
     LocalizedPrice: 
-    Rewards: []
-  - ProductId: com.yourgame.monthly_vip
+    Rewards:
+    - RewardType: 1
+      Money: 0
+      Gem: 10
+      prefab: {fileID: 0}
+      BrainrotName: 
+      SubscriptionDays: 0
+      ShieldCount: 0
+  - ProductId: com.yourgame.test.non_removeads
+    ProductType: 1
+    RemoveAds: 0
+    Title: '[TEST] Remove Ads'
+    Description: "NonConsumable \u2014 t\u1EAFt banner/inter/AOA/MREC v\u0129nh vi\u1EC5n,
+      rewarded v\u1EABn c\xF2n."
+    LocalizedPrice: 
+    Rewards:
+    - RewardType: 3
+      Money: 0
+      Gem: 0
+      prefab: {fileID: 0}
+      BrainrotName: 
+      SubscriptionDays: 0
+      ShieldCount: 0
+  - ProductId: com.yourgame.test.non_gem100_removeads
+    ProductType: 1
+    RemoveAds: 0
+    Title: '[TEST] 100 Gem + Remove Ads'
+    Description: "Pack g\u1ED9p \u2014 m\u1EABu \u0111\u1EC3 nh\xE2n b\u1EA3n cho
+      c\xE1c pack combo sau n\xE0y."
+    LocalizedPrice: 
+    Rewards:
+    - RewardType: 1
+      Money: 0
+      Gem: 100
+      prefab: {fileID: 0}
+      BrainrotName: 
+      SubscriptionDays: 0
+      ShieldCount: 0
+    - RewardType: 3
+      Money: 0
+      Gem: 0
+      prefab: {fileID: 0}
+      BrainrotName: 
+      SubscriptionDays: 0
+      ShieldCount: 0
+  - ProductId: com.yourgame.test.sub_gem100
     ProductType: 2
     RemoveAds: 0
-    Title: Monthly VIP
-    Description: Subscribe for VIP perks for 30 days.
+    Title: "[TEST] SUB 2 ng\xE0y \u2014 100 Gem"
+    Description: "Subscription c\u1EA5p gem. Ki\u1EC3m tra gia h\u1EA1n c\xF3 c\u1EA5p
+      l\u1EA1i kh\xF4ng."
     LocalizedPrice: 
-    Rewards: []
+    Rewards:
+    - RewardType: 1
+      Money: 0
+      Gem: 100
+      prefab: {fileID: 0}
+      BrainrotName: 
+      SubscriptionDays: 0
+      ShieldCount: 0
+    - RewardType: 4
+      Money: 0
+      Gem: 0
+      prefab: {fileID: 0}
+      BrainrotName: 
+      SubscriptionDays: 2
+      ShieldCount: 0
+  - ProductId: com.yourgame.test.sub_shield
+    ProductType: 2
+    RemoveAds: 0
+    Title: "[TEST] SUB 2 ng\xE0y \u2014 Shield"
+    Description: "Subscription c\u1EA5p shield. H\u1EBFt h\u1EA1n ph\u1EA3i m\u1EA5t
+      shield."
+    LocalizedPrice: 
+    Rewards:
+    - RewardType: 5
+      Money: 0
+      Gem: 0
+      prefab: {fileID: 0}
+      BrainrotName: 
+      SubscriptionDays: 0
+      ShieldCount: 1
+    - RewardType: 4
+      Money: 0
+      Gem: 0
+      prefab: {fileID: 0}
+      BrainrotName: 
+      SubscriptionDays: 2
+      ShieldCount: 0
+  - ProductId: com.yourgame.test.sub_removeads
+    ProductType: 2
+    RemoveAds: 0
+    Title: "[TEST] SUB 2 ng\xE0y \u2014 Remove Ads"
+    Description: "CA B\u1EAAY: remove-ads c\xF3 th\u1EDDi h\u1EA1n. H\u1EBFt h\u1EA1n
+      ads PH\u1EA2I hi\u1EC7n l\u1EA1i."
+    LocalizedPrice: 
+    Rewards:
+    - RewardType: 3
+      Money: 0
+      Gem: 0
+      prefab: {fileID: 0}
+      BrainrotName: 
+      SubscriptionDays: 0
+      ShieldCount: 0
+    - RewardType: 4
+      Money: 0
+      Gem: 0
+      prefab: {fileID: 0}
+      BrainrotName: 
+      SubscriptionDays: 2
+      ShieldCount: 0

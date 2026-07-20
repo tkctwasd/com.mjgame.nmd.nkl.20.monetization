@@ -91,8 +91,8 @@ public enum IAPRewardType
     Brainrot,
     RemoveAds,
     Subscription,
+    Shield,
 
-    TictacBlock,
 }
 
 [Serializable]
@@ -113,6 +113,9 @@ public class IAPReward
 
     [ShowIf(nameof(RewardType), (int)IAPRewardType.Subscription)]
     public int SubscriptionDays;
+
+    [ShowIf(nameof(RewardType), (int)IAPRewardType.Shield)]
+    public int ShieldCount;
 
     public void ResetValidate()
     {

@@ -15,18 +15,32 @@ public class IAPButtonRemoveAds : IAPButtonUI
     protected override void RefreshUI()
     {
         base.RefreshUI();
-        bool alreadyPurchased = IAPManager.Instance?.PurchaseModule?.IsRemoveAdsPurchased() == true;
-        if (DataSave.Instance.DataMonetization.IsRemoveAdsPurchased)
+
+        // Store báo đã sở hữu nhưng local chưa ghi (cài lại máy / restore) → ghi lại entitlement
+        // để lần mở game offline sau vẫn nhận là đã mua.
+        if (IAPManager.Instance != null && IAPManager.Instance.PurchaseModule != null
+            && IAPManager.Instance.PurchaseModule.IsRemoveAdsPurchased())
+            SaveRemoveAdsPurchased();
+
+        if (DataSave.Instance != null && DataSave.Instance.DataMonetization.IsRemoveAdsPurchased)
         {
-            priceText.text = "<color=red>Owned</color>";
-            button.interactable = false;
+            if (priceText != null) priceText.text = "<color=red>Owned</color>";
+            if (button != null) button.interactable = false;
             this.gameObject.SetActive(!active);
         }
-        else if (alreadyPurchased)
-        {
-            priceText.text = "<color=#0065FF>Restore</color>";
-            button.interactable = false;
-        }
+    }
+
+    /// <summary>
+    /// Ghi cờ remove-ads và flush xuống đĩa ngay.
+    /// DataSave chỉ tự lưu lúc pause/quit nên nếu app bị kill sau khi mua sẽ mất cờ.
+    /// </summary>
+    void SaveRemoveAdsPurchased()
+    {
+        if (DataSave.Instance == null) return;
+        if (DataSave.Instance.DataMonetization.IsRemoveAdsPurchased) return;
+
+        DataSave.Instance.DataMonetization.RemoveAdsPurchased();
+        DataSave.Instance.SaveGame();
     }
 
 
@@ -35,13 +49,12 @@ public class IAPButtonRemoveAds : IAPButtonUI
         base.OnPurchaseSuccess(productId, order);
         Debug.Log("<color=green>Remove Ads purchased successfully.</color>");
 
-        DataSave.Instance.DataMonetization.RemoveAdsPurchased();
+        SaveRemoveAdsPurchased();
 
         if (AdsManager.Instance != null)
         {
             AdsManager.Instance.BannerModule.HideBanner();
             AdsManager.Instance.MRECModule.HideMREC();
-            AdsManager.Instance.IsShowAds = false;
         }
 
         RefreshUI();
