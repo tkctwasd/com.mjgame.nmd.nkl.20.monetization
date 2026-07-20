@@ -104,7 +104,7 @@ public class AdsManager : MonoBehaviour
         }
     }
 
-    public bool IsRemoveAdsPurchased => IAPManager.Instance?.PurchaseModule?.IsRemoveAdsPurchased() == true || DataSave.Instance?.DataMonetization?.IsRemoveAdsPurchased == true;
+    public bool IsRemoveAdsPurchased => MonetizationEntitlements.HasRemoveAds;
 
     public void OnAOADismissed()
     {

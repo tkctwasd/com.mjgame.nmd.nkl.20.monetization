@@ -36,6 +36,7 @@ public class IAPButtonUI : MonoBehaviour
         if (IAPManager.Instance == null) return;
         IAPManager.Instance.OnProductsReady += OnProductsReady;
         IAPManager.Instance.OnProductsFetchFailed += OnProductsFetchFailed;
+        IAPManager.Instance.OnPurchasesReady += OnPurchasesReady;
         IAPManager.Instance.OnProductDelivered += OnProductDelivered;
         IAPManager.Instance.OnPurchaseFailedEvent += OnPurchaseFailed;
         IAPManager.Instance.OnRestoreComplete += OnRestoreComplete;
@@ -48,6 +49,7 @@ public class IAPButtonUI : MonoBehaviour
         if (IAPManager.Instance == null) return;
         IAPManager.Instance.OnProductsReady -= OnProductsReady;
         IAPManager.Instance.OnProductsFetchFailed -= OnProductsFetchFailed;
+        IAPManager.Instance.OnPurchasesReady -= OnPurchasesReady;
         IAPManager.Instance.OnProductDelivered -= OnProductDelivered;
         IAPManager.Instance.OnPurchaseFailedEvent -= OnPurchaseFailed;
         IAPManager.Instance.OnRestoreComplete -= OnRestoreComplete;
@@ -67,6 +69,9 @@ public class IAPButtonUI : MonoBehaviour
     public void Refresh() => RefreshUI();
 
     void OnProductsReady(List<Product> products) => RefreshUI();
+
+    // Purchases về sau Products, đây mới là lúc biết được product nào đã sở hữu.
+    void OnPurchasesReady(Orders orders) => RefreshUI();
 
     void OnProductsFetchFailed()
     {

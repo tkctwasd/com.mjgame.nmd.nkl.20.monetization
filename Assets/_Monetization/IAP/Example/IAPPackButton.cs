@@ -47,22 +47,38 @@ public class IAPPackButton : IAPButtonUI
         // Consumable mua lại được nhiều lần nên không bao giờ khoá.
         bool onceOnly = data.ProductType == ProductType.NonConsumable
                         || data.ProductType == ProductType.Subscription;
+        if (!onceOnly)
+        {
+            if (ownedText != null) ownedText.gameObject.SetActive(false);
+            return;
+        }
 
-        bool owned = onceOnly
-                     && IAPManager.Instance != null
-                     && IAPManager.Instance.PurchaseModule != null
-                     && IAPManager.Instance.PurchaseModule.IsPurchased(ProductId);
+        // Local trước: đúng ngay lúc mở app và cả khi offline.
+        // Store chỉ dùng để bù cho máy mới cài lại, lúc local chưa có gì.
+        bool owned = MonetizationEntitlements.IsOwned(ProductId)
+                     || (IAPManager.Instance != null
+                         && IAPManager.Instance.PurchaseModule != null
+                         && IAPManager.Instance.PurchaseModule.IsPurchased(ProductId));
 
         if (ownedText != null)
         {
             ownedText.gameObject.SetActive(owned);
-            ownedText.text = data.ProductType == ProductType.Subscription
-                ? "<color=#0065FF>Subscribed</color>"
-                : "<color=red>Owned</color>";
+            ownedText.text = BuildOwnedLabel();
         }
 
         if (owned && button != null)
             button.interactable = false;
+    }
+
+    private string BuildOwnedLabel()
+    {
+        if (data.ProductType != ProductType.Subscription)
+            return "<color=red>Owned</color>";
+
+        var expiry = MonetizationEntitlements.GetExpiry(ProductId);
+        return expiry == null
+            ? "<color=#0065FF>Subscribed</color>"
+            : $"<color=#0065FF>Subscribed</color> — {expiry.Value.ToLocalTime():dd/MM HH:mm}";
     }
 
     private static string DescribeRewards(List<IAPReward> rewards)

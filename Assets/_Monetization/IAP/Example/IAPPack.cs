@@ -18,9 +18,16 @@ public class IAPPack : UIPanel
     [Header("Status")]
     [SerializeField] private TextMeshProUGUI statusText;
 
+    [Header("Show")]
+    [SerializeField] private TextMeshProUGUI coinText;
+    [SerializeField] private TextMeshProUGUI gemText;
+    [SerializeField] private TextMeshProUGUI shieldText;
+    [SerializeField] private TextMeshProUGUI removeAdsText;
+
     [Header("Actions")]
     [SerializeField] private Button restoreButton;
     [SerializeField] private Button closeButton;
+    [SerializeField] private Button resetButton;
 
     private readonly List<IAPPackButton> spawned = new();
     private bool isBuilt;
@@ -31,6 +38,7 @@ public class IAPPack : UIPanel
 
         if (restoreButton != null) restoreButton.onClick.AddListener(OnRestoreClicked);
         if (closeButton != null) closeButton.onClick.AddListener(Hide);
+        if (resetButton != null) resetButton.onClick.AddListener(OnResetClicked);
     }
 
     public override void Show()
@@ -39,7 +47,9 @@ public class IAPPack : UIPanel
 
         Build();
         Subscribe();
-        RefreshStatus();
+
+        // Build() bỏ qua từ lần mở thứ hai, nên phải vẽ lại tay để không giữ trạng thái cũ.
+        RefreshAll();
     }
 
     public override void Hide()
@@ -92,6 +102,7 @@ public class IAPPack : UIPanel
         }
 
         RefreshStatus();
+        RefreshBalance();
     }
 
     #endregion
@@ -100,6 +111,9 @@ public class IAPPack : UIPanel
 
     private void Subscribe()
     {
+        MonetizationEntitlements.OnChanged -= OnEntitlementsChanged;
+        MonetizationEntitlements.OnChanged += OnEntitlementsChanged;
+
         if (IAPManager.Instance == null) return;
 
         IAPManager.Instance.OnProductsReady += OnProductsReady;
@@ -112,6 +126,8 @@ public class IAPPack : UIPanel
 
     private void Unsubscribe()
     {
+        MonetizationEntitlements.OnChanged -= OnEntitlementsChanged;
+
         if (IAPManager.Instance == null) return;
 
         IAPManager.Instance.OnProductsReady -= OnProductsReady;
@@ -145,6 +161,41 @@ public class IAPPack : UIPanel
 
         if (restoreButton != null) restoreButton.interactable = false;
         IAPManager.Instance.RestorePurchases();
+    }
+
+    private void OnResetClicked()
+    {
+        MonetizationEntitlements.ResetForTesting();
+        RefreshAll();
+    }
+
+    private void OnEntitlementsChanged() => RefreshAll();
+
+    #endregion
+
+    #region Balance
+
+    /// <summary>
+    /// Vẽ số dư thật đọc từ DataSave — dùng để xác nhận reward có cộng vào hay không.
+    /// </summary>
+    private void RefreshBalance()
+    {
+        if (coinText != null) coinText.text = $"Coin: {MonetizationEntitlements.Money:N0}";
+        if (gemText != null) gemText.text = $"Gem: {MonetizationEntitlements.Gem:N0}";
+        if (shieldText != null) shieldText.text = $"Shield: {MonetizationEntitlements.Shield:N0}";
+
+        if (removeAdsText == null) return;
+
+        if (!MonetizationEntitlements.HasRemoveAds)
+        {
+            removeAdsText.text = "RemoveAds: <color=#C0C020>OFF</color>";
+            return;
+        }
+
+        var expiry = MonetizationEntitlements.RemoveAdsExpiry;
+        removeAdsText.text = expiry == null
+            ? "RemoveAds: <color=#20C060>ON (vĩnh viễn)</color>"
+            : $"RemoveAds: <color=#20C060>ON</color> — hết hạn {expiry.Value.ToLocalTime():dd/MM HH:mm}";
     }
 
     #endregion
