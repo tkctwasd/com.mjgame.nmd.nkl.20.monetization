@@ -5,7 +5,7 @@ using UnityEngine;
 
 
 [Serializable]
-public partial class DataGamePlay
+public partial class DataExample
 {
     public double Money;
     public int Gem;

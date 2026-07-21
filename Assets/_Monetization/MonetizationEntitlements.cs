@@ -9,6 +9,9 @@ public class MonetizationEntitlements : MonoBehaviour
 
     public static event Action OnChanged;
 
+
+    public static event Action<IAPReward, DateTime?> OnGrantReward;
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void AutoCreate()
     {
@@ -116,7 +119,7 @@ public class MonetizationEntitlements : MonoBehaviour
 
         Debug.Log("Entitlements".IAP(
             $"<color=green>Cấp thưởng '{productId}'</color> | tx={transactionId} | " +
-            $"Money={Money} Gem={Gem} Shield={Shield} RemoveAds={data.HasRemoveAds}"));
+            $"RemoveAds={data.HasRemoveAds}"));
 
         OnChanged?.Invoke();
     }
@@ -151,22 +154,8 @@ public class MonetizationEntitlements : MonoBehaviour
 
     static void Apply(DataMonetization data, IAPReward reward, DateTime? expiry)
     {
-        var wallet = Wallet;
-
         switch (reward.RewardType)
         {
-            case IAPRewardType.Money:
-                if (wallet != null) wallet.AddMoney(reward.Money);
-                break;
-
-            case IAPRewardType.Gem:
-                if (wallet != null) wallet.AddGem(reward.Gem);
-                break;
-
-            case IAPRewardType.Shield:
-                if (wallet != null) wallet.AddShield(reward.ShieldCount);
-                break;
-
             case IAPRewardType.RemoveAds:
                 data.GrantRemoveAds(expiry);
                 HideAdsNow();
@@ -176,7 +165,7 @@ public class MonetizationEntitlements : MonoBehaviour
                 break;
 
             default:
-                Debug.LogWarning("Entitlements".IAP($"Chưa xử lý reward '{reward.RewardType}'."));
+                OnGrantReward?.Invoke(reward, expiry);
                 break;
         }
     }
@@ -194,8 +183,6 @@ public class MonetizationEntitlements : MonoBehaviour
     #region Query
 
     static DataMonetization Data => DataSave.Instance != null ? DataSave.Instance.DataMonetization : null;
-
-    static DataGamePlay Wallet => DataSave.Instance != null ? DataSave.Instance.DataGamePlay : null;
 
     static IAPProducts Products => IAPManager.Instance != null ? IAPManager.Instance.IAPProducts : null;
     public static bool HasRemoveAds
@@ -218,10 +205,6 @@ public class MonetizationEntitlements : MonoBehaviour
         var data = Data;
         return data != null ? data.GetExpiry(productId) : null;
     }
-
-    public static double Money => Wallet != null ? Wallet.Money : 0;
-    public static int Gem => Wallet != null ? Wallet.Gem : 0;
-    public static int Shield => Wallet != null ? Wallet.Shield : 0;
 
     public static DateTime? RemoveAdsExpiry
     {

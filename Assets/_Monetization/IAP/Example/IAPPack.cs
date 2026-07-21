@@ -180,9 +180,9 @@ public class IAPPack : UIPanel
     /// </summary>
     private void RefreshBalance()
     {
-        if (coinText != null) coinText.text = $"Coin: {MonetizationEntitlements.Money:N0}";
-        if (gemText != null) gemText.text = $"Gem: {MonetizationEntitlements.Gem:N0}";
-        if (shieldText != null) shieldText.text = $"Shield: {MonetizationEntitlements.Shield:N0}";
+        if (coinText != null) coinText.text = $"Coin: {IAPExampleRewardHandler.Money:N0}";
+        if (gemText != null) gemText.text = $"Gem: {IAPExampleRewardHandler.Gem:N0}";
+        if (shieldText != null) shieldText.text = $"Shield: {IAPExampleRewardHandler.Shield:N0}";
 
         if (removeAdsText == null) return;
 
