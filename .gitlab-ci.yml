@@ -1,0 +1,36 @@
+# Tạo GitLab Release tự động khi bạn export bản mới rồi push.
+#
+# Luồng:
+#   1. Trong Unity: Tools > Monetization > Release (Export + Changelog) -> nhập version + changelog -> Export.
+#      (sinh Assets/Release/_Monetization_v<ver>.unitypackage, version.txt, CHANGELOG_LATEST.md)
+#   2. git add Assets/Release && git commit -m "release: vX.Y.Z" && git push  (lên nhánh mặc định)
+#   3. Job dưới đây chạy KHI version.txt thay đổi -> tạo tag vX.Y.Z + Release, đính link file .unitypackage.
+#
+# KHÔNG cần Unity trong CI -> image tí hon, chạy vài giây -> gần như không tốn compute minutes.
+# KHÔNG cần secret gì thêm: release-cli dùng sẵn CI_JOB_TOKEN.
+
+stages:
+  - release
+
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    # Chỉ chạy trên nhánh mặc định và chỉ khi version.txt đổi (tránh tạo release thừa).
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      changes:
+        - Assets/Release/version.txt
+  script:
+    - VERSION="$(cat Assets/Release/version.txt)"
+    - PKG="_Monetization_v${VERSION}.unitypackage"
+    - test -f "Assets/Release/${PKG}"    # fail sớm nếu quên commit file .unitypackage
+    - 'echo "Tạo release v${VERSION}"'
+    # URL tải file: trỏ vào chính file đã commit, tại tag vừa tạo (repo private -> đồng nghiệp cần quyền truy cập).
+    - ASSET_URL="${CI_PROJECT_URL}/-/raw/v${VERSION}/Assets/Release/${PKG}"
+    - |
+      release-cli create \
+        --name "Monetization v${VERSION}" \
+        --tag-name "v${VERSION}" \
+        --ref "${CI_COMMIT_SHA}" \
+        --description "$(cat Assets/Release/CHANGELOG_LATEST.md)" \
+        --assets-link "{\"name\":\"${PKG}\",\"url\":\"${ASSET_URL}\",\"link_type\":\"package\"}"

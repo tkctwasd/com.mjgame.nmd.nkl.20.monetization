@@ -843,7 +843,7 @@ PlayerSettings:
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Android: FIREBASE_ANALYTICS;USE_ADJUST;USE_APPSFLYER;DOTWEEN
+    Android: FIREBASE_ANALYTICS;USE_ADJUST;USE_APPSFLYER;DOTWEEN;USE_IAP
     EmbeddedLinux: DOTWEEN
     GameCoreScarlett: DOTWEEN
     GameCoreXboxOne: DOTWEEN
@@ -853,7 +853,7 @@ PlayerSettings:
     PS5: DOTWEEN
     QNX: DOTWEEN
     Stadia: DOTWEEN
-    Standalone: FIREBASE_ANALYTICS;DOTWEEN;USE_APPSFLYER;USE_ADJUST
+    Standalone: FIREBASE_ANALYTICS;DOTWEEN;USE_APPSFLYER;USE_ADJUST;USE_IAP
     VisionOS: DOTWEEN
     WebGL: DOTWEEN
     Windows Store Apps: DOTWEEN
