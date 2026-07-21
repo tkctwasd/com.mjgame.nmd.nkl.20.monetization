@@ -2,7 +2,7 @@
   "dependencies": {
     "com.applovin.mediation.adapters.googleadmanager.android": "25020000.0.0",
     "com.applovin.mediation.adapters.googleadmanager.ios": "13020000.0.0",
-    "com.applovin.mediation.ads": "8.6.0",
+    "com.applovin.mediation.ads": "8.6.4",
     "com.unity.collab-proxy": "2.8.2",
     "com.unity.feature.development": "1.0.1",
     "com.unity.nuget.newtonsoft-json": "3.2.1",
