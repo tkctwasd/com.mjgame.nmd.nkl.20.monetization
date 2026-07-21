@@ -27,9 +27,5 @@ public class PanelGamePlay : UIPanel
       {
       });
     });
-    btnShop.onClick.AddListener(() =>
-    {
-      UIManager.Instance.ShowPanel<IAPPack>();
-    });
   }
 }

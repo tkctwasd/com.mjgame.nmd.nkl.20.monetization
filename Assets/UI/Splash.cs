@@ -97,6 +97,7 @@ namespace WASD
                 yield return new WaitForEndOfFrame();
             }
             var ads = RemoteConfigManager.GetConfigValue<AdsConfig>(RemoteKey.AdsConfig);
+            Debug.Log(ads.DurationLoading);
             DurationLoading = ads.DurationLoading;
             TimeLoadAppOpen = ads.TimeLoadAppOpen;
         }

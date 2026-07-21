@@ -24,6 +24,8 @@ public class AdsManager : MonoBehaviour
     internal bool IsShowFirstAOA;
     internal DateTime LastTimeShowAOA;
     internal Action callAOADismissed;
+    public static event Action OnResumeShow;
+    public static event Action OnResumeComplete;
 
     [Header("Interstitial")]
     internal DateTime LastTimeShowInterstitial;
@@ -33,6 +35,7 @@ public class AdsManager : MonoBehaviour
 
     [Header("MREC")]
     internal bool ActiveMREC = false;
+
 
     void Awake()
     {
@@ -89,14 +92,14 @@ public class AdsManager : MonoBehaviour
         {
             if (IsCloseFirstAOA && !IsShowAds)
             {
-                bool canshowAOA = AppOpenModule.CanShowAOA(true);
+                bool canshowAOA = AppOpenModule.CanShowAOA(false);
                 Debug.Log(canshowAOA);
                 if (AppOpenModule != null && MaxSdk.IsInitialized() && canshowAOA)
                 {
                     MRECModule.HideMREC(true);
                     BannerModule.HideBanner();
                     Debug.Log("AdsManager".Ads("Back to game from background - Show Resume"));
-                    UIManager.Instance.ShowPanel<PanelResume>();
+                    OnResumeShow?.Invoke();
                 }
             }
             IsCloseFirstAOA = false;
@@ -104,7 +107,7 @@ public class AdsManager : MonoBehaviour
         }
     }
 
-    public bool IsRemoveAdsPurchased => MonetizationEntitlements.HasRemoveAds;
+    public bool IsRemoveAdsPurchased => false;
 
     public void OnAOADismissed()
     {
@@ -123,7 +126,7 @@ public class AdsManager : MonoBehaviour
         {
             BannerModule.ShowBanner();
         }
-        UIManager.Instance.GetPanel<PanelResume>().Complete();
+        OnResumeComplete?.Invoke();
     }
 
     public void SendAdRevenueTracker(AdInfo impressionData)

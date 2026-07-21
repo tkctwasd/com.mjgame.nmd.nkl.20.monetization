@@ -21,12 +21,4 @@ public class AdsConfig
 public static class RemoteKey
 {
     public static string AdsConfig = "AdsConfig";
-    public static string PopupRate = "PopupRate";
-}
-[Serializable]
-public class PopupRate
-{
-    public int MaxShowCount = 2;
-    public bool CanShowRate = false;
-    public bool ShowAppleStore = false;
 }

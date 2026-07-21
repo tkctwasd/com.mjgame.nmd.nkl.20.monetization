@@ -76,8 +76,8 @@ public class AppReviewManager : Singleton<AppReviewManager>
 
     private bool ShouldShowRatePopup()
     {
-        var remote = RemoteConfigManager.GetConfigValue<PopupRate>(RemoteKey.PopupRate);
-        if (!remote.CanShowRate) return false;
+        // var remote = RemoteConfigManager.GetConfigValue<PopupRate>(RemoteKey.PopupRate);
+        // if (!remote.CanShowRate) return false;
         return true;
     }
 
