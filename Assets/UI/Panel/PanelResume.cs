@@ -9,7 +9,27 @@ public class PanelResume : UIPanel
     [SerializeField] Image imgLoadingProgress;
     [SerializeField] Slider slider;
     public float Duration = 2f;
-    bool isCompleted;
+    public float ShowAOATime = 1.5f;
+    static bool isCompleted;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    static void BindAdsResume()
+    {
+        AdsManager.OnResumeShow -= OnAdsResumeShow;
+        AdsManager.OnResumeShow += OnAdsResumeShow;
+        AdsManager.OnResumeComplete -= OnAdsResumeComplete;
+        AdsManager.OnResumeComplete += OnAdsResumeComplete;
+    }
+
+    static void OnAdsResumeShow() => UIManager.Instance.ShowPanel<PanelResume>();
+
+    static void OnAdsResumeComplete()
+    {
+        if (isCompleted) return;
+        isCompleted = true;
+        Debug.Log("<color=green>PanelResume Complete</color>");
+        UIManager.Instance.HidePanel<PanelResume>();
+    }
 
     private void OnEnable()
     {
@@ -27,15 +47,14 @@ public class PanelResume : UIPanel
 
     IEnumerator ResumeIE()
     {
-        float timer = 0f;
-
-        while (timer < Duration)
+        float timer = 0;
+        while (timer < ShowAOATime)
         {
             timer += Time.deltaTime;
-            float percent = Mathf.Clamp01(timer / Duration);
-            UpdateUI(percent);
+            UpdateUI(Mathf.Clamp01(timer / Duration));
             yield return null;
         }
+        UpdateUI(Mathf.Clamp01(ShowAOATime / Duration));
         AdsManager.Instance.AppOpenModule.ShowAppOpen(false);
     }
 

@@ -3,21 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Purchasing;
 
-/// <summary>
-/// Nơi duy nhất cấp thưởng IAP và giữ quyền lợi của người chơi.
-///
-/// Nghe cả hai đường:
-///  - OnProductDelivered  → vừa mua xong
-///  - OnPurchasesReady    → mở app / restore / cài lại máy
-///
-/// Chống cấp trùng bằng TransactionID nên restore bao nhiêu lần cũng chỉ cộng một lần.
-/// Tự sinh khi game chạy, không cần đặt vào scene hay Resources.
-/// </summary>
 public class MonetizationEntitlements : MonoBehaviour
 {
     public static MonetizationEntitlements Instance { get; private set; }
 
-    /// <summary>Bắn khi số dư hoặc quyền lợi đổi, để UI vẽ lại.</summary>
     public static event Action OnChanged;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -72,7 +61,6 @@ public class MonetizationEntitlements : MonoBehaviour
         subscribed = false;
     }
 
-    // IAPManager.Start() có thể chạy sau Start() của class này nên thử lại cho tới khi bắt được.
     void Update()
     {
         if (!subscribed) Subscribe();
@@ -100,10 +88,6 @@ public class MonetizationEntitlements : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Cấp thưởng của một product. Bỏ qua nếu transaction này đã cấp rồi.
-    /// Consumable mua lại luôn có TransactionID mới nên vẫn cộng dồn bình thường.
-    /// </summary>
     void Grant(string productId, string transactionId)
     {
         var data = Data;
@@ -119,13 +103,11 @@ public class MonetizationEntitlements : MonoBehaviour
             return;
         }
 
-        // Pack subscription: tính hạn trước để RemoveAds trong cùng pack dùng chung mốc.
         DateTime? expiry = FindExpiry(rewards);
 
         foreach (var reward in rewards)
             Apply(data, reward, expiry);
 
-        // Consumable mua lại được nên không ghi sở hữu, chỉ ghi loại mua-một-lần.
         if (IsOnceOnly(productId))
             data.SetOwned(productId, expiry);
 
@@ -139,7 +121,6 @@ public class MonetizationEntitlements : MonoBehaviour
         OnChanged?.Invoke();
     }
 
-    /// <summary>NonConsumable / Subscription = mua một lần, phải khoá nút sau khi sở hữu.</summary>
     static bool IsOnceOnly(string productId)
     {
         var products = Products;
@@ -159,19 +140,17 @@ public class MonetizationEntitlements : MonoBehaviour
             if (reward.RewardType != IAPRewardType.Subscription || reward.SubscriptionDays <= 0)
                 continue;
 
-            // Rút ngắn hạn khi đang test, để không phải chờ hết ngày thật.
             if (TestSubscriptionMinutes > 0f)
                 return DateTime.UtcNow.AddMinutes(TestSubscriptionMinutes);
 
             return DateTime.UtcNow.AddDays(reward.SubscriptionDays);
         }
 
-        return null; // vĩnh viễn
+        return null;
     }
 
     static void Apply(DataMonetization data, IAPReward reward, DateTime? expiry)
     {
-        // Tiền tệ đổ thẳng vào ví game (DataGamePlay), không giữ bản sao bên monetization.
         var wallet = Wallet;
 
         switch (reward.RewardType)
@@ -194,7 +173,6 @@ public class MonetizationEntitlements : MonoBehaviour
                 break;
 
             case IAPRewardType.Subscription:
-                // Thời hạn đã xử lý ở FindExpiry.
                 break;
 
             default:
@@ -215,19 +193,11 @@ public class MonetizationEntitlements : MonoBehaviour
 
     #region Query
 
-    static DataMonetization Data =>
-        DataSave.Instance != null ? DataSave.Instance.DataMonetization : null;
+    static DataMonetization Data => DataSave.Instance != null ? DataSave.Instance.DataMonetization : null;
 
-    /// <summary>Ví thật của game. Reward tiền tệ cộng thẳng vào đây.</summary>
-    static DataGamePlay Wallet =>
-        DataSave.Instance != null ? DataSave.Instance.DataGamePlay : null;
+    static DataGamePlay Wallet => DataSave.Instance != null ? DataSave.Instance.DataGamePlay : null;
 
-    static IAPProducts Products =>
-        IAPManager.Instance != null ? IAPManager.Instance.IAPProducts : null;
-
-    /// <summary>
-    /// Người chơi có đang được remove-ads không. Đọc từ local (có xét hạn) nên hoạt động cả khi offline.
-    /// </summary>
+    static IAPProducts Products => IAPManager.Instance != null ? IAPManager.Instance.IAPProducts : null;
     public static bool HasRemoveAds
     {
         get
@@ -237,17 +207,12 @@ public class MonetizationEntitlements : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Product loại mua-một-lần này còn hiệu lực không. Đọc local nên đúng ngay lúc mở app
-    /// và cả khi offline, không phải chờ store trả purchases.
-    /// </summary>
     public static bool IsOwned(string productId)
     {
         var data = Data;
         return data != null && data.IsOwned(productId);
     }
 
-    /// <summary>Hạn của một product. null = vĩnh viễn hoặc chưa sở hữu.</summary>
     public static DateTime? GetExpiry(string productId)
     {
         var data = Data;
@@ -258,7 +223,6 @@ public class MonetizationEntitlements : MonoBehaviour
     public static int Gem => Wallet != null ? Wallet.Gem : 0;
     public static int Shield => Wallet != null ? Wallet.Shield : 0;
 
-    /// <summary>Hạn remove-ads để hiển thị. null = vĩnh viễn hoặc chưa mua.</summary>
     public static DateTime? RemoveAdsExpiry
     {
         get
@@ -282,13 +246,6 @@ public class MonetizationEntitlements : MonoBehaviour
 
     const string KeyTestSubMinutes = "test_sub_minutes";
 
-    /// <summary>
-    /// Ép mọi subscription hết hạn sau X phút thay vì SubscriptionDays.
-    /// 0 = tắt, dùng số ngày thật khai trong IAPProducts.
-    ///
-    /// CHỈ rút ngắn hạn phía client. Gói trên store vẫn là weekly và store vẫn coi là đang active,
-    /// nên đây là để test logic hết hạn của game, không phải test luồng gia hạn của store.
-    /// </summary>
     public static float TestSubscriptionMinutes
     {
         get
@@ -296,7 +253,7 @@ public class MonetizationEntitlements : MonoBehaviour
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             return PlayerPrefs.GetFloat(KeyTestSubMinutes, 0f);
 #else
-            return 0f; // không bao giờ bật ở bản release
+            return 0f; 
 #endif
         }
         set
@@ -309,13 +266,8 @@ public class MonetizationEntitlements : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Khi đang test rút ngắn hạn thì chỉ tin dữ liệu local, bỏ qua store —
-    /// vì store vẫn báo sub còn active nên nút sẽ không bao giờ mở lại.
-    /// </summary>
     public static bool TrustLocalOnly => TestSubscriptionMinutes > 0f;
 
-    /// <summary>Xoá sạch quyền lợi + số dư. Dùng khi test lại từ đầu.</summary>
     public static void ResetForTesting()
     {
         if (DataSave.Instance == null) return;
