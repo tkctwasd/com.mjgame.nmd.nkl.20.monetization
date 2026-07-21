@@ -4,5 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
+public partial class DataMonetization
+{ }
 public partial class DataExample
 { }

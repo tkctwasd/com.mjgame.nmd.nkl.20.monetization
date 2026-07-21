@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 #region Monetization
 [Serializable]
-public class DataMonetization
+public partial class DataMonetization
 {
     public bool IsRemoveAdsPurchased;
 
