@@ -42,8 +42,8 @@ public class AdsManager : MonoBehaviour
         Instance = this;
 
 
-        InterstitialModule = new InterstitialModule(this, AdConstants.InterstitialId);
-        RewardedModule = new RewardedModule(this, AdConstants.RewardedId);
+        InterstitialModule = new InterstitialModule(this, AdConstants.InterstitialIdHigh, AdConstants.InterstitialIdMedium, AdConstants.InterstitialIdMain);
+        RewardedModule = new RewardedModule(this, AdConstants.RewardedIdHigh, AdConstants.RewardedIdMedium, AdConstants.RewardedIdMain);
         BannerModule = new BannerModule(this, AdConstants.BannerId);
         MRECModule = new MRECModule(this, AdConstants.MRECId);
         AppOpenModule = new AppOpenModule(this, AdConstants.AppOpenId);
@@ -64,6 +64,10 @@ public class AdsManager : MonoBehaviour
 #if USE_ADJUST
             AdjustManager.Instance.Init();
 #endif
+            // Bid Floor test: disable auto retries AFTER init (before init it crashes).
+            // We drive the retry loop ourselves via the HIGH -> MEDIUM -> MAIN waterfall.
+            DisableAutoRetries();
+
             AppOpenModule.Initialize();
             InterstitialModule.Initialize();
             BannerModule.Initialize();
@@ -74,6 +78,8 @@ public class AdsManager : MonoBehaviour
 #if USE_APPSFLYER
         MaxSdk.SetUserId(AppsFlyerSDK.AppsFlyer.getAppsFlyerId());
 #endif
+        // Bid Floor test: disable back-to-back BEFORE init so the manual waterfall controls loading.
+        DisableBackToBack();
         MaxSdk.InitializeSdk();
 
         callAOADismissed += OnAOADismissed;
@@ -132,6 +138,29 @@ public class AdsManager : MonoBehaviour
     public void SendAdRevenueTracker(AdInfo impressionData)
     {
         AdRevenueTracker.SendAllTracker(impressionData);
+    }
+
+    // Bid Floor test setup ------------------------------------------------
+
+    private void DisableBackToBack()
+    {
+        string ids = string.Join(",", new[]
+        {
+            AdConstants.InterstitialIdHigh, AdConstants.InterstitialIdMedium, AdConstants.InterstitialIdMain,
+            AdConstants.RewardedIdHigh, AdConstants.RewardedIdMedium, AdConstants.RewardedIdMain
+        });
+        MaxSdk.SetExtraParameter("disable_b2b_ad_unit_ids", ids);
+    }
+
+    private void DisableAutoRetries()
+    {
+        MaxSdk.SetInterstitialExtraParameter(AdConstants.InterstitialIdHigh, "disable_auto_retries", "true");
+        MaxSdk.SetInterstitialExtraParameter(AdConstants.InterstitialIdMedium, "disable_auto_retries", "true");
+        MaxSdk.SetInterstitialExtraParameter(AdConstants.InterstitialIdMain, "disable_auto_retries", "true");
+
+        MaxSdk.SetRewardedAdExtraParameter(AdConstants.RewardedIdHigh, "disable_auto_retries", "true");
+        MaxSdk.SetRewardedAdExtraParameter(AdConstants.RewardedIdMedium, "disable_auto_retries", "true");
+        MaxSdk.SetRewardedAdExtraParameter(AdConstants.RewardedIdMain, "disable_auto_retries", "true");
     }
 
 

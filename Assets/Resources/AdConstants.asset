@@ -22,7 +22,11 @@ MonoBehaviour:
   AppOpenId: app-open-id
   BannerId: banner-id
   MRECId: mrec-id
-  InterstitialId: interstitial-id
-  RewardedId: rewarded-id
+  InterstitialIdHigh: interstitial-high-id
+  InterstitialIdMedium: interstitial-medium-id
+  InterstitialIdMain: interstitial-main-id
+  RewardedIdHigh: rewarded-high-id
+  RewardedIdMedium: rewarded-medium-id
+  RewardedIdMain: rewarded-main-id
   bannerPosition: 7
   mrecPosition: 0

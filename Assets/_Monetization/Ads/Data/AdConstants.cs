@@ -25,8 +25,12 @@ public class AdConstants : ScriptableObject
     [ColorLabel(1f, 0.65f, 0f)] public string AppOpenId = "app-open-id";
     [ColorLabel(1f, 0.65f, 0f)] public string BannerId = "banner-id";
     [ColorLabel(1f, 0.65f, 0f)] public string MRECId = "mrec-id";
-    [ColorLabel(1f, 0.65f, 0f)] public string InterstitialId = "interstitial-id";
-    [ColorLabel(1f, 0.65f, 0f)] public string RewardedId = "rewarded-id";
+    [ColorLabel(1f, 0.65f, 0f)] public string InterstitialIdHigh = "interstitial-high-id";
+    [ColorLabel(1f, 0.65f, 0f)] public string InterstitialIdMedium = "interstitial-medium-id";
+    [ColorLabel(1f, 0.65f, 0f)] public string InterstitialIdMain = "interstitial-main-id";
+    [ColorLabel(1f, 0.65f, 0f)] public string RewardedIdHigh = "rewarded-high-id";
+    [ColorLabel(1f, 0.65f, 0f)] public string RewardedIdMedium = "rewarded-medium-id";
+    [ColorLabel(1f, 0.65f, 0f)] public string RewardedIdMain = "rewarded-main-id";
 
     [Header("Banner")]
     public MaxSdkBase.AdViewPosition bannerPosition = MaxSdkBase.AdViewPosition.BottomCenter;

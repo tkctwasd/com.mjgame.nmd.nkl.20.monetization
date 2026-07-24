@@ -476,6 +476,7 @@ MonoBehaviour:
   imgLoadingProgress: {fileID: 6694184564515232241}
   slider: {fileID: 751064082925712753}
   Duration: 2
+  ShowAOATime: 1.5
 --- !u!1 &1104706581786797618
 GameObject:
   m_ObjectHideFlags: 0
@@ -488,7 +489,6 @@ GameObject:
   - component: {fileID: 3069647966540490328}
   - component: {fileID: 3163187858760367380}
   - component: {fileID: 4748668194561786194}
-  - component: {fileID: 4924098371455914548}
   m_Layer: 5
   m_Name: PanelShop
   m_TagString: Untagged
@@ -571,31 +571,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &4924098371455914548
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1104706581786797618}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b1026271af8fc6d45998a09215ff7c43, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  panelId: IAPPack
-  elementGroups: []
-  canvasGroup: {fileID: 4748668194561786194}
-  packButtonPrefab: {fileID: 7098284310344626293, guid: 37cb5d2a5dd660e48a10d90477b5d62c, type: 3}
-  contentParent: {fileID: 4261153066284447616}
-  statusText: {fileID: 3601528550949020790}
-  coinText: {fileID: 6639366152841485727}
-  gemText: {fileID: 2277338012699997472}
-  shieldText: {fileID: 7048476705452891611}
-  removeAdsText: {fileID: 3420472166970071057}
-  restoreButton: {fileID: 4860976655990164006}
-  closeButton: {fileID: 1577004987665162338}
-  resetButton: {fileID: 2757748380860133543}
 --- !u!1 &1110560488982190034
 GameObject:
   m_ObjectHideFlags: 0
@@ -3200,7 +3175,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9364c9146d84c949943cda0e957de3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isLoadingOnAwake: 1
+  isLoadingOnAwake: 0
   DurationLoading: 10
   TimeLoadAppOpen: 5
   OnProgressPercent:

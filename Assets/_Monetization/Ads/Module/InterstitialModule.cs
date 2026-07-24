@@ -6,14 +6,21 @@ using System.Collections;
 public class InterstitialModule
 {
     public AdsManager ApplovinManager;
-    private string intersId = "inters-id";
+
+    private enum Tier { High, Medium, Main }
+    private readonly string intersIdHigh;
+    private readonly string intersIdMedium;
+    private readonly string intersIdMain;
     internal Action callBackInters;
     internal int intersRetry;
     internal string interLocation;
-    public InterstitialModule(AdsManager applovinMaxManager, string intersId)
+
+    public InterstitialModule(AdsManager applovinMaxManager, string intersIdHigh, string intersIdMedium, string intersIdMain)
     {
         ApplovinManager = applovinMaxManager;
-        this.intersId = intersId;
+        this.intersIdHigh = intersIdHigh;
+        this.intersIdMedium = intersIdMedium;
+        this.intersIdMain = intersIdMain;
     }
 
     #region Interstitial
@@ -36,15 +43,59 @@ public class InterstitialModule
         LoadInterstitial();
     }
 
+    // Begin (or restart) the waterfall from HIGH. Idempotent: does nothing if an ad is already ready.
     public void LoadInterstitial()
     {
-        if (MaxSdk.IsInitialized())
+        if (!MaxSdk.IsInitialized())
+            return;
+        if (IsAnyTierReady())
+            return;
+
+        intersRetry = 0;
+        LoadTier(Tier.High);
+    }
+
+    private void LoadTier(Tier tier)
+    {
+        string id = GetId(tier);
+        if (MaxSdk.IsInterstitialReady(id))
+            return;
+        MaxSdk.LoadInterstitial(id);
+    }
+
+    private string GetId(Tier tier)
+    {
+        switch (tier)
         {
-            if (!MaxSdk.IsInterstitialReady(intersId))
-            {
-                MaxSdk.LoadInterstitial(intersId);
-            }
+            case Tier.High: return intersIdHigh;
+            case Tier.Medium: return intersIdMedium;
+            default: return intersIdMain;
         }
+    }
+
+    private bool TryGetTier(string adUnitId, out Tier tier)
+    {
+        if (adUnitId == intersIdHigh) { tier = Tier.High; return true; }
+        if (adUnitId == intersIdMedium) { tier = Tier.Medium; return true; }
+        if (adUnitId == intersIdMain) { tier = Tier.Main; return true; }
+        tier = Tier.Main;
+        return false;
+    }
+
+    private bool IsAnyTierReady()
+    {
+        return MaxSdk.IsInterstitialReady(intersIdHigh)
+            || MaxSdk.IsInterstitialReady(intersIdMedium)
+            || MaxSdk.IsInterstitialReady(intersIdMain);
+    }
+
+    // Highest available tier to show: HIGH -> MEDIUM -> MAIN.
+    private string GetReadyTierId()
+    {
+        if (MaxSdk.IsInterstitialReady(intersIdHigh)) return intersIdHigh;
+        if (MaxSdk.IsInterstitialReady(intersIdMedium)) return intersIdMedium;
+        if (MaxSdk.IsInterstitialReady(intersIdMain)) return intersIdMain;
+        return null;
     }
 
     public bool CanShowInterstitial()
@@ -63,7 +114,7 @@ public class InterstitialModule
         bool timestampInterReward = (DateTime.UtcNow - ApplovinManager.LastTimeShowReward).TotalSeconds >= config.TimestampInterReward;
         bool timestampInterAOA = (DateTime.UtcNow - ApplovinManager.LastTimeShowAOA).TotalSeconds >= config.TimestampInterAppOpen;
 
-        return MaxSdk.IsInitialized() && MaxSdk.IsInterstitialReady(intersId) && passedCappingTime && delayTime && timestampInterAOA && timestampInterReward;
+        return MaxSdk.IsInitialized() && IsAnyTierReady() && passedCappingTime && delayTime && timestampInterAOA && timestampInterReward;
     }
 
 
@@ -78,7 +129,7 @@ public class InterstitialModule
             AdAnalytic.LogAd("show_interstitial_success", location);
             callBackInters = callBack;
             ApplovinManager.IsShowAds = true;
-            MaxSdk.ShowInterstitial(intersId);
+            MaxSdk.ShowInterstitial(GetReadyTierId());
         }
         else
         {
@@ -90,16 +141,44 @@ public class InterstitialModule
 
     private void InterstitialOnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
     {
+        if (!TryGetTier(adUnitId, out _))
+            return;
+
+        // Got fill: stop the waterfall here, this tier will be shown.
         intersRetry = 0;
         Debug.Log("Interstitial".Ads($"Ad Loaded"));
     }
 
     private void InterstitialOnAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
     {
-        intersRetry++;
-        double retryDelay = Math.Pow(2, Math.Min(6, intersRetry));
-        ApplovinManager.StartCoroutine(IELoadDelay((float)retryDelay));
+        if (!TryGetTier(adUnitId, out Tier tier))
+            return;
+
         Debug.Log("Interstitial".Ads($"Ad Load Failed: {errorInfo.Message}"));
+
+        switch (tier)
+        {
+            case Tier.High:
+                LoadTier(Tier.Medium);
+                break;
+            case Tier.Medium:
+                LoadTier(Tier.Main);
+                break;
+            case Tier.Main:
+                intersRetry++;
+                if (intersRetry < 3)
+                {
+                    float retryDelay = Mathf.Pow(2, intersRetry);
+                    ApplovinManager.StartCoroutine(IERetryCycle(retryDelay));
+                }
+                break;
+        }
+    }
+
+    private IEnumerator IERetryCycle(float time)
+    {
+        yield return new WaitForSeconds(time);
+        LoadTier(Tier.High);
     }
 
     private void InterstitialOnAdDisplayedEvent(string adUnitID, MaxSdkBase.AdInfo adInfo)
