@@ -1,0 +1,23 @@
+{
+    "name": "com.mjgame.nmd.nkl.20.monetization",
+    "rootNamespace": "",
+    "references": [
+        "com.mjgame.nmd.nkl.20",
+        "MaxSdk.Scripts",
+        "MaxSdk.Scripts.IntegrationManager.Editor",
+        "Unity.Purchasing",
+        "Unity.Services.Core",
+        "Unity.Services.Core.Environments",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

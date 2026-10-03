@@ -1,0 +1,23 @@
+{
+  "AdsConfig": {
+    "ShowAppOpen": true,
+    "ShowInterstitial": true,
+    "ShowBanner": true,
+    "ShowMREC": true,
+    "ShowReward": true,
+    "InterstitialCappingTime": 15,
+    "AppOpenCappingTime": 20,
+    "TimestampInterReward": 2,
+    "TimestampInterAppOpen": 2,
+    "SwitchBannerMREC": true,
+    "DurationLoading": 10,
+    "TimeLoadAppOpen": 5,
+    "TimeDelayInterstitial": 5,
+    "InterstitialOnClose": true
+  },
+  "PopupRate": {
+    "MaxShowCount": 2,
+    "CanShowRate": false,
+    "ShowAppleStore": false
+  }
+}

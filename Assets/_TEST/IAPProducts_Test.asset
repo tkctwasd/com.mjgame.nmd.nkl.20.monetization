@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ddeacacd543954ab211f18041409ab, type: 3}
+  m_Name: IAPProducts_Test
+  m_EditorClassIdentifier: 
+  products:
+  - ProductId: com.yourgame.money_small
+    ProductType: 0
+    RemoveAds: 0
+    Title: Small Money Pack
+    Description: A small bundle of money for quick upgrades.
+    LocalizedPrice: 
+    Rewards: []
+  - ProductId: com.yourgame.remove_ads
+    ProductType: 1
+    RemoveAds: 1
+    Title: Remove Ads
+    Description: Permanently remove ads from the game.
+    LocalizedPrice: 
+    Rewards: []
+  - ProductId: com.yourgame.monthly_vip
+    ProductType: 2
+    RemoveAds: 0
+    Title: Monthly VIP
+    Description: Subscribe for VIP perks for 30 days.
+    LocalizedPrice: 
+    Rewards: []
