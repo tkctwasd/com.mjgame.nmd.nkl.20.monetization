@@ -12,17 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 407a26058b2630a428ee6538cd8dcd95, type: 3}
   m_Name: AdConstants_Test
   m_EditorClassIdentifier: 
-  SdkKey: sdk-key
+  SdkKey: bZncTTqqX6Kebm0dMxUgLHPAC7HVzkQo4iVz2zT32odFJeB7qTQbIf2SfSB9Q65Q3lhWc0EI9OEDhFyxrxo7f2
   AdmobAndroidAppId: admob-android-id
-  AdmobIosAppId: admob-ios-id
-  GameName: Your Game Name
-  PackageName: com.yourcompany.yourgame
-  PrivacyPolicyURL: https://yourcompany.com/privacy
-  TermsURL: https://yourcompany.com/terms
-  AppOpenId: app-open-id
-  BannerId: banner-id
-  MRECId: mrec-id
-  InterstitialId: interstitial-id
-  RewardedId: rewarded-id
+  AdmobIosAppId: ca-app-pub-6699289089504508~8454963257
+  GameName: Cheesy Key Switch Escape
+  PackageName: com.cheese.key2026
+  PrivacyPolicyURL: https://doc-hosting.flycricket.io/nguyn-van-ha-privacy-policy/3f4145a0-1d4d-47b6-82fb-396325feee3b/privacy
+  TermsURL: https://doc-hosting.flycricket.io/nguyn-van-ha-terms-of-use/29ebb85b-f369-4f06-a352-f82845bfe5c3/terms
+  AppOpenId: 051163c16533a8a5
+  BannerId: 591aaa223c2908fa
+  MRECId: 7b8c9a376453710b
+  InterstitialId: d25c52bba89327b2
+  RewardedId: 827540ae9ce4d8f6
   bannerPosition: 7
   mrecPosition: 0
