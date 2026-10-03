@@ -1,93 +1,274 @@
-# ads
+# mindongun — Monetization
 
+| | |
+|---|---|
+| Package | `com.mjgame.nmd.nkl.20.monetization` |
+| Ten hien thi | mindongun Monetization |
+| Phien ban | **1.0.0** (2026-10-03) |
+| Unity | 2022.3 tro len |
+| Phu thuoc | Core `com.mjgame.nmd.nkl.20` 2.0.x |
+| Tac gia | mindongun |
 
+Package kiem tien dung chung cho game mobile Unity: quang cao (AppLovin MAX), IAP (Unity IAP v5),
+Firebase Analytics / Remote Config, tracking doanh thu qua Adjust / AppsFlyer va In-App Review.
+Package la **assembly rieng**, chi tham chieu Core, **khong goi toi class nao cua game**.
 
-## Getting started
+## Muc luc
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+1. [Cai dat](#cai-dat)
+2. [Assembly va define](#assembly-va-define)
+3. [Bat dau nhanh](#bat-dau-nhanh)
+4. [Save (DataMonetization)](#save-datamonetization)
+5. [Ads](#ads)
+6. [IAP](#iap)
+7. [Firebase va Remote Config](#firebase-va-remote-config)
+8. [In-App Review](#in-app-review)
+9. [Event analytics](#event-analytics)
+10. [Cach game cam vao package](#cach-game-cam-vao-package)
+11. [Xu ly loi thuong gap](#xu-ly-loi-thuong-gap)
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+---
 
-## Add your files
+## Cai dat
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+### Thu vien can co
+
+| Thu vien | Bat buoc | Cach co |
+|---|---|---|
+| Core `com.mjgame.nmd.nkl.20` | Co | `package.json` (cai Core truoc) |
+| Unity IAP (`com.unity.purchasing`) | Co | `package.json` (5.4.4) |
+| TextMeshPro, uGUI, Newtonsoft Json | Co | `package.json` |
+| **AppLovin MAX SDK** | Co | Import rieng (can `MaxSdk.Scripts.asmdef`) |
+| **Firebase** Analytics, Remote Config (Crashlytics tuy chon) | Co | Import rieng (`.unitypackage`) |
+| Adjust | Khong | Import rieng + define `USE_ADJUST` |
+| AppsFlyer | Khong | Import rieng + define `USE_APPSFLYER` |
+| Google Play In-App Review | Khi build Android | Import rieng (`com.google.play.review`) |
+
+### Cach dua vao project
+
+- **Chep vao `Assets/`**: chep ca folder, dam bao Core cung co trong project.
+- **Package qua git**: day folder len git rieng, them vao `Packages/manifest.json`:
+  `"com.mjgame.nmd.nkl.20.monetization": "<git-url>"`. Core phai duoc cai truoc.
+
+GUID file khong doi khi chuyen giua 2 cach, prefab va scene khong mat tham chieu.
+
+---
+
+## Assembly va define
+
+| Assembly | File | Nen tang | Tham chieu |
+|---|---|---|---|
+| `com.mjgame.nmd.nkl.20.monetization` | `Runtime/com.mjgame.nmd.nkl.20.monetization.asmdef` | Tat ca | Core, MaxSdk.Scripts, MaxSdk.Scripts.IntegrationManager.Editor, Unity.Purchasing, Unity.Services.Core(.Environments), Unity.TextMeshPro, UnityEngine.UI |
+| `com.mjgame.nmd.nkl.20.monetization.Editor` | `Editor/com.mjgame.nmd.nkl.20.monetization.Editor.asmdef` | Editor | Runtime + cac thu vien tren |
+
+- Ca 2 deu `autoReferenced`: code game (Assembly-CSharp) dung duoc ngay.
+- Firebase, Newtonsoft la DLL tu dong tham chieu, khong can khai bao.
+- Adjust / AppsFlyer: khi bat define, SDK phai co asmdef va **phai them ten asmdef do vao `references`** cua Runtime asmdef.
+
+| Define | Tac dung |
+|---|---|
+| `USE_IAP` | Bat toan bo IAP (`IAPManager`, callback, editor test) |
+| `USE_ADJUST` | Bat `AdjustManager` + gui doanh thu ads/IAP sang Adjust |
+| `USE_APPSFLYER` | Bat `AppsFlyerManager` + gui doanh thu ads/IAP sang AppsFlyer |
+
+Dat define trong `Project Settings > Player > Scripting Define Symbols` cho **tung nen tang**.
+
+Cau truc:
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/dongnm/ads.git
-git branch -M main
-git push -uf origin main
+Runtime/   AdsManager, Ads/Module, IAP, Firebase*, RemoteConfigManager, Adjust/AppsFlyer, Store, Attribute, Data
+Editor/    Ads/AdsEditor, IAP/IAPEditor, IAP/IAPTestEditor
+Samples~/  DataSaveBridge (DataSave mau + MonetizationBridge)
 ```
 
-## Integrate with your tools
+---
 
-- [ ] [Set up project integrations](https://gitlab.com/dongnm/ads/-/settings/integrations)
+## Bat dau nhanh
 
-## Collaborate with your team
+1. Cai Core, MAX SDK, Firebase; them `google-services.json` / `GoogleService-Info.plist`.
+2. Tao `AdConstants` (`Create > Ads > Ad Constants`), dien SDK key, ad unit id, bam **Apply Ad Ids**.
+3. Neu dung IAP: tao `IAPProducts` (`Create > IAP > IAP Products`), bat `USE_IAP`.
+4. Dat vao scene dau (hoac prefab load tu Bootstrap): `FirebaseManager`, `FirebaseAnalyticManager`,
+   `RemoteConfigManager`, `AdsManager` (gan `AdConstants`), `IAPManager` (gan `IAPProducts`).
+5. Import sample **DataSave & Bridge** tu Package Manager, sua `DataSave` cua game theo mau
+   (xem [Save](#save-datamonetization)), gan `MonetizationBridge` de noi Ads/IAP voi UI.
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+---
 
-## Test and Deploy
+## Save (DataMonetization)
 
-Use the built-in continuous integration in GitLab.
+Package khong tu luu. Data nam trong `DataSave` cua game (quy uoc Core: **mot file save duy nhat**).
+Vi package khong thay duoc `DataSave`, no doc qua static `DataMonetization.Current`
+(cung pattern voi `DataSetting.Current` cua Core).
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+| Thanh vien | Mo ta |
+|---|---|
+| `DataMonetization.Current` | Instance dang dung. Mac dinh la object rong, game gan lai sau khi load |
+| `IsRemoveAdsPurchased` | Da mua Remove Ads |
+| `RemoveAdsPurchased()` | Bat co Remove Ads |
 
-***
+`DataSave` cua game (giong `Samples~/DataSaveBridge/DataSave.cs`):
 
-# Editing this README
+```csharp
+public class DataSave : SaveBase<DataSave>
+{
+    private const string KEY_MONETIZATION = "data_monetization_fls";
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+    public DataMonetization DataMonetization { get; private set; }
 
-## Suggestions for a good README
+    // Package chi doc DataMonetization.Current, khong goi DataSave.Instance,
+    // nen phai tu tao DataSave khi vao game de load/save chay.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void Bootstrap() => _ = Instance;
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+    protected override void OnLoadGame()
+    {
+        DataMonetization = JsonDataUtility.LoadData<DataMonetization>(KEY_MONETIZATION) ?? new DataMonetization();
+        DataMonetization.Current = DataMonetization;
+    }
 
-## Name
-Choose a self-explaining name for your project.
+    protected override void OnSaveGame() => JsonDataUtility.SaveData(KEY_MONETIZATION, DataMonetization);
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+    protected override void OnNewGame()
+    {
+        DataMonetization = new DataMonetization();
+        DataMonetization.Current = DataMonetization;
+    }
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+    protected override void OnDeleteSave() => JsonDataUtility.DeleteData(KEY_MONETIZATION);
+}
+```
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+- Neu game da load `DataSave` bang prefab trong Bootstrap thi khong can ham `Bootstrap()` o tren.
+- Key `data_monetization_fls` chi xuat hien trong PlayerPrefs sau lan `SaveGame()` dau tien
+  (Core tu save khi pause / mat focus / thoat, hoac `NewGame()`).
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+---
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+## Ads
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+**`AdsManager`** (MonoBehaviour, gan `AdConstants`): khoi tao MAX SDK va tao cac module.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+| Module | API chinh |
+|---|---|
+| `AppOpenModule` | `CanShowAOA(isLoading)`, `ShowAppOpen(isLoading)` |
+| `InterstitialModule` | `CanShowInterstitial(popupClose)`, `ShowInterstitial(location, callback, popupClose)` |
+| `RewardedModule` | `ShowRewarded(location, onDone, onFail)` |
+| `BannerModule` | `ShowBanner()`, `HideBanner()`, `CanShowBanner()` |
+| `MRECModule` | `ShowMREC()`, `HideMREC(isTemporary)`, `ResumeMREC()`, `CanShowMREC()` |
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+Khac:
+- `IsRemoveAdsPurchased`: true neu da mua Remove Ads (IAP hoac `DataMonetization.Current`). Interstitial/banner/AOA tu bo qua.
+- Event `OnResumeRequested`, `OnResumeCompleted`: game hien/an panel cho khi quay lai app (xem `MonetizationBridge`).
+- `AdsManager.GetAdsConfig()`: capping/delay doc tu Remote Config.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+```csharp
+AdsManager.Instance.InterstitialModule.ShowInterstitial("level_complete", () => LoadNextLevel());
+AdsManager.Instance.RewardedModule.ShowRewarded("double_coin", () => AddCoin(x2), () => ShowToast("Ad chua san sang"));
+```
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+**Doanh thu**: callback revenue cua MAX → `AdsManager.SendAdRevenueTracker` → `AdRevenueTracker.SendAllTracker`
+gui toi Firebase (`ad_impression`), Adjust (`USE_ADJUST`), AppsFlyer (`USE_APPSFLYER`).
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+---
 
-## License
-For open source projects, say how it is licensed.
+## IAP
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Can define `USE_IAP`.
+
+**`IAPManager`** (gan `IAPProducts`): khoi tao Unity Services → build catalog → connect store → fetch product.
+
+| Thanh vien | Mo ta |
+|---|---|
+| `IsConnected`, `IsProductsReady`, `IsPurchasesReady` | Trang thai |
+| `PurchaseModule` | Mua / tra cuu (bang duoi) |
+| `RestorePurchases(callback)` | Khoi phuc (iOS) |
+| Event `OnProductsReady`, `OnProductsFetchFailed`, `OnPurchasesReady` | Catalog |
+| Event `OnProductDelivered(productId, order)` | **Game giao hang o day** |
+| Event `OnPurchaseFailedEvent`, `OnRestoreComplete`, `OnPurchaseFlowChanged(isPurchasing)` | Ket qua / chan input khi dang mua |
+
+`IAPPurchaseModule`: `Purchase(productId)`, `Purchase(productId, (id, ok) => ...)`, `FindProduct`, `GetLocalizedPrice`,
+`IsPurchased`, `IsRemoveAdsPurchased`, `RestorePurchases`, `ConfirmPendingPurchase`.
+
+`IAPProducts` (SO): danh sach `IAPProduct` (`ProductId`, `ProductType`, `RemoveAds`, `Title`, `Description`, `Rewards`).
+Product co `RemoveAds = true` se bat `DataMonetization.Current.IsRemoveAdsPurchased` khi mua thanh cong.
+
+`IAPButtonUI`: gan len `Button`, chon product id, tu hien gia va goi mua.
+
+Luong mua:
+
+```mermaid
+flowchart TD
+    UI[Bam mua] -->|Purchase| PurchaseModule --> StoreService
+    StoreService --> Pending[OnPurchasePending] -->|iap_purchase_attempt| IAPAnalytic
+    Pending --> Confirm[ConfirmPurchase] --> Confirmed[OnPurchaseConfirmed]
+    Confirmed -->|doanh thu| IAPRevenueTracker --> Firebase & Adjust & AppsFlyer
+    Confirmed --> Deliver[OnProductDelivered → game giao hang]
+    StoreService --> Failed[OnPurchaseFailed] -->|iap_purchase_failed| IAPAnalytic
+```
+
+Tool Editor: Inspector `IAPManager` (`IAPEditor`) va checklist test IAP (`IAPTestEditor`).
+
+---
+
+## Firebase va Remote Config
+
+| Class | Mo ta |
+|---|---|
+| `FirebaseManager` | Kiem tra dependency, khoi tao Firebase. Event static `InitDone` |
+| `FirebaseAnalyticManager` | `LogEvent(name, params)`; builder `LogEventParameter.Create(name).AddParam(k, v).Send()` |
+| `RemoteConfigManager` | Fetch Remote Config. `GetConfigValue<T>(key)`, `GetAllRemoteConfigValues()`, event `ActionFetchDone` |
+
+Gia tri mac dinh cua Remote Config doc tu `Resources/RemoteConfig_Android.json`, `RemoteConfig_iOS.json`
+(hoac `RemoteConfig.json` tren Editor/nen tang khac).
+
+---
+
+## In-App Review
+
+`AppReviewManager : Singleton<AppReviewManager>` — `ShowInAppReview(onDone)`.
+Android dung Google Play In-App Review, iOS dung `Device.RequestStoreReview`. Chi hien khi Remote Config `PopupRate.CanShowRate = true`.
+
+---
+
+## Event analytics
+
+| Nhom | Event |
+|---|---|
+| Ads | `show_interstitial_ads`, `show_interstitial_success`, `show_interstitial_click`, `show_rewarded_ads`, `show_rewarded_ads_sucess`, `show_rewarded_ads_click`, `show_rewarded_ads_completed`, `show_banner_ads`, `show_banner_ads_click`, `show_app_open_ads`, `show_app_open_ads_success`, `show_app_open_ads_click`, `show_mrec_ads`, `show_mrec_ads_click` |
+| Doanh thu ads | `ad_impression` |
+| IAP | `iap_purchase_attempt` (luc pending, khong phai luc bam), `iap_purchase_success`, `iap_purchase_failed`, `iap_restore_start`, `iap_restore_complete` |
+
+Ten event da thong nhat voi team UA; doi ten thi bao truoc. Can event "bam mua" thi them trong `IAPButtonUI` hoac `IAPPurchaseModule.Purchase`.
+
+---
+
+## Cach game cam vao package
+
+| Package can gi | Game lam gi |
+|---|---|
+| Luu Remove Ads | `DataSave` giu `DataMonetization`, gan `DataMonetization.Current` |
+| Panel resume khi quay lai app | Nghe `AdsManager.OnResumeRequested/OnResumeCompleted` (`MonetizationBridge`) |
+| Chan input khi dang mua | Nghe `IAPManager.OnPurchaseFlowChanged` |
+| Giao hang IAP | Nghe `IAPManager.OnProductDelivered` |
+| Product, ad unit, SDK key | SO `IAPProducts`, `AdConstants` |
+| Capping ads | Remote Config + file JSON trong `Resources` |
+
+Log cua package dung extension `MonetLogMessage`: `"AdsManager".Ads("...")`, `.IAP(...)`, `.Firebase(...)`.
+
+---
+
+## Xu ly loi thuong gap
+
+| Trieu chung | Nguyen nhan / cach sua |
+|---|---|
+| `The name 'DataSave' does not exist` trong package | Code cu goi `DataSave.Instance.DataMonetization`. Doi sang `DataMonetization.Current` |
+| PlayerPrefs khong co key `data_monetization_fls` | `DataSave` chua duoc tao (them `Bootstrap()` hoac prefab), hoac chua save lan nao (dung Play/mat focus de save) |
+| Remove Ads mat sau khi mo lai game | `OnLoadGame` khong load tu `JsonDataUtility` hoac quen gan `DataMonetization.Current` |
+| `'LogMessage' does not contain a definition for 'Ads'` | Goi tinh `LogMessage.Ads(...)`; doi thanh `MonetLogMessage.Ads(...)` |
+| `namespace 'IntegrationManager' does not exist` | Thieu tham chieu `MaxSdk.Scripts.IntegrationManager.Editor` trong asmdef |
+| `AdjustSdk` / `AppsFlyerSDK` not found khi bat define | Them asmdef cua SDK vao `references` cua Runtime asmdef |
+| `Google.Play.Review` not found khi build Android | Chua import Google Play In-App Review |
+| IAP khong chay | Chua bat `USE_IAP` cho nen tang dang build |
+
+Lich su thay doi: xem [CHANGELOG.md](CHANGELOG.md).

@@ -1,0 +1,32 @@
+{
+  "name": "com.mjgame.nmd.nkl.20.monetization",
+  "version": "1.0.0",
+  "displayName": "mindongun Monetization",
+  "description": "Ads (AppLovin MAX), IAP (Unity IAP v5), Firebase Analytics/RemoteConfig, Adjust/AppsFlyer revenue tracking va In-App Review cho game mobile Unity.\n\nCan import rieng: AppLovin MAX SDK, Firebase (Analytics, RemoteConfig, Crashlytics). Tuy chon: Adjust (USE_ADJUST), AppsFlyer (USE_APPSFLYER), Google Play In-App Review. Bat IAP bang define USE_IAP.\n\nGame tu luu DataMonetization trong DataSave va gan DataMonetization.Current (xem Samples).",
+  "unity": "2022.3",
+  "author": {
+    "name": "mindongun"
+  },
+  "keywords": [
+    "monetization",
+    "ads",
+    "iap",
+    "applovin",
+    "firebase",
+    "unity"
+  ],
+  "dependencies": {
+    "com.mjgame.nmd.nkl.20": "2.0.0",
+    "com.unity.purchasing": "5.4.4",
+    "com.unity.textmeshpro": "3.0.7",
+    "com.unity.ugui": "1.0.0",
+    "com.unity.nuget.newtonsoft-json": "3.2.2"
+  },
+  "samples": [
+    {
+      "displayName": "DataSave & Bridge",
+      "description": "DataSave mau luu DataMonetization va MonetizationBridge noi Ads/IAP voi UI cua game.",
+      "path": "Samples~/DataSaveBridge"
+    }
+  ]
+}
