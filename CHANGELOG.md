@@ -4,6 +4,17 @@ All notable changes to this package will be documented in this file.
 
 ---
 
+## [1.1.0] - 2026-10-14
+
+### Changed
+
+* Ads: `AdsManager.IsShowFirstAOA` / `IsCloseFirstAOA` doi thanh property `public get` / `internal set` -> game doc duoc trang thai AppOpen (vd cho AOA dau tien dong roi moi hien UI), khong sua duoc.
+* Ads: bo `[Header]` tren cac field `internal` khong serialize trong `AdsManager` (khong co tac dung tren Inspector).
+
+### Removed
+
+* Attribute trung voi Core: `Button`, `ReadOnly`, `ShowIf`, `ColorLabel` (`Runtime/Attribute/`). Dung ban trong Core `com.mjgame.nmd.nkl.20` (het loi trung type khi cai ca 2 package).
+
 # [1.0.0] - 2026-10-03
 
 > [!IMPORTANT]

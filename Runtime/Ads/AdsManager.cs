@@ -14,14 +14,12 @@ public class AdsManager : MonoBehaviour
     public RewardedModule RewardedModule;
     public AdRevenueTracker AdRevenueTracker;
 
-    [Header("Ads")]
     internal bool IsShowAds;
     internal DateTime TimeStart;
 
-    [Header("AppOpen")]
-    internal bool IsCloseFirstAOA;
+    public bool IsCloseFirstAOA { get; internal set; }
     internal bool IsCanShowAOABackGame;
-    internal bool IsShowFirstAOA;
+    public bool IsShowFirstAOA { get; internal set; }
     internal DateTime LastTimeShowAOA;
     internal Action callAOADismissed;
     public event Action OnResumeRequested;
