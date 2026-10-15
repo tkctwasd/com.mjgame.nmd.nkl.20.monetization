@@ -1,6 +1,6 @@
 {
   "name": "com.mjgame.nmd.nkl.20.monetization",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "displayName": "mindongun Monetization",
   "description": "Ads (AppLovin MAX), IAP (Unity IAP v5), Firebase Analytics/RemoteConfig, Adjust/AppsFlyer revenue tracking va In-App Review cho game mobile Unity.\n\nCan import rieng: AppLovin MAX SDK, Firebase (Analytics, RemoteConfig, Crashlytics). Tuy chon: Adjust (USE_ADJUST), AppsFlyer (USE_APPSFLYER), Google Play In-App Review. Bat IAP bang define USE_IAP.\n\nGame tu luu DataMonetization trong DataSave va gan DataMonetization.Current (xem Samples).",
   "unity": "2022.3",

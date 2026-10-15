@@ -4,6 +4,15 @@ All notable changes to this package will be documented in this file.
 
 ---
 
+
+
+## [1.1.0] - 2026-10-14
+
+### Changed
+
+* AdsConfig: remove key, config old
+
+
 ## [1.1.0] - 2026-10-14
 
 ### Changed

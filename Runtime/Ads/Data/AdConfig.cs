@@ -20,20 +20,11 @@ public class AdsConfig
     public bool InterstitialOnClose = true;
 }
 
-[Serializable]
-public class AdsPopupSetting
-{
-    public bool ButtonClose = false;
-    public bool ButtonReset = false;
-}
 
 public static class RemoteKey
 {
     public static string AdsConfig = "AdsConfig";
-    public static string AdsPopupSetting = "AdsPopupSetting";
-    public static string AdsPopup = "AdsPopup";
     public static string PopupRate = "PopupRate";
-    public static string BaseConfig = "BaseConfig";
 }
 [Serializable]
 public class PopupRate
@@ -43,9 +34,3 @@ public class PopupRate
     public bool ShowAppleStore = false;
 }
 
-
-[Serializable]
-public class BaseConfig
-{
-    public bool IconAd = false;
-}
