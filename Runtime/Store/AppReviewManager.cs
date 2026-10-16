@@ -1,34 +1,44 @@
-#if UNITY_ANDROID
+#if UNITY_ANDROID && USE_GOOGLE_REVIEW
 using Google.Play.Review;
 #endif
 using System;
 using System.Collections;
 using UnityEngine;
 
-public class AppReviewManager : Singleton<AppReviewManager>
+public class AppReviewManager : MonoBehaviour
 {
-#if UNITY_ANDROID
+    public static AppReviewManager Ins;
+#if UNITY_ANDROID && USE_GOOGLE_REVIEW
     private ReviewManager reviewManager;
     private PlayReviewInfo playReviewInfo;
 #endif
-
+    float nextTimeCanShow = 0f;
+    float delayShowAgain = 180f;
+    private void Awake()
+    {
+        Ins = this;
+        DontDestroyOnLoad(gameObject);
+    }
     public void ShowInAppReview(Action completedShow = null)
     {
-        if (ShouldShowRatePopup())
+        if(Time.time < nextTimeCanShow)
         {
-#if UNITY_IOS
-            AppReviewiOS(completedShow);
-#elif UNITY_ANDROID
-        AppReviewAndroid();
-#endif
+            Debug.Log("Show In App Review Delay");
+            return;
         }
+        Debug.Log("Show In App Review");
+        AppReviewiOS(completedShow);
+#if UNITY_ANDROID && USE_GOOGLE_REVIEW
+        AppReviewAndroid(completedShow);
+#endif
     }
     private void AppReviewiOS(Action completedShow)
     {
 #if UNITY_IOS
         bool popupShown = UnityEngine.iOS.Device.RequestStoreReview();
-        if (popupShown)
+        if(popupShown)
         {
+            nextTimeCanShow = Time.time + delayShowAgain;
             completedShow?.Invoke();
             Debug.Log("Show In App Review Completed");
         }
@@ -36,11 +46,10 @@ public class AppReviewManager : Singleton<AppReviewManager>
         {
             Debug.LogWarning($"Show In App Review Error");
         }
-        Debug.Log("ShowRate");
 #endif
     }
 
-#if UNITY_ANDROID
+#if UNITY_ANDROID && USE_GOOGLE_REVIEW
     private void AppReviewAndroid(Action completedShow)
     {
         StartCoroutine(IEReviewAndroid(completedShow));
@@ -69,16 +78,9 @@ public class AppReviewManager : Singleton<AppReviewManager>
             Debug.LogWarning($"Show In App Review Error: {requestFlowOperation.Error}");
             yield break;
         }
+        nextTimeCanShow = Time.time + delayShowAgain;
         completedShow?.Invoke();
         Debug.Log("Show In App Review Completed");
     }
 #endif
-
-    private bool ShouldShowRatePopup()
-    {
-        var remote = RemoteConfigManager.GetConfigValue<PopupRate>(RemoteKey.PopupRate);
-        if (!remote.CanShowRate) return false;
-        return true;
-    }
-
 }

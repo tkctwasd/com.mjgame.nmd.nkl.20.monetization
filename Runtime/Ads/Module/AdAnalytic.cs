@@ -1,3 +1,4 @@
+#if USE_FIREBASE
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -62,3 +63,9 @@ public class AdAnalytic
     }
 
 }
+#else
+public class AdAnalytic
+{
+    public static void LogAd(string nameEvent, string placement, string error = "") { }
+}
+#endif

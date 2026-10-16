@@ -1,37 +1,45 @@
 #if UNITY_EDITOR
-using System.Linq;
+
 using UnityEditor;
 using UnityEngine;
 
-public static class AdsSymbolEditor
+[InitializeOnLoad]
+public static class AdConstantsAutoCreate
 {
+    const string Folder = "Assets/Resources", Path = Folder + "/AdConstants.asset";
 
-    [MenuItem("Tools/Ads/Toggle USE_ADJUST")]
-    public static void ToggleAdjust() => ToggleSymbol("USE_ADJUST");
+    static AdConstantsAutoCreate() => EditorApplication.delayCall += () => GetOrCreate();
 
-    [MenuItem("Tools/Ads/Toggle USE_FIREBASE")]
-    public static void ToggleFirebaseRC() => ToggleSymbol("FIREBASE_ANALYTIC");
-
-    [MenuItem("Tools/Ads/Toggle USE_APPSFLYER")]
-    public static void ToggleAppsFlyer() => ToggleSymbol("USE_APPSFLYER");
-
-    private static void ToggleSymbol(string symbol)
+    public static AdConstants GetOrCreate()
     {
-        var group = EditorUserBuildSettings.selectedBuildTargetGroup;
-        var defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(group).Split(';').ToList();
+        var guids = AssetDatabase.FindAssets("t:AdConstants");
+        if (guids.Length > 0) return AssetDatabase.LoadAssetAtPath<AdConstants>(AssetDatabase.GUIDToAssetPath(guids[0]));
+        if (EditorApplication.isPlayingOrWillChangePlaymode) return null;
 
-        if (defines.Contains(symbol)) defines.Remove(symbol);
-        else defines.Add(symbol);
-
-        PlayerSettings.SetScriptingDefineSymbolsForGroup(group, string.Join(";", defines));
-        Debug.Log($"Toggled {symbol}, new define symbols: {string.Join(";", defines)}");
+        if (!AssetDatabase.IsValidFolder(Folder)) AssetDatabase.CreateFolder("Assets", "Resources");
+        var asset = ScriptableObject.CreateInstance<AdConstants>();
+        AssetDatabase.CreateAsset(asset, Path);
+        AssetDatabase.SaveAssets();
+        Debug.Log($"[Ads] Created {Path}");
+        return asset;
     }
 }
 
-
+#if USE_APPLOVIN
 [CustomEditor(typeof(AdsManager))]
 public class AdsManagerEditor : Editor
 {
+    void OnEnable()
+    {
+        var manager = (AdsManager)target;
+        if (manager.AdConstants != null) return;
+        var asset = AdConstantsAutoCreate.GetOrCreate();
+        if (asset == null) return;
+        Undo.RecordObject(manager, "Assign AdConstants");
+        manager.AdConstants = asset;
+        EditorUtility.SetDirty(manager);
+    }
+
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
@@ -61,4 +69,5 @@ public class AdsManagerEditor : Editor
         adsManager.SendMessage("OnApplicationPause", false);
     }
 }
+#endif
 #endif

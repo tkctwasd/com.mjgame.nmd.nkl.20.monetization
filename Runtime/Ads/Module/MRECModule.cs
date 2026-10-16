@@ -1,3 +1,4 @@
+#if USE_APPLOVIN
 using UnityEngine;
 using static MaxSdkBase;
 using System.Collections;
@@ -119,3 +120,4 @@ public class MRECModule
     }
     #endregion
 }
+#endif

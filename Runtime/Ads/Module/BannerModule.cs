@@ -1,3 +1,4 @@
+#if USE_APPLOVIN
 using UnityEngine;
 using static MaxSdkBase;
 using System.Collections;
@@ -95,3 +96,5 @@ public class BannerModule
     #endregion
 }
 
+
+#endif

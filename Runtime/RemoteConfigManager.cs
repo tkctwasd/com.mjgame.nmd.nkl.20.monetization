@@ -1,5 +1,7 @@
+#if USE_FIREBASE
 using Firebase.Extensions;
 using Firebase.RemoteConfig;
+#endif
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -20,6 +22,99 @@ public class RemoteConfigManager : MonoBehaviour
         LoadLocalData();
     }
 
+    private void LoadLocalData()
+    {
+        string platformName = "RemoteConfig";
+#if UNITY_ANDROID
+        platformName = "RemoteConfig_Android";
+#elif UNITY_IOS
+        platformName = "RemoteConfig_iOS";
+#endif
+        TextAsset jsonFile = Resources.Load<TextAsset>(platformName);
+
+        if (jsonFile == null)
+        {
+            Debug.LogError("RemoteConfig JSON not found in Resources: " + platformName);
+            return;
+        }
+        try
+        {
+            remoteConfigData = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonFile.text);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError("Error parsing or comparing RemoteConfig: " + ex.Message);
+        }
+        Debug.Log("FirebaseRemoteConfig".Firebase("Load Local Data Json Complete"));
+    }
+
+    public static T GetConfigValue<T>(string key)
+    {
+        if (remoteConfigData == null || !remoteConfigData.ContainsKey(key))
+            return default;
+
+        try
+        {
+            object data = remoteConfigData[key];
+
+            if (data is T tValue)
+                return tValue;
+
+            if (data is JObject jObject)
+                return JsonConvert.DeserializeObject<T>(jObject.ToString());
+
+            string strVal = data?.ToString();
+
+            if (typeof(T) == typeof(string))
+                return (T)(object)strVal;
+
+            if (typeof(T) == typeof(bool))
+            {
+                if (bool.TryParse(strVal, out bool b)) return (T)(object)b;
+                if (long.TryParse(strVal, out long l)) return (T)(object)(l != 0);
+            }
+
+            if (typeof(T) == typeof(int))
+            {
+                if (int.TryParse(strVal, out int i)) return (T)(object)i;
+                if (long.TryParse(strVal, out long l)) return (T)(object)(int)l;
+                if (float.TryParse(strVal, NumberStyles.Float, CultureInfo.InvariantCulture, out float f))
+                    return (T)(object)(int)f;
+            }
+
+            if (typeof(T) == typeof(long))
+            {
+                if (long.TryParse(strVal, NumberStyles.Integer, CultureInfo.InvariantCulture, out long l))
+                    return (T)(object)l;
+            }
+
+            if (typeof(T) == typeof(float))
+            {
+                if (float.TryParse(strVal, NumberStyles.Float, CultureInfo.InvariantCulture, out float f))
+                    return (T)(object)f;
+            }
+
+            if (typeof(T) == typeof(double))
+            {
+                if (double.TryParse(strVal, NumberStyles.Float, CultureInfo.InvariantCulture, out double d))
+                    return (T)(object)d;
+            }
+
+            if (typeof(T).IsClass && (strVal.TrimStart().StartsWith("{") || strVal.TrimStart().StartsWith("[")))
+                return JsonConvert.DeserializeObject<T>(strVal);
+
+            return (T)Convert.ChangeType(data, typeof(T), CultureInfo.InvariantCulture);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[RemoteConfigManager] Error parsing key '{key}' to type {typeof(T).Name}: {ex.Message}");
+            return default;
+        }
+    }
+
+    public static Dictionary<string, object> DataRemoteConfig => remoteConfigData;
+
+#if USE_FIREBASE
     private void OnEnable()
     {
         FirebaseManager.InitDone += Init;
@@ -90,32 +185,6 @@ public class RemoteConfigManager : MonoBehaviour
         // #endif
     }
 
-    private void LoadLocalData()
-    {
-        string platformName = "RemoteConfig";
-#if UNITY_ANDROID
-        platformName = "RemoteConfig_Android";
-#elif UNITY_IOS
-        platformName = "RemoteConfig_iOS";
-#endif
-        TextAsset jsonFile = Resources.Load<TextAsset>(platformName);
-
-        if (jsonFile == null)
-        {
-            Debug.LogError("RemoteConfig JSON not found in Resources: " + platformName);
-            return;
-        }
-        try
-        {
-            remoteConfigData = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonFile.text);
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError("Error parsing or comparing RemoteConfig: " + ex.Message);
-        }
-        Debug.Log("FirebaseRemoteConfig".Firebase("Load Local Data Json Complete"));
-    }
-
     void LocalRemoteConfigAndCompare()
     {
         try
@@ -149,70 +218,6 @@ public class RemoteConfigManager : MonoBehaviour
     {
         return new string(input.Where(c => !char.IsWhiteSpace(c)).ToArray());
     }
-    public static T GetConfigValue<T>(string key)
-    {
-        if (remoteConfigData == null || !remoteConfigData.ContainsKey(key))
-            return default;
-
-        try
-        {
-            object data = remoteConfigData[key];
-
-            if (data is T tValue)
-                return tValue;
-
-            if (data is JObject jObject)
-                return JsonConvert.DeserializeObject<T>(jObject.ToString());
-
-            string strVal = data?.ToString();
-
-            if (typeof(T) == typeof(string))
-                return (T)(object)strVal;
-
-            if (typeof(T) == typeof(bool))
-            {
-                if (bool.TryParse(strVal, out bool b)) return (T)(object)b;
-                if (long.TryParse(strVal, out long l)) return (T)(object)(l != 0);
-            }
-
-            if (typeof(T) == typeof(int))
-            {
-                if (int.TryParse(strVal, out int i)) return (T)(object)i;
-                if (long.TryParse(strVal, out long l)) return (T)(object)(int)l;
-                if (float.TryParse(strVal, NumberStyles.Float, CultureInfo.InvariantCulture, out float f))
-                    return (T)(object)(int)f;
-            }
-
-            if (typeof(T) == typeof(long))
-            {
-                if (long.TryParse(strVal, NumberStyles.Integer, CultureInfo.InvariantCulture, out long l))
-                    return (T)(object)l;
-            }
-
-            if (typeof(T) == typeof(float))
-            {
-                if (float.TryParse(strVal, NumberStyles.Float, CultureInfo.InvariantCulture, out float f))
-                    return (T)(object)f;
-            }
-
-            if (typeof(T) == typeof(double))
-            {
-                if (double.TryParse(strVal, NumberStyles.Float, CultureInfo.InvariantCulture, out double d))
-                    return (T)(object)d;
-            }
-
-            if (typeof(T).IsClass && (strVal.TrimStart().StartsWith("{") || strVal.TrimStart().StartsWith("[")))
-                return JsonConvert.DeserializeObject<T>(strVal);
-
-            return (T)Convert.ChangeType(data, typeof(T), CultureInfo.InvariantCulture);
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"[RemoteConfigManager] Error parsing key '{key}' to type {typeof(T).Name}: {ex.Message}");
-            return default;
-        }
-    }
-
     public static Dictionary<string, string> GetAllRemoteConfigValues()
     {
         var allKeys = FirebaseRemoteConfig.DefaultInstance.Keys;
@@ -226,5 +231,5 @@ public class RemoteConfigManager : MonoBehaviour
 
         return result;
     }
-    public static Dictionary<string, object> DataRemoteConfig => remoteConfigData;
+#endif
 }

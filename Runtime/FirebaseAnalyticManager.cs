@@ -1,3 +1,4 @@
+#if USE_FIREBASE
 using System;
 using UnityEngine;
 using Firebase.Analytics;
@@ -83,3 +84,5 @@ public class LogEventParameter
     }
 }
 
+
+#endif

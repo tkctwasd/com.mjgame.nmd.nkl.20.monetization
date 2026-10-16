@@ -1,3 +1,4 @@
+#if USE_APPLOVIN
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -93,3 +94,4 @@ public class MaxSdkMREC
         rt.anchoredPosition = Vector2.zero;
     }
 }
+#endif

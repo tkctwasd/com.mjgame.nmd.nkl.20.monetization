@@ -15,17 +15,21 @@ Package la **assembly rieng**, chi tham chieu Core, **khong goi toi class nao cu
 
 ## Muc luc
 
-1. [Cai dat](#cai-dat)
-2. [Assembly va define](#assembly-va-define)
-3. [Bat dau nhanh](#bat-dau-nhanh)
-4. [Save (DataMonetization)](#save-datamonetization)
-5. [Ads](#ads)
-6. [IAP](#iap)
-7. [Firebase va Remote Config](#firebase-va-remote-config)
-8. [In-App Review](#in-app-review)
-9. [Event analytics](#event-analytics)
-10. [Cach game cam vao package](#cach-game-cam-vao-package)
-11. [Xu ly loi thuong gap](#xu-ly-loi-thuong-gap)
+- [mindongun — Monetization](#mindongun--monetization)
+  - [Muc luc](#muc-luc)
+  - [Cai dat](#cai-dat)
+    - [Thu vien can co](#thu-vien-can-co)
+    - [Cach dua vao project](#cach-dua-vao-project)
+  - [Assembly va define](#assembly-va-define)
+  - [Bat dau nhanh](#bat-dau-nhanh)
+  - [Save (DataMonetization)](#save-datamonetization)
+  - [Ads](#ads)
+  - [IAP](#iap)
+  - [Firebase va Remote Config](#firebase-va-remote-config)
+  - [In-App Review](#in-app-review)
+  - [Event analytics](#event-analytics)
+  - [Cach game cam vao package](#cach-game-cam-vao-package)
+  - [Xu ly loi thuong gap](#xu-ly-loi-thuong-gap)
 
 ---
 
@@ -37,13 +41,12 @@ Package la **assembly rieng**, chi tham chieu Core, **khong goi toi class nao cu
 |---|---|---|
 | Core `com.mjgame.nmd.nkl.20` | Co | `package.json` (cai Core truoc) |
 | Unity IAP (`com.unity.purchasing`) | Co | `package.json` (5.4.4) |
+| Google Play In-App Review (`com.google.play.review`) | Khi build Android | Import rieng tu [play-in-app-reviews-unity releases](https://github.com/google/play-in-app-reviews-unity/releases) |
 | TextMeshPro, uGUI, Newtonsoft Json | Co | `package.json` |
 | **AppLovin MAX SDK** | Co | Import rieng (can `MaxSdk.Scripts.asmdef`) |
 | **Firebase** Analytics, Remote Config (Crashlytics tuy chon) | Co | Import rieng (`.unitypackage`) |
 | Adjust | Khong | Import rieng + define `USE_ADJUST` |
 | AppsFlyer | Khong | Import rieng + define `USE_APPSFLYER` |
-| Google Play In-App Review | Khi build Android | Import rieng (`com.google.play.review`) |
-
 ### Cach dua vao project
 
 - **Chep vao `Assets/`**: chep ca folder, dam bao Core cung co trong project.
@@ -86,7 +89,7 @@ Samples~/  DataSaveBridge (DataSave mau + MonetizationBridge)
 ## Bat dau nhanh
 
 1. Cai Core, MAX SDK, Firebase; them `google-services.json` / `GoogleService-Info.plist`.
-2. Tao `AdConstants` (`Create > Ads > Ad Constants`), dien SDK key, ad unit id, bam **Apply Ad Ids**.
+2. Tao `AdConstants` (`Create > Ads > Ad Constants`), dien SDK key, ad unit id, bam **Apply ID Ads**.
 3. Neu dung IAP: tao `IAPProducts` (`Create > IAP > IAP Products`), bat `USE_IAP`.
 4. Dat vao scene dau (hoac prefab load tu Bootstrap): `FirebaseManager`, `FirebaseAnalyticManager`,
    `RemoteConfigManager`, `AdsManager` (gan `AdConstants`), `IAPManager` (gan `IAPProducts`).

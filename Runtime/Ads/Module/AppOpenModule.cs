@@ -1,3 +1,4 @@
+#if USE_APPLOVIN
 using System;
 using UnityEngine;
 
@@ -141,3 +142,5 @@ public class AppOpenModule
 
     #endregion
 }
+
+#endif

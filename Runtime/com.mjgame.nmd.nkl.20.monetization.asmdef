@@ -4,8 +4,12 @@
     "references": [
         "com.mjgame.nmd.nkl.20",
         "MaxSdk.Scripts",
+        "AdjustSdk.Scripts",
+        "AppsFlyer",
         "MaxSdk.Scripts.IntegrationManager.Editor",
         "Unity.Purchasing",
+        "Google.Play.Review",
+        "Google.Play.Common",
         "Unity.Services.Core",
         "Unity.Services.Core.Environments",
         "Unity.TextMeshPro",

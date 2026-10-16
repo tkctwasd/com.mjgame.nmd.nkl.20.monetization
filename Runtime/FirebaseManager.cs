@@ -1,3 +1,4 @@
+#if USE_FIREBASE
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -45,3 +46,5 @@ public class FirebaseManager : MonoBehaviour
         }
     }
 }
+
+#endif

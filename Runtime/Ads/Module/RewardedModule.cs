@@ -1,3 +1,4 @@
+#if USE_APPLOVIN
 using System;
 using UnityEngine;
 using static MaxSdkBase;
@@ -159,3 +160,4 @@ public class RewardedModule
     #endregion
 
 }
+#endif

@@ -1,3 +1,4 @@
+#if USE_APPLOVIN
 using System;
 using UnityEngine;
 using static MaxSdkBase;
@@ -37,6 +38,7 @@ public class AdsManager : MonoBehaviour
     void Awake()
     {
         Instance = this;
+        if (AdConstants == null) AdConstants = Resources.Load<AdConstants>("AdConstants");
 
 
         InterstitialModule = new InterstitialModule(this, AdConstants.InterstitialId);
@@ -138,8 +140,17 @@ public class AdsManager : MonoBehaviour
 
     public void SendAdRevenueTracker(AdInfo impressionData)
     {
-        AdRevenueTracker.SendAllTracker(impressionData);
+        AdRevenueTracker.SendAllTracker(new AdRevenueData
+        {
+            NetworkName = impressionData.NetworkName,
+            AdUnitId = impressionData.AdUnitIdentifier,
+            Placement = impressionData.Placement,
+            AdFormat = impressionData.AdFormat,
+            CountryCode = MaxSdk.GetSdkConfiguration().CountryCode,
+            Revenue = impressionData.Revenue
+        });
     }
 
 
 }
+#endif

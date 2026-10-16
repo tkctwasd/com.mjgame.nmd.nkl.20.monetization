@@ -1,4 +1,4 @@
-#if USE_IAP
+#if USE_IAP && USE_FIREBASE
 using System;
 using UnityEngine;
 using UnityEngine.Purchasing;
@@ -79,5 +79,17 @@ public static class IAPAnalytic
 
             Debug.Log("IAPAnalytic".IAP($"LogRestoreComplete: {success}"));
       }
+}
+#elif USE_IAP
+using UnityEngine.Purchasing;
+
+public static class IAPAnalytic
+{
+      public static void LogPurchaseBtnClick(string productId) { }
+      public static void LogPurchaseAttempt(string productId) { }
+      public static void LogPurchaseSuccess(Product product, double price, string currency, string transactionId = "") { }
+      public static void LogPurchaseFailure(string productId, string failureReason) { }
+      public static void LogRestoreStart() { }
+      public static void LogRestoreComplete(bool success) { }
 }
 #endif

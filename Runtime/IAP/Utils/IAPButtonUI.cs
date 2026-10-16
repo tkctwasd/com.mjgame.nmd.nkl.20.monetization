@@ -97,7 +97,6 @@ public class IAPButtonUI : MonoBehaviour
 
     public virtual void OnClick()
     {
-        if (AudioManager.Instance != null) AudioManager.Instance.AudioClickBtn();
         if (string.IsNullOrEmpty(ProductId))
         {
             Debug.LogWarning("[IAPButtonUI] ProductId is empty!");
